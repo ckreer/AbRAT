@@ -1,0 +1,362 @@
+#!/usr/bin/env python3
+
+import argparse
+import subprocess
+import os
+import logging
+
+from pathlib import Path
+from Bio import SeqIO
+
+from abrat.core.utils import (decompress,
+                              get_indels,
+                              translate_nt_to_aa,
+                              generate_q_check_df,
+                              make_quality_check_excel,
+                              combine_ig_blast_and_q_check_data,
+                              log_message, date_stamp,
+                              str2bool)
+
+# Settings
+path_to_human_V = "/app/data/database/igblastdb/human_V"
+path_to_human_D = "/app/data/database/igblastdb/human_D"
+path_to_human_J = "/app/data/database/igblastdb/human_J"
+
+airr_fmt = "19"
+
+def combine_ab1_files(input_path, output_path, cf_name):
+    """Reads all *.ab1 files from input_path and combines them to one fasta string that is saved in cf_name
+    in output_path. Returns path to combined fasta."""
+    try:
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
+        combined = ""
+
+        ab1_files = list(Path(input_path).rglob("*.ab1"))
+
+        if not ab1_files:
+            raise FileNotFoundError("No .ab1-files found in "+input_path)
+
+        for ab1_file in ab1_files:
+            with ab1_file.open("rb") as input_file:
+                # record name and sequence to combined string
+                for record in SeqIO.parse(input_file, 'abi'):
+                    combined += ">" + record.name + "\n" + str(record.seq) + "\n"
+
+        with open(os.path.join(output_path, cf_name), 'w') as c_fasta:
+            c_fasta.write(combined)
+
+        return os.path.join(output_path, cf_name)
+
+    except FileNotFoundError as e:
+        return False, f"Error: {e}"
+    except Exception as e:
+        return False, f"General error: {e}"
+
+
+def run_igblast(path_to_input_file, output_folder, outformat):
+    """
+    Runs igblast as a subprocess on path_to_input_file as query and captures igblasts sdtout and stderror.
+    If no error occurs, it returns True and the stdout.
+    Of any exception eccorus, it returns False and the error message.
+
+    :param path_to_input_file: Path to input file
+    :param output_folder: Path to output folder
+    """
+
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    logger = logging.getLogger()
+
+    if not os.path.exists(path_to_input_file):
+        logger.error(f"Input folder does not exist: {path_to_input_file}")
+        return False, f"Input folder does not exist: {path_to_input_file}"
+
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # igblast command
+    cmd = [
+        "igblastn",
+        "-germline_db_V", path_to_human_V,
+        "-germline_db_D", path_to_human_D,
+        "-germline_db_J", path_to_human_J,
+        "-auxiliary_data", "optional_file/human_gl.aux",
+        "-query", path_to_input_file,
+        "-outfmt", outformat,
+        "-extend_align5end"
+    ]
+    try:
+        #logger.info("Starting IgBLAST...")
+        print(log_message("Running IgBLAST"), flush=True)
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        #logger.info("Run completed.")
+        return True, result.stdout
+
+    except subprocess.CalledProcessError as e:
+        msg = f"Error from igblast: {e}\nStderr:\n{e.stderr}"
+        logger.error(msg)
+        return False, msg
+
+    except Exception as e:
+        msg = f"General error: {e}"
+        logger.error(msg)
+        return False, msg
+
+def get_infos_from_igblast(blast_result):
+    """Extracts all infos from blast_result.
+    Returns the sample name from blast_result and all features.
+    NOTE: fwr4_start is defined in relation to j_gene,
+    fwr4_end as all others to the whole sequence. however, fwr4_start is exported in reference to original sequence...
+    """
+
+    # workaround for getting the correct c-terminus
+    c_term_offset = 0
+    fwr4_correction = False
+
+    parts = blast_result.split('# ')
+    # initialize values for q-check
+    name, orientation, fwr1_start, fwr1_found, j_start, j_end, j_found, v_length, q_overhang = \
+        "N/A", "N/A", -1, False, -1, -1, False, 0, 0
+    # q_overhang = if query does not start at 1, we add the unknown bases before
+    # initialize values for other important blast results
+    v_gene, j_gene, d_gene, v_btop, j_btop = "N/A", "N/A", "N/A", "N/A", "N/A"
+    chain_type, stop_codon, frame, productive = "N/A", "N/A", "N/A", "N/A"
+    cdr3_nt, cdr3_aa, cdr3_start, cdr3_end = "N/A", "N/A", "N/A", "N/A"
+    j_nt, fwr4_start, fwr4_end, fwr4_nt, fwr4_aa, fwr4_frame, fwr4_stop_codon = \
+        "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+    fwr1_end, cdr1_start, cdr1_end, fwr2_start, fwr2_end = "N/A", "N/A", "N/A", "N/A", "N/A"
+    cdr2_start, cdr2_end, fwr3_start, fwr3_end, v_identity = "N/A", "N/A", "N/A", "N/A", "N/A"
+    cdr1_found, fwr2_found, cdr2_found, fwr3_found, cdr3_found, fwr4_found = False, False, False, False, False, False
+    truncated_kappa = False
+    for part in parts:
+        if part.startswith('Query: '):
+            name = part.split(': ')[1].rstrip('\n')
+        elif part.startswith('V-(D)-J rearrangement'):
+            # light chain specific:
+            if ("VK\t" in part.split('\n')[1]) or ("VL\t" in part.split('\n')[1]):
+                v_gene = part.split('\n')[1].split('\t')[0]
+                j_gene = part.split('\n')[1].split('\t')[1]
+                chain_type = part.split('\n')[1].split('\t')[2]
+                stop_codon = part.split('\n')[1].split('\t')[3]
+                frame = part.split('\n')[1].split('\t')[4]
+                productive = part.split('\n')[1].split('\t')[5]
+            # heavy chain specific:
+            if "VH\t" in part.split('\n')[1]:
+                v_gene = part.split('\n')[1].split('\t')[0]
+                d_gene = part.split('\n')[1].split('\t')[1]
+                j_gene = part.split('\n')[1].split('\t')[2]
+                chain_type = part.split('\n')[1].split('\t')[3]
+                stop_codon = part.split('\n')[1].split('\t')[4]
+                frame = part.split('\n')[1].split('\t')[5]
+                productive = part.split('\n')[1].split('\t')[6]
+            # for both chain types the second last part is orientation, last is frame shift
+            orientation = part.split('\n')[1].split('\t')[-2]
+        elif part.startswith('Sub-region sequence'):
+            cdr3_nt = part.split('\n')[1].split('\t')[1]
+            cdr3_aa = part.split('\n')[1].split('\t')[2]
+            cdr3_start = int(part.split('\n')[1].split('\t')[3])
+            cdr3_end = int(part.split('\n')[1].split('\t')[4])
+            cdr3_found = True
+        elif part.startswith('Alignment summary'):
+            subparts = part.split('\n')
+            for subpart in subparts:
+                if subpart.startswith('FR1'):
+                    fwr1_start = int(subpart.split('\t')[1])
+                    fwr1_end = int(subpart.split('\t')[2])
+                    fwr1_found = True
+                if subpart.startswith('CDR1'):
+                    cdr1_start = int(subpart.split('\t')[1])
+                    cdr1_end = int(subpart.split('\t')[2])
+                    cdr1_found = True
+                if subpart.startswith('FR2'):
+                    fwr2_start = int(subpart.split('\t')[1])
+                    fwr2_end = int(subpart.split('\t')[2])
+                    fwr2_found = True
+                if subpart.startswith('CDR2'):
+                    cdr2_start = int(subpart.split('\t')[1])
+                    cdr2_end = int(subpart.split('\t')[2])
+                    cdr2_found = True
+                if subpart.startswith('FR3'):
+                    fwr3_start = int(subpart.split('\t')[1])
+                    fwr3_end = int(subpart.split('\t')[2])
+                    fwr3_found = True
+                elif subpart.startswith('Total'):
+                    v_length = int(subpart.split('\t')[3])
+                    v_identity = float(subpart.split('\t')[7])
+        elif 'hits found' in part and not part.startswith("0"):
+            v_start = int(
+                part.split('\n')[1].split('\t')[10])  # start alignment of v gene (should be 1, if complete match)
+            s_start = int(part.split('\n')[1].split('\t')[8])  # first nt of sequence matching to v gene
+            q_overhang = v_start - 1 if s_start > v_start else 0  # make overhang, if (orig) sequence > v_start (Vgene)
+            v_btop = part.split('\n')[1].split('\t')[16]
+            # check if fwr1 complete
+            if fwr1_found and (v_start > 1) and (s_start < v_start):
+                if (v_start - s_start < 20) and (chain_type == "VK"):
+                    fwr1_found = True
+                    truncated_kappa = True
+                else:
+                    fwr1_found = False
+            for subpart in part.split('\n'):
+                if subpart.startswith('J') and not j_found:
+                    j_start = int(subpart.split('\t')[8])
+                    j_end = int(subpart.split('\t')[9])
+                    j_nt = subpart.split('\t')[14]
+                    j_btop = subpart.split('\t')[16]
+                    if cdr3_found and (cdr3_end != "N/A"):
+                        if j_start > cdr3_end:  # modified this here to account for insertions at the end of CDR3
+                            fwr4_start = 0
+                        else:
+                            fwr4_start = cdr3_end - j_start + 1
+                        fwr4_end = j_end
+                        if (fwr4_start >= 0) & (fwr4_end > 0) & (j_btop != "N/A"):
+                            fwr4_nt = j_nt[fwr4_start:]
+                            if len(fwr4_nt) > 0:
+                                # workaround to solve igblast problem that c/g is somtimes missed or not at 5' end
+                                # if one additional nucleotide: drop it and add to constant region (c_term_offset = -1)
+
+                                if len([fwr4_nt[i:i+3] for i in range(0, len(fwr4_nt), 3)][-1]) == 1:
+                                    fwr4_correction = -1
+                                    c_term_offset = -1
+                                # if last triplet misses one nucleotide, add 1 nucleotides from original sequence
+                                elif len([fwr4_nt[i:i+3] for i in range(0, len(fwr4_nt), 3)][-1]) == 2:
+                                    fwr4_correction = +1
+                                    c_term_offset = +1
+
+                                # make frame analysis:
+                                ins, dels = get_indels(decompress(j_btop)[fwr4_start:], decompression=False)
+                                if ((ins - dels) % 3) == 0:
+                                    fwr4_frame = "In-frame"
+                                else:
+                                    fwr4_frame = "Out-of-frame"
+
+                                fwr4_aa = translate_nt_to_aa(fwr4_nt)
+                                fwr4_stop_codon = "Yes" if "*" in fwr4_aa else "No"
+                                fwr4_found = True
+
+                    j_found = True
+        # elongate 5' end, if blast did not start align at 1 but more sequence available
+        if fwr1_start > q_overhang:
+            v_length += q_overhang
+            fwr1_start -= q_overhang
+
+    if fwr1_found and j_found:
+        total_length = j_end - fwr1_start if j_end > fwr1_start else 0
+
+    orient_found = False if orientation == "N/A" else True
+    v_length_found = False if v_length < 1 else True
+
+    # check if v_alignment is complete at 5' end
+    if (q_overhang > 0) or truncated_kappa or (fwr1_start == -1):
+        full_v_alignment = False
+    else:
+        full_v_alignment = True
+
+    # add constant region here
+    # TODO: igblast sometimes adds the G to J gene, sometimes to C. Figure out, when this happens to get correct start
+    # stupid workaround
+
+    if fwr4_found:
+        constant_region_start = fwr4_end + 1 + c_term_offset
+        fwr4_start = fwr4_start + j_start
+    else:
+        constant_region_start = False
+    igblast_pass = fwr1_found and orient_found and v_length_found and j_found and fwr3_found
+
+    features = {'V_GENE': v_gene, 'TOP_V': v_gene.split('*')[0], 'D_GENE': d_gene, 'TOP_D': d_gene.split('*')[0],
+                'J_GENE': j_gene, 'TOP_J': j_gene.split('*')[0], 'V_IDENTITY': v_identity, 'CHAIN_TYPE': chain_type,
+                'STOP_CODON': stop_codon, 'FRAME': frame, 'PRODUCTIVE': productive, 'ORIENTATION': orientation,
+                'FWR1_START': fwr1_start, 'FWR1_END': fwr1_end, 'CDR1_START': cdr1_start, 'CDR1_END': cdr1_end,
+                'FWR2_START': fwr2_start, 'FWR2_END': fwr2_end, 'CDR2_START': cdr2_start, 'CDR2_END': cdr2_end,
+                'FWR3_START': fwr3_start, 'FWR3_END': fwr3_end, 'CDR3_START': cdr3_start, 'CDR3_END': cdr3_end,
+                'CDR3_NT': cdr3_nt, 'CDR3_AA': cdr3_aa, 'V_BTOP': v_btop, 'J_START': j_start, 'J_END': j_end,
+                'J_BTOP': j_btop, 'FWR4_START': fwr4_start, 'FWR4_END': fwr4_end, 'FWR4_CORRECTION': fwr4_correction,
+                'FWR4_NT': fwr4_nt, 'FWR4_AA': fwr4_aa, 'FWR4_FRAME': fwr4_frame, 'FWR4_STOP_CODON': fwr4_stop_codon,
+                'C_START': constant_region_start, 'V_LENGTH': v_length, 'FWR1_FOUND': fwr1_found, 'J_FOUND': j_found,
+                'ORIENT_FOUND': orient_found, 'LENGTH_FOUND': v_length_found, 'FULL_V_ALIGNMENT': full_v_alignment,
+                'IGBLAST_PASS': igblast_pass}
+    return name, features
+
+def main():
+    parser = argparse.ArgumentParser(description="Sequence annotation and quality check")
+    parser.add_argument('--input', type=str, required=True, help='Path to input files')
+    parser.add_argument('--output', type=str, required=True, help='Path to output')
+    parser.add_argument('--project_name', type=str, default="NEW-PROJECT", help='Project name')
+    parser.add_argument('--q_cut_off', type=int, default=16, help='Minimum Phred score for base calls')
+    parser.add_argument('--mean_q_cut_off', type=int, default=28, help='Minimum mean Phred score per sequence')
+    parser.add_argument('--min_length', type=int, default=240, help='Minimum sequence length')
+    parser.add_argument('--inner_n', type=int, default=15, help='Maximum number of uncertain bases')
+    parser.add_argument('--isotype_determination', type=str2bool, default=False, help='Determine chain isotype')
+    parser.add_argument('--airr_export', type=str2bool, default=False, help='Export a copy in airr format')
+    args = parser.parse_args()
+
+    print(log_message("Combining all ab1-files from"), args.input, flush=True)
+    # combine all ab1 files
+    combined_fasta_file = date_stamp(args.project_name+"_combined-sequences.fasta")
+    path_to_combined_fasta = combine_ab1_files(args.input, args.output, combined_fasta_file)
+
+    if args.airr_export:
+        airr_success, airr_message = run_igblast(path_to_combined_fasta, args.output, airr_fmt)
+
+        if airr_success:
+            print(log_message("Generating AIRR output"), flush=True)
+            path_to_airr_output_file = os.path.join(args.output,
+                                                       date_stamp(args.project_name + "_igblast-annotation-airr.tsv"))
+            with open(path_to_airr_output_file, "w") as airr_output_file:
+                airr_output_file.write(airr_message)
+        else:
+            print(log_message("AIRR annotation failed"), flush=True)
+
+
+    # run igblast for qcheck
+    success, message = run_igblast(path_to_combined_fasta, args.output, "7 std qseq sseq btop")
+
+    # save output to file
+    path_to_igblast_output_file = os.path.join(args.output, date_stamp(args.project_name+"_igblast-annotation.fmt7"))
+    with open(path_to_igblast_output_file, "w") as igblast_output_file:
+        igblast_output_file.write(message)
+
+    if success:
+        # continue only, if igblast worked
+        igblast_results = message.split('# IGBLASTN')[1:]
+
+        igblast_dictionary = {}
+        for entry in igblast_results:
+            key, value = get_infos_from_igblast(entry)
+            igblast_dictionary[key] = value
+
+        # Check ab1 files, igblast infos and save in quality check dataframe
+        print(log_message("Performing quality check"), flush=True)
+        quality_check_df = generate_q_check_df(args.input,
+                                               args.q_cut_off,
+                                               args.mean_q_cut_off,
+                                               args.min_length,
+                                               args.inner_n,
+                                               igblast_dictionary)
+        # Generate Excel quality check output
+        qcheck_excel_name = date_stamp(args.project_name+"_qc-summary.xlsx")
+        path_to_qc_excel_file = Path(args.output).joinpath(qcheck_excel_name)
+
+        # Export excel
+        qc_excel_success, qc_excel_msg = make_quality_check_excel(quality_check_df, path_to_qc_excel_file)
+        if not qc_excel_success:
+            print(log_message(qc_excel_msg), flush=True)
+            exit(1)
+        print(log_message(qc_excel_msg), flush=True)
+
+        # make a composite dataframe from quality_check_df and igblast dictionary
+        print(log_message('Preparing summary output with all data'), flush=True)
+        combined_excel_name = date_stamp(args.project_name+"_all-sequences.xlsx")
+        composite_df = combine_ig_blast_and_q_check_data(quality_check_df,
+                                                         igblast_dictionary,
+                                                         combined_excel_name,
+                                                         args.output,
+                                                         args.isotype_determination)
+
+        exit(0)
+    else:
+        print(log_message("IgBLAST failed."), flush=True)
+        exit(1)
+
+if __name__ == "__main__":
+    main()

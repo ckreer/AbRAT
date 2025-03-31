@@ -1,0 +1,418 @@
+# gui/content/7_quickguide.py
+
+import os
+import streamlit as st
+
+from importlib.resources import files
+
+# ==============================================
+# Passing of global settings from session state
+# ==============================================
+
+page_name = os.path.splitext(os.path.basename(__file__))[0]
+
+workflow_path = files('abrat.gui.assets') / 'workflow.png'
+workflow_caption = ("The typical workflow of AbRAT consists of (1) Data Preparation, (2) Clonal Assignment, "
+                    "and (3) Exploratory & Comparative Analysis")
+st.title("Quick Guide")
+
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Workflow", "Folder Structure", "Data Format",
+                                        "Clustering Algorithms", "Repertoire Characteristics",
+                                              "Citation & References"])
+
+with tab1:
+    st.subheader(":blue[_AbRAT_] workflow")
+
+    col1, col2 = st.columns([1,2], vertical_alignment="top")
+    with col1:
+        st.image(str(workflow_path), caption=workflow_caption)
+
+    with col2:
+        st.markdown("""
+        **1. Data Preparation**
+
+        - **Quality Control & Annotation:**  
+          In this first step, the module takes _***.ab1 files**_ from a dedicated *ab1files* folder (see *Folder 
+          Structure*) that have been renamed according to a specific naming scheme (see *Data Format*). Using 
+          IgBLAST and BLAST for sequence annotation, along with Biopython’s SeqIO to extract quality scores, 
+          it evaluates several user-defined quality metrics and saves both the sequence data and quality measures 
+          in an _***all-sequences.xlsx**_ file.
+
+        - **Compile B-Cell Receptors:**  
+          Next, use this module to combine the best available heavy and light chain sequences from one or more 
+          _***all-sequences.xlsx**_ file(s) into individual B-cell receptors. The resulting data is saved as a 
+          _***b-cell-receptors.xlsx**_ file.
+
+        - **Filter & Split B-Cell Receptors:**  
+          Finally, filter the combined B-cell receptor data for specific quality or sequence features (e.g. productive 
+          chains only) and split the dataset into subgroups (e.g. by donor). A separate _***filtered_subgroup.xlsx**_ file 
+          is generated for each subgroup. These tables represent your polished repertoire data, ready for downstream analyses.
+
+        **2. Clonal Assignment**
+
+        - **Clonal Clustering:**  
+          Often, the goal is to assess the clonal relationships among individual B cells. This module provides a modular
+          system of filter settings and clustering algorithms to infer clonal relationships based
+          on sequence similarities. Clustered BCRs are labeled with a unique clone name and optionally a color within
+          the _***filtered_subgroup.xlsx**_ files. Information on implemented clustering algorithms is provided
+          separately.
+          _Note: You may also infer clonal relationships with any external tool and simply record the results in the 
+          designated columns._
+
+        **3. Exploratory & Comparative Analysis**
+
+        - **Basic Repertoire Characteristics:**  
+          Finally, explore your filtered and clustered repertoire data (from the _***filtered_subgroup.xlsx**_ files) using 
+          this module. It computes key metrics and presents them on an interactive dashboard, allowing you to save 
+          individual graphs.  
+          _Note: Any tables following the ***b-cell-receptors.xlsx** layout can also be uploaded and analyzed here._
+        """)
+
+with tab2:
+    st.subheader("Folder Structure")
+    st.markdown("""
+    :blue[_AbRAT_] runs inside a Docker container that interacts with your computer’s file system exclusively via the 
+    **data/** folder. This means :blue[_AbRAT_] can only access files within this folder — every data exchange must 
+    occur here. Within **data/**, :blue[_AbRAT_] expects a predefined folder structure that is essential for its 
+    proper operation. **Please do not move or rename any of these folders.**
+ 
+    ```
+    data/
+    ├── database/
+    │   ├── blastdb/
+    │   └── igblastdb/
+    └── userdata/
+        ├── ab1files/
+        │   └── ...
+        └── output/
+            └── ...
+
+    ```
+    
+    The **database/** folder holds the databases required by IgBLAST and BLAST. It is strongly recommended that you do 
+    not alter these folders unless you are completely sure of your actions. If needed, you can add your custom databases 
+    into **igblastdb/** or **blastdb/** respectively.
+
+    The **userdata/** folder is designated for your data exchange:
+    - In **ab1files/**, deposit your correctly renamed _*.ab1_ files (see the *Data Format* tab for details). You can 
+    organize your sequencing data by creating custom subfolder hierarchies here.
+    - The **output/** folder is the default destination for all results generated by :blue[_AbRAT_]. It is highly 
+    recommended to use separate subfolders for different projects (this is also the default configuration in :blue[_AbRAT_]).
+
+    ``` 
+    └── userdata/
+        ├── ab1files/
+        │   ├── Project_1/
+        │   │   ├── Subject_1/
+        │   │   │   ├── Heavy_Chains_1/
+        │   │   │   ├── Kappa_Chains_1/
+        │   │   │   ├── Lambda_Chains_1/
+        │   │   │   └── ...
+        │   │   └── ...
+        │   ├── Project_2/
+        │   │   ├── Subject_1/
+        │   │   │   └── ...
+        │   │   └── ...
+        │   └── ...
+        └── output/
+            ├── YYMMDD_Project_1/
+            │   └── ...
+            └── ...
+    ```
+           
+    """, unsafe_allow_html=True )
+
+with tab3:
+    st.subheader("Data Format")
+    st.markdown("""
+    In :blue[_AbRAT_], _ab1-file_-names serve as a **unique identifier** to a specific sequence. Therefore, 
+    _ab1-files_ have to follow a strict **nomenclature** with **13 positions** that are separated by lower dashes '_'.
+    ```
+    COHORT_SUBJECT_TIMEPOINT_SAMPLE_SUBSET_PLATE_WELL_CHAIN_PRIMERSET_SOURCE-SUBSOURCE_SEQPRIMER_SEQCOMPANY_SEQ-REPEAT.ab1
+    ```
+    The file name splits into 4 blocks that contain information on (1) the sample, (2) the cell position, (3) the PCR, 
+    and (4) the sequencing. The information stored in (1) and (2) represents the unique identifier of each analyzed B cell
+    and is therefore used as the so called 'B_CELL_ID' throughout :blue[_AbRAT_]. 
+    Some of the positions in the _ab1-file_, such as the COHORT, SUBJECT, or CHAIN, are fixed and should not be mixed up to guarantee 
+    proper functionality of :blue[_AbRAT_]. Other positions such as SUBSET or BAIT may be handled more flexible and
+    may be used to introduce custom subgroups in your sample set.
+    
+    **Sample block:**
+    ```
+    COHORT_SUBJECT_TIMEPOINT_SAMPLE_SUBSET_
+    ```
+    - Includes the information from the study cohort, the subject id, the sampling time point (required for longitudinal 
+    samples) as well as the sample material and cell subset information. Sample and subset are quite flexible in use. 
+    The sample position might for example include details on the tissue (PBMCs, lymphnode,  etc.) or a preselection of 
+    your sample material (e.g., CD20-IgG for CD20+ and IgG+ gating during FACS analysis). The subset position may contain 
+    the bait protein, which was used for antigen-specific sorting.
+
+    **Cell position block:**
+    ```
+    PLATE_WELL
+    ```
+    - Holds the specific physical storage information of your cell (Plate and well).
+    - Plates should be encoded as continuous numbers (1, 2, 3, ..., etc.).
+    - Well information has to be encoded as A1-H12 to guarantee proper functionality.
+    - Together with the sample block, this information is considered the "B Cell ID", which is unique for each sorted cell.
+    _Plate and well information is required, if you continue with cloning antibody chains from the original cDNA._  
+    
+    **PCR block:**
+    ```
+    CHAIN_PRIMERSET_SOURCE-SUBSOURCE
+    ```
+    - Encodes Information on the PCR that was performed including the chain that was amplified and should be available 
+    in the ab1 file, the potential primer set used for amplification of the chain (e.g., 'oPR' for the openPrimeR sets
+    from our antibody isolation pipeline), and the source from which the sequence was generated (e.g., '2ND-1' for the 
+    first try of a nested PCR product, or 'MIDI-PlasmidID' for a Midi-prep Plasmid). 
+    - **Important**: _CHAIN_ **must be** either **HC** (for heavy chain), **KC** (for kappa light chain), or **LC** (for 
+    lambda light chain) to guarantee proper assembly of heavy and light chains of the same B cell receptor
+    _The subsource is determined as the first string after the dash '-'. It is optional but highly recommended, as it 
+    helps for example to identify repeated PCR amplification events or plasmid batches._
+    
+    **Sequencing block:**
+    ```
+    SEQPRIMER_SEQCOMPANY_SEQ-REPEAT.ab1
+    ```
+    - Contains all information for that particular _ab1-file_. Including information on which primer was used for 
+    sequencing, which company (or sequencer) was used for sequencing and, if you re-sequence the same DNA several times,
+    from which sequencing run the file is. 
+    
+    #### Example:
+    ```
+    SARS2_IDC10_t1_PBMCs_IgG-S488_1_B8_HC_oPR_2ND-1_IgInt_EF_SEQ-1.ab1
+    SARS2_IDC10_t1_PBMCs_IgG-S488_1_B8_KC_oPR_MIDI-435_Ckrev_EF_SEQ-2.ab1
+    ```
+    These two sequences are derived from the same B Cell that was sampled from Subject IDC10 of a SARS-CoV-2 study (SARS2) 
+    at the first study visit (t1). The cell was sampled from PBMCs and was sorted from an IgG and S-Protein-Alexa488 
+    positive sorting gate. The cell was sorted on plate 1 from this patient into well B8. The first sequence represents
+    the first try of the nested PCR (2ND-1) with the openPrimeR set for the heavy chain (HC) and was sequenced with the 
+    heavy chain reverse primer 'IgInt' at the sequencing company Eurofins (EF) for the first time (SEQ-1). The second 
+    sequence belongs to the same cell but holds the information of its kappa light chain PCR (KC). Here we sequenced a
+    Midiprap plasmid of this particular light chain (plasmid number 435) with the kappa constant region reverse primer
+    'Ckrev' at the same sequencing company (EF). However, the first sequence of this plasmid had quality issues and had
+    to be re-sequenced (SEQ-2).
+    """)
+
+with tab4:
+    st.subheader("Clonal Assignment")
+    st.markdown("""
+    :blue[_AbRAT_] features a modular clonal assignment framework. The user can select which chain (e.g., heavy 
+    and/or light) to include in the clustering process and which V(D)J gene segment information to use for pre-grouping. 
+    Each selected chain is clustered independently, and a global cluster is formed by combining the resulting 
+    subclusters. Rows with missing or non-computable values are assigned to subcluster 0. The framework currently 
+    offers three clustering algorithms for CDR3 sequences (on the amino acid or nucleotide level):  
+    
+    - **Iterative Greedy CDR3 Clustering (Original Approach)**  
+    - **Matrix-Based Greedy CDR3 Clustering (Global Greedy Approach)**  
+    - **Hierarchical CDR3 Clustering**
+    
+    For all methods, common preprocessing steps are applied: filtering out missing data, applying a configurable 
+    threshold on sequence length differences, and using a normalized Levenshtein distance threshold. In addition, 
+    each algorithm can be run over multiple iterations with different random initializations to minimize the number 
+    of unassigned sequences ("singles")—allowing the selection of the optimal clustering result based on this metric.
+
+    ---
+    #### Iterative Greedy CDR3 Clustering (Original Approach)
+    
+    **How It Works:**  
+    - Valid CDR3 sequences are processed sequentially:  
+      - The first sequence in the list starts a new cluster.  
+      - Each subsequent candidate is compared first with the cluster’s representative using a length filter (ensuring 
+      the difference in length does not exceed a specified threshold) and then against **all** members already in the 
+      cluster using the normalized Levenshtein distance.  
+      - Only if the candidate meets both criteria for every cluster member is it added to the cluster.  
+    - The process repeats with the remaining unclustered sequences.
+    - Multiple iterations with different random orderings can be performed to minimize the number of singles.
+    
+    **Pros:**  
+    - **High Homogeneity:** Every candidate is verified against all existing cluster members, ensuring very homogeneous 
+    clusters.  
+    - **Historical Consistency:** This is the original approach used in previous versions.
+    
+    **Cons:**  
+    - **Performance:** Sequential pairwise comparisons can be slow for large datasets.  
+    - **Order Sensitivity:** The final clustering result may depend on the initial sequence order.
+    
+    ---
+    #### Matrix-Based Greedy CDR3 Clustering (Global Greedy Approach)
+    
+    **How It Works:**  
+    - A full pairwise similarity matrix is computed for all valid CDR3 sequences using both the normalized Levenshtein 
+    distance and a length filter.  
+    - A global greedy strategy is applied:  
+      - In each iteration, the sequence with the highest overall similarity (i.e., the one with the most matches 
+      according to the filters) is chosen as the cluster representative.  
+      - All sequences similar to this representative (meeting both length and distance criteria) are grouped together.  
+      - These sequences are then removed from further consideration, and the process repeats.
+    - As with the iterative method, multiple iterations can be performed to reduce the number of singles.
+    
+    **Pros:**  
+    - **Efficiency:** Vectorized computation of the similarity matrix makes it faster for larger datasets.  
+    - **Global Perspective:** Quickly identifies clusters with many similar sequences based on overall similarity counts.
+    
+    **Cons:**  
+    - **Potential Heterogeneity:** Because clustering is based on overall counts rather than verifying each candidate 
+    against every cluster member, some pairs within a cluster might slightly exceed the threshold.  
+    - **Less Fine-Grained:** New candidates may not be compared as rigorously on a pairwise basis compared to the 
+    iterative approach.
+    
+    ---
+    
+    #### Hierarchical CDR3 Clustering
+    
+    **How It Works:**  
+    - For valid sequences, a full pairwise distance matrix is computed that combines the normalized Levenshtein distance 
+    with a length filter—this ensures that only sequences with acceptable length differences are compared. 
+    - The resulting distance information is then condensed to focus on the unique distances between sequence pairs. 
+    - Using this condensed distance data, a hierarchical clustering procedure is applied, where the most similar 
+    sequences are iteratively merged into clusters to form a dendrogram representing the overall structure. 
+    - Finally, a threshold is applied to cut the dendrogram into flat clusters. 
+    - Multiple iterations can also be run to optimize the result, though hierarchical clustering is deterministic and 
+    less order-sensitive than the greedy approaches.
+    
+    **Pros:**  
+    - **Flexible Clustering Structure:** Hierarchical clustering produces a dendrogram, which can be "cut" at different 
+    levels, providing a flexible view of the data structure.  
+    - **No Need to Predefine Cluster Number:** A threshold is used to form clusters, which can be particularly useful 
+    for heterogeneous datasets.
+    
+    **Cons:**  
+    - **Computational Complexity:** Calculating the full distance matrix and linkage can be computationally intensive 
+    for very large datasets.  
+    - **Sensitivity to Cutoff:** The choice of the cutoff threshold is critical and may require fine-tuning.
+    
+    ---
+    #### Summary of Differences
+    
+    - The **Iterative Greedy CDR3 Clustering (Original Approach)** builds clusters by sequentially verifying each 
+    candidate against all current cluster members. It produces very homogeneous clusters but is slower and more order-sensitive.  
+    - The **Matrix-Based Greedy CDR3 Clustering (Global Greedy Approach)** uses a full similarity matrix to quickly 
+    form clusters based on overall similarity counts, trading off some pairwise strictness for efficiency.  
+    - The **Hierarchical CDR3 Clustering** method computes a full distance matrix and uses a dendrogram-based approach 
+    to form clusters. It offers flexibility in selecting the clustering threshold but can be computationally heavy and 
+    sensitive to the chosen cutoff.
+    
+    All methods share common preprocessing steps—such as filtering out missing data, applying a configurable length 
+    difference threshold, and using a normalized Levenshtein distance threshold—and they all allow for multiple 
+    iterations with random initializations to minimize the number of unassigned sequences ("singles"). 
+
+    Note that iterations are generally critical for the original (iterative) greedy algorithm because its outcome 
+    is highly dependent on the order in which sequences are processed, leading to different clustering outcomes when the 
+    order is changed. Running multiple iterations with different random orderings helps overcome local optima and 
+    reduces the chance that a suboptimal ordering leads to too many unassigned sequences ("singles").
+    In contrast, the matrix-based approach computes a full pairwise similarity matrix and uses a global view to choose 
+    the representative with the highest overall similarity. Although randomization can still affect the tie-breaking 
+    or the grouping in borderline cases, the global nature of the matrix reduces the sensitivity to ordering. 
+    Therefore, iterations might have a less pronounced effect on the matrix-based algorithm. Hierarchical clustering 
+    is deterministic and largely insensitive to input order; however, in edge cases with many nearly identical 
+    distances leading to tie-breaking ambiguities, additional iterations with random variations may help.
+    
+    """)
+
+with tab5:
+    st.subheader("Repertoire Characteristics")
+    st.markdown("""
+    
+    #### Gene Segment Usage:
+    Collapsing requires a unique clone identifier in the dataset and reduces the gene segments to count only unique 
+    gene_segment occurances within a clone. Note that if clustering settings are less stringent, there might be multiple 
+    gene segments in one clone (e.g., multiple light chain V gene segments, if this was not restricted during
+    clustering).
+    """)
+
+    st.markdown(r"""
+    #### Hydrophobicity Values:
+    
+    The **GRAVY (Grand Average of Hydropathy)** score is calculated as follows:
+    
+    $$
+    \text{GRAVY} = \frac{\sum_{i=1}^{n} h(a_i)}{n}
+    $$
+
+    where $h(a_i)$ is the hydrophobicity value (**Kyte-Doolittle** or **Eisenberg** scale) for the $i$-th 
+    amino acid and $n$ is the total number of amino acids in the sequence.  
+
+    - **Positive GRAVY values** indicate a generally hydrophobic protein.
+    - **Negative GRAVY values** suggest a more hydrophilic protein.
+    """)
+
+    st.markdown(r"""
+    #### Net Charge Values:
+
+    The **CDR3 net charge** at physiological pH7.4 is computed with the Python 
+    **peptides** package (Peptide.charge(pH=7.4)), which uses the Henderson–Hasselbalch equation and Lehninger pKa 
+    values to sum fractional charges of all ionizable side chains and termini. 
+    A **positive net charge** indicates an overall basic sequence (more protonated groups), whereas a **negative net 
+    charge** indicates an acidic sequence (more deprotonated groups).
+    """)
+
+    st.markdown(r"""
+    #### CDR3 diversity:
+    
+    :blue[_AbRAT_] implements two widely used diversity indices to quantify the heterogeneity of CDR3 sequences. 
+    _Note: The basic adaptations of both indices only check for identical CDR3 sequences and do not account for 
+    similar CDR3s in estimating heterogeneity._
+    
+    The **Shannon Index** is calculated as:
+    $$
+    H = -\sum_{i=1}^{S} p_i \ln(p_i)
+    $$
+    where $( p_i )$ is the relative frequency of the $( i )$-th unique CDR3 sequence and $( S )$ is the total number of 
+    unique sequences.  
+    - **Interpretation:**  
+      A higher Shannon Index indicates a more diverse repertoire (i.e., more unique sequences and a more even distribution).  
+
+    The **Inverse Simpson Index** is computed as:
+    $$
+    D = \frac{1}{\sum_{i=1}^{S} p_i^2}
+    $$
+    - **Interpretation:**  
+      A larger Inverse Simpson Index means that the repertoire is more diverse and evenly distributed, whereas a lower 
+      value indicates that the repertoire is dominated by a few sequences.
+    
+    **Subsampling for Fair Comparisons**
+    
+    When comparing diversity across multiple repertoires, differences in dataset sizes can bias the indices. Therefore, 
+    **subsampling (rarefaction)** is performed. Each dataset is randomly subsampled to match the size of the smallest dataset.
+    The mean of 20 subsamples is reported together with the standard deviation. _No standard deviation is reported for the
+    smallest dataset, since the indices are calculated on the complete dataset._
+    
+    In summary, the Shannon Index captures both the richness and evenness of the repertoire, while the Inverse Simpson 
+    Index gives more weight to common sequences. Subsampling ensures that these diversity measures are comparable across 
+    datasets of different sizes.
+    """)
+
+with tab6:
+    st.subheader("Citation and References")
+    st.markdown("""
+        **:blue[_AbRAT_] DOI:** [10.1234/your-doi](https://doi.org/10.1234/your-doi)
+
+        If you use this software, please cite:  
+        Kreer, C. (2025). *AbRAT*. DOI: [10.1234/your-doi](https://doi.org/10.1234/your-doi)
+
+        **Related Publications:**  
+        *Kreer, C. (2025). AbRAT - an Antibody Repertoire Analysis Toolkit for single B cell receptor sequencing. 
+        BMC, 12(3), 123-145.* [Read the article](https://link-to-your-article.com)
+
+        :blue[_AbRAT_] includes the following tools and datasets:
+        - Sequence annotation is performed with the stand-alone version of **IgBLAST**:
+        > *Ye J, Ma N, Madden TL, Ostell JM. IgBLAST: an immunoglobulin variable domain sequence analysis tool. 
+        Nucleic Acids Res. 2013 Jul;41(Web Server issue):W34-40. doi: 10.1093/nar/gkt382. 
+        Epub 2013 May 13. PMID: 23671333; PMCID: PMC3692102.* [Read the article](https://doi.org/10.1093/nar/gkt382)
+        - **BLAST**
+        >
+        - **IMGT**
+        >
+        - The **Kyte-Doolittle scale** and **Eisenberg hydrophobicity scale** for GRAVY score determination are taken from:
+    
+        > *Kyte J, Doolittle RF. A simple method for displaying the hydropathic character of a protein. J Mol Biol. 1982 
+        May 5;157(1):105-32. doi: 10.1016/0022-2836(82)90515-0. PMID: 7108955.* 
+        [Read the article](https://doi.org/10.1016/0022-2836(82)90515-0)
+    
+        > *Eisenberg D, Weiss RM, Terwilliger TC. The helical hydrophobic moment: a measure of the amphiphilicity of a 
+        helix. Nature. 1982 Sep 23;299(5881):371-4. doi: 10.1038/299371a0. PMID: 7110359.* 
+        [Read the article](https://doi.org/10.1038/299371a0)
+        """,
+        unsafe_allow_html=True
+    )

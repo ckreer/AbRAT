@@ -1,0 +1,11 @@
+Um Docker Image für richtige architektur zu starten:
+    docker run --platform linux/amd64 -it abrat_image
+
+-d (detach), damit container im hintergrund läuft und terminal frei bleibt
+
+docker run -d -p 8501:8501 meine-streamlit-app
+
+port für streamlit mit angeben
+
+
+
