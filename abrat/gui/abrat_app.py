@@ -46,7 +46,6 @@ def main():
     if 'sequence_xlsx_verified' not in st.session_state:
         st.session_state.sequence_xlsx_verified = False  # checks, if all-sequence.xlsx for bcr_builder are available
 
-    ### XXX ### TODO: move here and everywhereelse to page sepecific values if possible
     if 'ab1file_info' not in st.session_state:
         st.session_state.ab1file_info = {}  # Contains all infos from ab1 files
 

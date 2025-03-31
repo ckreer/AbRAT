@@ -1,7 +1,8 @@
 # Installation and Setup Guide
 
 Hello and welcome! This guide will help you install and run our containerized app on your Mac in a designated 
-folder—even if you have little experience with GitHub and Docker.
+folder—even if you have little experience with GitHub and Docker. You can choose from several options to 
+obtain the app’s code or its prebuilt container image.
 
 ---
 
@@ -24,22 +25,22 @@ folder—even if you have little experience with GitHub and Docker.
 Create a folder on your Mac where you want to install the software.  
 Example:
 ```bash
-mkdir ~/MyApp
+mkdir ~/Applications
 ```
-### 2. Download the Repository
+### 2. Obtaining the App
 
-You have two options to get the source code and all necessary files (Dockerfile, docker-compose.yml, etc.):
+You have four options to get started:
 
 **Option A: Clone with Git (recommended)**
 1. Open Terminal. 
 2. Change directory to your destination folder:
 
 ```bash
-cd ~/MyApp
+cd ~/Applications
 ```
 3. Clone the repository:
 
-git clone https://github.com/yourUsername/yourRepository.git
+git clone https://github.com/ckreer/AbRAT.git
 
 This will create a subfolder yourRepository containing all the files.
 
@@ -49,16 +50,52 @@ This will create a subfolder yourRepository containing all the files.
 3. Save the ZIP file in your destination folder.
 4. Unzip the file (double-click the ZIP file in Finder).
 
-### 3. Change to the Project Folder
+**Option C: Use Prebuilt Image from GitHub Container Registry**
 
-Open Terminal and navigate to the folder containing the source code.
-Example (if cloned via Git):
+If you prefer not to build the image locally, you can pull the prebuilt image directly from the GitHub Container Registry.
+1. Ensure Docker Desktop is running.
+2. Open Terminal and run:
 
 ```bash
-cd ~/MyApp/yourRepository
+docker pull ghcr.io/ckreer/abrat:latest
 ```
 
-### 4. Start the Application with Docker Compose
+3. Once the image is downloaded, you can start the container with:
+
+```bash
+docker run -d -p 8501:8501 ghcr.io/ckreer/abrat:latest
+```
+Adjust volume mounts or environment variables as needed (consult the docker-compose.yml for additional configuration details).
+
+**Option D: Use Prebuilt Image from Docker Hub**
+
+Alternatively, a prebuilt image is available on Docker Hub.
+1. Make sure Docker Desktop is running.
+2. Open Terminal and pull the image:
+
+```bash
+docker pull ckreer/abrat:latest
+```
+
+3. Start the container with:
+
+```bash
+docker run -d -p 8501:8501 ckreer/abrat:latest
+```
+
+Again, if your container requires specific volume mounts or other settings, adjust the docker run command accordingly.
+
+
+### 3. Change to the Project Folder (if using Options A or B)
+
+If you chose to clone or download the repository, open Terminal and navigate to the folder containing the source code. 
+For example (if cloned via Git):
+
+```bash
+cd ~/Applications/AbRAT
+```
+
+### 4. Start the Application with Docker Compose (for Options A & B)
 - Ensure Docker Desktop is running.
 Check that the Docker icon is visible in the menu bar. 
 - Start the App:
@@ -68,20 +105,22 @@ In Terminal, run:
 docker-compose up
 ```
 
-This command builds and starts all required containers. Your docker-compose.yml file is likely configured with a volume for sharing local files (e.g., ./data:/app/data).
+This command builds and starts all required containers. 
 
-- Wait until the containers are running.
-Once the logs indicate that the app is running, you should be able to access it, e.g., at http://localhost:8501.
+- Wait for Startup:
+Once the logs indicate that the app is running, you can proceed to the next step.
 
 ### 5. Access the App and Exchange Files
-	•	Open your browser and navigate to http://localhost:8501 (or the URL shown in the logs) to use the app.
-	•	File Exchange:
-Place files in the local folder defined as a volume in the docker-compose.yml (e.g., the data folder).
+- Open your browser and navigate to http://localhost:8501 (or the URL shown in the logs) to use the app.
+- File Exchange:
+Place ab1-files in the local data/userdata/ab1files folder (defined as a volume in the docker-compose.yml).
 Any files you add to this folder will be accessible within the app.
 
 ### 6. Stop the Application
-	•	Press Ctrl + C in the Terminal running docker-compose up to stop the process.
-	•	Alternatively, open a new Terminal window, navigate to the project folder, and run:
+- Stop via Terminal:
+Press Ctrl + C in the Terminal running docker-compose up to stop the process.
+- Alternatively:
+Open a new Terminal window, navigate to the project folder, and run:
 
 ```bash
 docker-compose down
@@ -92,29 +131,50 @@ This command stops and removes all running containers.
 ### 7. Applying Updates (when using Git)
 
 If there are updates to the repository, follow these steps:
-- Open Terminal and navigate to the project folder:
+1. Open Terminal and navigate to the project folder:
 
 ```bash
-cd ~/MyApp/yourRepository
+cd ~/Applications/AbRAT
 ```
 
-- Pull the latest changes:
+2. Pull the latest changes:
 
 ```bash
 git pull
 ```
 
-- Restart the app (first stop it using docker-compose down, then start it again with docker-compose up).
+3. Restart the app:
+- First, stop it using:
+```bash
+docker-compose down
+```
+- Then, start it again with:
+```bash
+docker-compose up
+```
 
 ### Summary
-	1.	Create a Destination Folder: E.g., ~/MyApp.
-	2.	Download the Repository: Either clone with Git or download and unzip the ZIP file.
-	3.	Navigate to the Project Folder: Open Terminal and change to the folder containing the source code.
-	4.	Launch Docker Desktop: Ensure Docker is running.
-	5.	Start the App: Run docker-compose up in Terminal.
-	6.	Access the App: Open http://localhost:8501 in your browser.
-	7.	Exchange Files: Place files in the designated local folder (e.g., data) to share with the app.
-	8.	Stop and Update the App: Use docker-compose down to stop and git pull for updates.
+1. Create a Destination Folder:
+E.g., ~/Applications.
+2. Download the Repository or Image:
+- Option A: Clone with Git
+- Option B: Download as ZIP
+- Option C: Pull the prebuilt image from GitHub Container Registry
+- Option D: Pull the prebuilt image from Docker Hub
+3. Navigate to the Project Folder: (if applicable).
+4. Launch Docker Desktop:
+Ensure Docker is running.
+5. Start the App:
+- Use docker-compose up for Options A & B.
+- Use docker run for Options C & D.
+6. Access the App:
+Open http://localhost:8501 in your browser.
+7. Exchange Files:
+Place files in the designated local folder (e.g., data folder) to share with the app.
+8. Stop and Update the App:
+- Use docker-compose down to stop the app.
+- Use git pull for updates (if using Git).
 
-With these steps, you should be able to quickly and easily run our app on your Mac. If you have any questions or need support, feel free to reach out!
+With these steps, you should be able to quickly and easily run our app on your Mac using your preferred method of 
+obtaining the code or image. Enjoy!
 

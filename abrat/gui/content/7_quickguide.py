@@ -201,7 +201,7 @@ with tab4:
     and/or light) to include in the clustering process and which V(D)J gene segment information to use for pre-grouping. 
     Each selected chain is clustered independently, and a global cluster is formed by combining the resulting 
     subclusters. Rows with missing or non-computable values are assigned to subcluster 0. The framework currently 
-    offers three clustering algorithms for CDR3 sequences (on the amino acid or nucleotide level):  
+    offers three clustering algorithms for CDR3 sequences (on the amino acid level):  
     
     - **Iterative Greedy CDR3 Clustering (Original Approach)**  
     - **Matrix-Based Greedy CDR3 Clustering (Global Greedy Approach)**  

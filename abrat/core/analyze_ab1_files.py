@@ -274,7 +274,7 @@ def get_infos_from_igblast(blast_result):
                 'FWR4_NT': fwr4_nt, 'FWR4_AA': fwr4_aa, 'FWR4_FRAME': fwr4_frame, 'FWR4_STOP_CODON': fwr4_stop_codon,
                 'C_START': constant_region_start, 'V_LENGTH': v_length, 'FWR1_FOUND': fwr1_found, 'J_FOUND': j_found,
                 'ORIENT_FOUND': orient_found, 'LENGTH_FOUND': v_length_found, 'FULL_V_ALIGNMENT': full_v_alignment,
-                'IGBLAST_PASS': igblast_pass}
+                'IGBLAST_PASSED': igblast_pass}
     return name, features
 
 def main():

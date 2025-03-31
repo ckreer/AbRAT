@@ -198,7 +198,6 @@ if hc_selected:
         heavy_chain_settings['params'] = {}
 
         if hc_algorithm: #== "Iterative CDR3 similarity" or hc_algorithm == "Matrix CDR3 similarity":
-            # TODO: add logic to select nt or aa
             if st.toggle('Restrict CDR3 length difference for clustering', value=True, key='hc_length_difference'):
                 heavy_chain_settings['params']['length_threshold'] = st.slider("Max. difference", 0, 20,
                                                                                value=default_cdrh3_aa_length_difference_threshold,
@@ -239,7 +238,6 @@ if lc_selected:
         light_chain_settings['params'] = {}
 
         if lc_algorithm: # == "Iterative CDR3 similarity" or lc_algorithm == "Matrix CDR3 similarity":
-            # TODO: add logic to select nt or aa
             if st.toggle('Restrict CDR3 length difference for clustering', value=True, key="lc_length_difference"):
                 light_chain_settings['params']['length_threshold'] = st.slider("Max. difference", 0, 10,
                                       value = default_cdrl3_aa_length_difference_threshold,

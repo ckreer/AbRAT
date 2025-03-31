@@ -286,7 +286,7 @@ def check_abi_file(ab1_file, handle, q_cut_off, mean_q_cut_off, min_length, inne
     stop_codon = igblast_results[name]['STOP_CODON']
     productive = igblast_results[name]['PRODUCTIVE']
     igblast_v_align = igblast_results[name]['FULL_V_ALIGNMENT']
-    igblast_pass = igblast_results[name]['IGBLAST_PASS']
+    igblast_pass = igblast_results[name]['IGBLAST_PASSED']
 
     # Step 3: Get data from ab1 file
     for record in SeqIO.parse(handle, "abi"):
@@ -359,8 +359,8 @@ def generate_q_check_df(data_dir, q_co, mean_q_co, min_l, in_n, igblast_d):
     # cohort, subject, time_point, bait, plate, well, primer_set, chain, source, rev_primer, seq_company, seq_counter
     columns = ["COHORT", "SUBJECT", "TIME_POINT", "TISSUE", "SUBSET", "PLATE", "WELL", "PRIMER_SET", "CHAIN_PCR",
                "SOURCE", "SUBSOURCE", "REV_PRIMER", "COMPANY", "SEQ_COUNTER", "RAW_LENGTH", "RAW_MEAN_Q",
-               "IGBLAST_PASS", "FULL_V_ALIGNMENT", "V_to_J_LENGTH", "LENGTH_PASS", "MEAN_Q", "Q_PASS", "TOTAL_N",
-               "INNER_N_PASS", "PASSED", "STOP_CODON", "FRAME", "PRODUCTIVE", "TRIMMED_SEQ", "MASKED_SEQ",
+               "IGBLAST_PASSED", "FULL_V_ALIGNMENT", "V_to_J_LENGTH", "LENGTH_PASSED", "MEAN_Q", "MEAN_PHRED_PASSED", "INNER_N",
+               "INNER_N_PASSED", "PASSED", "STOP_CODON", "FRAME", "PRODUCTIVE", "TRIMMED_SEQ", "MASKED_SEQ",
                "ORIGINAL_SEQ", "FILE_NAME"]
 
     return pd.DataFrame(q_check_list, columns=columns).sort_values(
@@ -488,7 +488,7 @@ def plot_pie_chart(
 def plot_qc_statistics(q_check_df):
     """ Identifeis reaseons why QC failed und returns a bar plot."""
 
-    # find reasons for not passing "Q_PASS","INIT_LENGTH_PASS", "TRIMMED_LENGTH_PASS", "INNER_N_PASS"
+    # find reasons for not passing "MEAN_PHRED_PASSED","INIT_LENGTH_PASS", "TRIMMED_LENGTH_PASS", "INNER_N_PASS"
     np_df = q_check_df[~q_check_df["QCHECK_PASSED"]]
 
     qp = len(np_df[~np_df["MEAN_PHRED_PASSED"].astype(bool)])  # /len(np_df) if len(np_df)>0 else 0 # put 100* in front to get %
@@ -605,7 +605,7 @@ def get_isotype_with_blast(input_column, output_folder, blast_db="CH1_DB"):
     path_to_blast_file = Path(output_folder).joinpath(date_stamp("blast-query.fasta"))
     with open(path_to_blast_file, "w") as handle:
         handle.write("\n".join(output))
-    # TODO: set proper cut offs to prevent mixing up chains, include other isotypes!!
+
     # blast
     blast_output = perform_blast(path_to_blast_file, blast_db)
     isotype_list = []
@@ -644,8 +644,6 @@ def combine_ig_blast_and_q_check_data(q_check_df, igblast_dict, combi_ex_name, o
         # Dateiname ohne Suffix
         file_name = entry['FILE_NAME'].replace('.ab1', '')
         orig_seq = entry['ORIGINAL_SEQ']
-        trimmed_seq = entry['TRIMMED_SEQ']
-        inner_n = entry['TOTAL_N']
 
         # Hole IgBLAST-Ergebnis (als Dictionary) und extrahiere benötigte Werte
         igblast_result = igblast_dict.get(file_name, {})
@@ -658,14 +656,14 @@ def combine_ig_blast_and_q_check_data(q_check_df, igblast_dict, combi_ex_name, o
         new_df['SUBSET'] = entry['SUBSET']
         new_df['TISSUE'] = entry['TISSUE']
         new_df['CHAIN_PCR'] = entry['CHAIN_PCR']
-        new_df['IGBLAST_PASSED'] = entry['IGBLAST_PASS']
-        new_df['MEAN_PHRED_PASSED'] = entry['Q_PASS']
-        new_df['INNER_N_PASSED'] = entry['INNER_N_PASS']
-        new_df['LENGTH_PASSED'] = entry['LENGTH_PASS']
-        new_df['INNER_N'] = inner_n
+        new_df['IGBLAST_PASSED'] = entry['IGBLAST_PASSED']
+        new_df['MEAN_PHRED_PASSED'] = entry['MEAN_PHRED_PASSED']
+        new_df['INNER_N_PASSED'] = entry['INNER_N_PASSED']
+        new_df['LENGTH_PASSED'] = entry['LENGTH_PASSED']
+        new_df['INNER_N'] = entry['INNER_N']
         new_df['QCHECK_PASSED'] = bool(entry['PASSED'])  # explizite Typumwandlung
         new_df['ORIG_SEQ'] = orig_seq
-        new_df['TRIMMED_SEQ'] = trimmed_seq
+        new_df['TRIMMED_SEQ'] = entry['TRIMMED_SEQ']
         new_df['MASKED_SEQ'] = entry['MASKED_SEQ']
         new_df['COHORT'] = entry['COHORT']
         new_df['SUBJECT'] = entry['SUBJECT']
@@ -717,9 +715,6 @@ def combine_ig_blast_and_q_check_data(q_check_df, igblast_dict, combi_ex_name, o
     if isotype_determination:
         print(log_message("Determining Isotypes"), flush=True)
         combined_dataframe['ISOTYPE'] = get_isotype_with_blast(combined_dataframe['C_NT'], out_dir)
-
-        # TODO: insert quality check or warning, if Isotype makes no sense, or score is to low
-
         combined_dataframe['TOP_ISOTYPE'] = combined_dataframe['ISOTYPE'].apply(lambda x: x.split("*")[0])
     else:
         combined_dataframe['ISOTYPE'] = "N.D."
@@ -754,9 +749,6 @@ def combine_ig_blast_and_q_check_data(q_check_df, igblast_dict, combi_ex_name, o
 
     print(log_message(f"{combi_ex_name} exported to {out_dir}"), flush=True)
     return combined_dataframe
-
-
-import datetime
 
 
 def dict_to_str(d, indent=0):

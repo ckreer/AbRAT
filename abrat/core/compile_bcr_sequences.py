@@ -14,7 +14,6 @@ def find_best_sequence(df, difference_cut_off):
     - will also return all possible sources that were available
     to check if best hit was taken from best source.
     - will also return colliding sequences, if quality passed sequences dramatically differ"""
-    # TODO: could somehow rescue the INNER_N = "N/A" reads to get the file names for those...
     # TODO: How to proceed with truncated sequences?
     df = df[df['INNER_N'] != 'N/A']
     sources = list(df['SOURCE'].unique())
@@ -32,7 +31,6 @@ def find_best_sequence(df, difference_cut_off):
         name_list = list(df['SAMPLE_NAME'])
         name_list.remove(best)
         others = ", ".join(name_list)
-        # TODO: perform sequence comparison here
         # pairwise comparison sequence, v gene and j gene
         for idx1 in df[df['QCHECK_PASSED']].index[:-1]:
             seq1 = df.at[idx1, 'MASKED_SEQ']
@@ -235,7 +233,6 @@ def compile_bcrs(composite_df, h_ident, k_ident, l_ident, col_co):
                 sample_infos['WARNING'] = add_to_list(sample_infos['WARNING'], 'TWO_LIGHT_CHAINS_ONE_PRODUCTIVE')
 
             # if two unproductive sequences are found, take the one with less Ns as best sequence
-            # TODO: should change maybe to identity here?
             elif not prod_k and not prod_l:
                 if int(best_k['INNER_N'].fillna(1000).iloc[0]) <= int(best_l['INNER_N'].fillna(1000).iloc[0]):
                     best_light_chain = best_k.reindex(light_chain_columns, axis=1)
