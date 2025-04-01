@@ -1,40 +1,53 @@
+#!/usr/bin/env python3
+
 import pandas as pd
 import numpy as np
 from difflib import SequenceMatcher
-
 import plotly.graph_objects as go
-import peptides
-import streamlit as st
+
 
 def get_sample_information(df):
-    """Extracts Sample information from dataframe and returns a dictionary"""
-    infos = {'Cohort': ', '.join(df[('SAMPLE_INFORMATION', 'COHORT')].unique()),
-             'Donor': ', '.join(df[('SAMPLE_INFORMATION', 'SUBJECT')].unique()),
-             'Time points': ', '.join(df[('SAMPLE_INFORMATION', 'TIME_POINT')].unique()),
-             'Sample': ', '.join(df[('SAMPLE_INFORMATION', 'TISSUE')].unique()),
-             'Subset': ', '.join(df[('SAMPLE_INFORMATION', 'SUBSET')].unique()), 'Total BCRs': df.shape[0],
-             'Heavy chains': int(df[('HEAVY_CHAIN', 'HEAVY_FOUND')].sum()),
-             'Light chains': int(df[('LIGHT_CHAIN', 'LIGHT_FOUND')].sum()),
-             'Kappa chains': int((df[('LIGHT_CHAIN', 'PCR_ISOTYPE')].dropna()=="KC").sum()),
-             'Lambda chains': int((df[('LIGHT_CHAIN', 'PCR_ISOTYPE')].dropna()=="LC").sum())
-             }
-    # infos['Paired chains'] = df[('HEAVY_CHAIN','HEAVY_FOUND')].sum()
+    """
+    Extracts sample information from the DataFrame and returns it as a dictionary.
+
+    Parameters:
+        df (pd.DataFrame): DataFrame containing sample information with MultiIndex columns
+                           (e.g., ('SAMPLE_INFORMATION', 'COHORT'), ('SAMPLE_INFORMATION', 'SUBJECT'), etc.).
+
+    Returns:
+        dict: A dictionary with sample information including Cohort, Donor, Time points, Sample, Subset, Total BCRs,
+              Heavy chains, Light chains, Kappa chains, and Lambda chains.
+    """
+    infos = {
+        'Cohort': ', '.join(df[('SAMPLE_INFORMATION', 'COHORT')].unique()),
+        'Donor': ', '.join(df[('SAMPLE_INFORMATION', 'SUBJECT')].unique()),
+        'Time points': ', '.join(df[('SAMPLE_INFORMATION', 'TIME_POINT')].unique()),
+        'Sample': ', '.join(df[('SAMPLE_INFORMATION', 'TISSUE')].unique()),
+        'Subset': ', '.join(df[('SAMPLE_INFORMATION', 'SUBSET')].unique()),
+        'Total BCRs': df.shape[0],
+        'Heavy chains': int(df[('HEAVY_CHAIN', 'HEAVY_FOUND')].sum()),
+        'Light chains': int(df[('LIGHT_CHAIN', 'LIGHT_FOUND')].sum()),
+        'Kappa chains': int((df[('LIGHT_CHAIN', 'PCR_ISOTYPE')].dropna() == "KC").sum()),
+        'Lambda chains': int((df[('LIGHT_CHAIN', 'PCR_ISOTYPE')].dropna() == "LC").sum())
+    }
     return infos
+
 
 def get_hydrophobicity_values(sequence, scale='kyte-doolittle'):
     """
-    Returns a list of hydrophobicity values based on the given amino acid sequence
-    and the selected scale.
+    Returns a list of hydrophobicity values for the given amino acid sequence based on the selected scale.
 
-    :param sequence: Amino acid sequence (single-letter code).
-    :param scale: 'kyte-doolittle' or 'eisenberg' (default: 'kyte-doolittle').
+    Parameters:
+        sequence (str): Amino acid sequence (using single-letter codes).
+        scale (str): Hydrophobicity scale to use ('kyte-doolittle' or 'eisenberg'; default is 'kyte-doolittle').
 
-    :return: List[float]: A list of the corresponding hydrophobicity values.
+    Returns:
+        list: A list of hydrophobicity values corresponding to each residue in the sequence.
 
-    :raises: ValueError: If an unknown amino acid symbol is encountered or an unsupported scale is specified.
+    Raises:
+        ValueError: If an unknown amino acid symbol is encountered or an unsupported scale is specified.
     """
-
-    # Kyte-Doolittle scale: Hydrophobicity values for each amino acid residue
+    # Kyte-Doolittle scale: hydrophobicity values for each amino acid
     kyte_doolittle = {
         'I': 4.5, 'V': 4.2, 'L': 3.8, 'F': 2.8, 'C': 2.5,
         'M': 1.9, 'A': 1.8, 'G': -0.4, 'T': -0.7, 'S': -0.8,
@@ -42,7 +55,7 @@ def get_hydrophobicity_values(sequence, scale='kyte-doolittle'):
         'Q': -3.5, 'D': -3.5, 'N': -3.5, 'K': -3.9, 'R': -4.5
     }
 
-    # Eisenberg scale: Consensus scale (values according to Eisenberg et al.)
+    # Eisenberg scale: consensus hydrophobicity scale (Eisenberg et al.)
     eisenberg = {
         'A': 0.62, 'R': -2.53, 'N': -0.78, 'D': -0.90, 'C': 0.29,
         'Q': -0.85, 'E': -0.74, 'G': 0.48, 'H': -0.40, 'I': 1.38,
@@ -50,7 +63,6 @@ def get_hydrophobicity_values(sequence, scale='kyte-doolittle'):
         'S': -0.18, 'T': -0.05, 'W': 0.81, 'Y': 0.26, 'V': 1.08
     }
 
-    # Select the scale based on the parameter
     scale = scale.lower()
     if scale == 'kyte-doolittle':
         scale_dict = kyte_doolittle
@@ -59,112 +71,87 @@ def get_hydrophobicity_values(sequence, scale='kyte-doolittle'):
     else:
         raise ValueError("Unsupported scale. Please choose 'kyte-doolittle' or 'eisenberg'.")
 
-    # Generate a list of hydrophobicity values
     values = []
     for aa in sequence.upper():
         if aa in scale_dict:
             values.append(scale_dict[aa])
         else:
             raise ValueError(f"Unknown amino acid '{aa}' in sequence.")
-
     return values
 
 
 def compute_gravy_scores(sequences: pd.Series, scale: str = 'kyte-doolittle') -> pd.Series:
     """
-    Computes the GRAVY (Grand Average of Hydropathy) scores for a Pandas Series of
-    CDR3 amino acid sequences using the specified hydrophobicity scale.
+    Computes the GRAVY (Grand Average of Hydropathy) scores for a Series of CDR3 amino acid sequences.
+
+    The GRAVY score is calculated as the average of the hydrophobicity values for the amino acids in the sequence.
 
     Parameters:
-      swquences (pd.Series): Series of CDR3 amino acid sequences (using single-letter codes).
-      scale (str): Hydrophobicity scale to use ('kyte-doolittle' or 'eisenberg').
+        sequences (pd.Series): Series of CDR3 amino acid sequences (using single-letter codes).
+        scale (str): Hydrophobicity scale to use ('kyte-doolittle' or 'eisenberg'; default is 'kyte-doolittle').
 
-    :returns: pd.Series: Series of GRAVY scores calculated for each sequence.
+    Returns:
+        pd.Series: Series containing the GRAVY scores for each sequence.
     """
-
     def compute_gravy(seq: str) -> float:
-        # Get the hydrophobicity values for the given sequence based on the chosen scale.
         values = get_hydrophobicity_values(seq, scale=scale)
-        # Check if sequence is not empty to avoid division by zero.
         if len(values) == 0:
             return None
-        # Calculate the GRAVY score as the average of the hydrophobicity values.
         return sum(values) / len(values)
-
-    # Apply the computation to each sequence in the series.
     return sequences.apply(compute_gravy)
 
 
-def compute_histogram(series: pd.Series, bin_size: float = 1, min_val: float=None, max_val: float=None) -> pd.Series:
+def compute_histogram(series: pd.Series, bin_size: float = 1, min_val: float = None, max_val: float = None) -> pd.Series:
     """
-    Computes a histogram from a Pandas Series using the specified bin size.
+    Computes a histogram from a numeric Pandas Series using the specified bin size.
 
     Parameters:
-      series (pd.Series): The input data as a numeric Pandas Series.
-      bin_size (float): The size of the bins. Default is 1.
-      min_val (float): min bin value
-      max_val (float): max bin value
+        series (pd.Series): Numeric data as a Pandas Series.
+        bin_size (float): Size of each histogram bin (default is 1).
+        min_val (float): Minimum value for the bins (if None, uses the series minimum).
+        max_val (float): Maximum value for the bins (if None, uses the series maximum).
 
     Returns:
-      pd.Series: A Pandas Series where the index represents the start of each bin
-                 and the values are the counts of elements in each bin.
+        pd.Series: A Pandas Series where the index represents the start of each bin and the values are the counts.
     """
-    # Ensure the series contains numeric data
     if not pd.api.types.is_numeric_dtype(series):
         raise ValueError("The input series must be numeric.")
-
-    # Determine the minimum and maximum values in the series
     if min_val is None:
         min_val = series.min()
     if max_val is None:
         max_val = series.max()
-
-    # Create bins from the minimum to the maximum value, ensuring the maximum is included
     bins = np.arange(min_val, max_val + bin_size, bin_size)
-
-    # Compute the histogram counts and bin edges using numpy.histogram
     counts, bin_edges = np.histogram(series, bins=bins)
-
-    # Calculate the midpoint for each bin as the average of the bin edges
     index = bin_edges[:-1]
-    # [(bin_edges[i] + bin_edges[i + 1]) / 2 for i in range(len(bin_edges) - 1)]
-
-    # Return the histogram as a Pandas Series with the index as index
     hist_series = pd.Series(counts, index=index)
     return hist_series
+
 
 def compute_diversity_index(sequences: pd.Series, index_type: str = "shannon") -> float:
     """
     Computes a diversity index for a Series of CDR3 amino acid sequences.
 
-    The function calculates the frequency distribution of unique sequences and then:
-      - For the Shannon index: H = -∑ p_i * ln(p_i)
-      - For the Inverse Simpson index: D = 1 / ∑ p_i^2
+    The diversity index is computed from the frequency distribution of unique sequences:
+      - Shannon index: H = -∑ (p_i * ln(p_i))
+      - Inverse Simpson index: D = 1 / ∑ (p_i^2)
 
     Parameters:
-        sequences (pd.Series): A Pandas Series containing CDR3 sequences (strings).
-        index_type (str): The type of diversity index to compute. Use "shannon"
-                          for the Shannon index or "inverse_simpson" for the Inverse Simpson index.
+        sequences (pd.Series): Series containing CDR3 sequences.
+        index_type (str): The type of diversity index to compute ("shannon" or "inverse_simpson").
 
     Returns:
         float: The computed diversity index.
 
     Raises:
-        ValueError: If an unknown index_type is provided.
+        ValueError: If an unsupported index_type is provided.
     """
-    # Get counts for each unique sequence
     counts = sequences.value_counts()
     total = counts.sum()
-
-    # Calculate the proportion (p_i) for each unique sequence
     probs = counts / total
-
     if index_type.lower() == "shannon":
-        # Shannon index: H = -sum(p_i * ln(p_i))
         shannon_index = -np.sum(probs * np.log(probs))
         return shannon_index
     elif index_type.lower() == "inverse_simpson":
-        # Inverse Simpson index: D = 1 / sum(p_i^2)
         inverse_simpson = 1.0 / np.sum(probs ** 2)
         return inverse_simpson
     else:
@@ -174,13 +161,12 @@ def compute_diversity_index(sequences: pd.Series, index_type: str = "shannon") -
 def subsample_series_dict(series_dict: dict) -> tuple:
     """
     Determines the smallest Series (by length) from a dictionary of Series and returns:
-    - the original dictionary (unchanged)
-    - the minimal size,
-    - and the key of the smallest Series.
+      - the original dictionary,
+      - the minimal size,
+      - and the key corresponding to the smallest Series.
 
     Parameters:
-        series_dict (dict): Dictionary where keys are dataset names and values are Pandas Series.
-        random_state (int): Seed for reproducibility.
+        series_dict (dict): Dictionary with dataset names as keys and Pandas Series as values.
 
     Returns:
         tuple: (series_dict, min_size, smallest_key)
@@ -199,37 +185,31 @@ def compute_diversity_indices_for_subsampling(
         seq_column: str = "CDR3_AA"
 ) -> dict:
     """
-    For each Pandas Series in series_dict (which should contain CDR3 sequences),
-    performs multiple iterations of subsampling (for those larger than the smallest)
-    and computes the diversity index (e.g., Shannon) for each iteration.
+    Computes diversity indices for each dataset in a dictionary of Series via subsampling.
 
-    For the smallest Series, the index is computed directly.
+    For each dataset in the dictionary, if the Series is larger than the smallest Series, multiple subsamples
+    (of size equal to the smallest Series) are drawn and the diversity index is computed for each subsample.
+    For the smallest Series, the diversity index is computed directly.
 
     Parameters:
         series_dict (dict): Dictionary where keys are dataset names and values are Pandas Series.
-        index_type (str): "shannon" or "inverse_simpson".
-        iterations (int): Number of subsampling iterations.
-        random_state (int): Seed for reproducibility.
-        seq_column (str): The name to assign to the Series (for clarity; not used internally).
+        index_type (str): Type of diversity index to compute ("shannon" or "inverse_simpson").
+        iterations (int): Number of subsampling iterations (default is 20).
+        random_state (int): Seed for reproducibility (default is 42).
+        seq_column (str): The name to assign to the Series for clarity (not used internally).
 
     Returns:
-        dict: A dictionary with keys corresponding to dataset names and values being a dict of (n, mean, std)
-              for the computed diversity index.
+        dict: A dictionary with dataset names as keys and a dict as value containing:
+              'n' (minimal sample size), 'mean' (mean diversity index), and 'std' (standard deviation).
     """
-    # Bestimme die Länge jeder Series und den kleinsten Datensatz
     series_dict, min_size, smallest_key = subsample_series_dict(series_dict)
-
     results = {}
     for key, series in series_dict.items():
-        # Optional: falls die Series einen anderen Namen hat, benenne sie um:
         series = series.rename(seq_column)
-
         if series.shape[0] == min_size:
-            # Für den kleinsten Datensatz direkt berechnen.
             diversity_value = compute_diversity_index(series, index_type=index_type)
-            results[key] = {'n':min_size, 'mean':diversity_value, 'std':0.0}
+            results[key] = {'n': min_size, 'mean': diversity_value, 'std': 0.0}
         else:
-            # Für größere Series mehrfach subsamplen.
             indices = []
             for i in range(iterations):
                 subsample = series.sample(n=min_size, random_state=random_state + i)
@@ -237,34 +217,30 @@ def compute_diversity_indices_for_subsampling(
                 indices.append(index_value)
             mean_val = np.mean(indices)
             std_val = np.std(indices)
-            results[key] = {'n':min_size, 'mean':mean_val, 'std':std_val}
+            results[key] = {'n': min_size, 'mean': mean_val, 'std': std_val}
     return results
 
 
-# CURRENTLY NOT IMPLEMENTED
 def compute_pairwise_jaccard(data_dict: dict, iterations: int = 20, random_state: int = 42):
     """
-    Computes the pairwise Jaccard index for multiple sequence datasets (e.g. CDR3 repertoires).
+    Computes the pairwise Jaccard index for multiple sequence datasets via subsampling.
 
-    For each dataset (key in data_dict), the function:
-      - Extracts the unique sequences.
-      - Determines the minimal set size across all datasets.
-      - Performs 'iterations' rounds of subsampling (without replacement) from each dataset,
-        sampling 'min_size' sequences.
-      - Computes the Jaccard index for each pair of datasets:
-          J(A,B) = |A ∩ B| / |A ∪ B|
-
-    Returns:
-      - results: A dictionary with keys as tuples (set1, set2) and values as dictionaries:
-                 {'n': min_size, 'mean': mean_jaccard, 'std': std_jaccard}
-      - matrix: A symmetric Pandas DataFrame with dataset names as rows and columns containing the mean Jaccard values.
+    For each dataset in the dictionary, unique sequences are extracted and the minimal set size is determined.
+    For a specified number of iterations, subsamples of size equal to the minimal set size are drawn from each dataset.
+    The Jaccard index for each pair of datasets is computed as:
+        J(A, B) = |A ∩ B| / |A ∪ B|
 
     Parameters:
-        data_dict (dict): Dictionary where keys are dataset names and values are lists or pandas Series of sequences (str, e.g. CDR3s).
-        iterations (int): Number of subsampling iterations (default 20).
-        random_state (int): Seed for reproducibility.
+        data_dict (dict): Dictionary where keys are dataset names and values are lists or Pandas Series of sequences.
+        iterations (int): Number of subsampling iterations (default is 20).
+        random_state (int): Seed for reproducibility (default is 42).
+
+    Returns:
+        tuple: A tuple (results, matrix) where:
+               - results (dict): Dictionary with keys as tuples (dataset1, dataset2) and values as a dict with:
+                                 'n' (minimal set size), 'mean' (mean Jaccard index), and 'std' (standard deviation).
+               - matrix (pd.DataFrame): A symmetric DataFrame with dataset names as rows and columns containing the mean Jaccard index.
     """
-    # Get unique sequences only
     unique_dict = {}
     for dataset, seqs in data_dict.items():
         if isinstance(seqs, pd.Series):
@@ -273,29 +249,19 @@ def compute_pairwise_jaccard(data_dict: dict, iterations: int = 20, random_state
             seq_list = list(set(seqs))
         unique_dict[dataset] = seq_list
 
-    # Determine the minimal set size
     min_size = min(len(seq_list) for seq_list in unique_dict.values())
-
-    # Sort dataset names to ensure consistent key ordering
     dataset_names = sorted(list(unique_dict.keys()))
-
-    # Create dictionary for pairwise results for all combinations.
-    # Keys are tuples (dataset1, dataset2) with dataset1 <= dataset2 (alphabetically).
     pairwise_results = {}
     for i in range(len(dataset_names)):
         for j in range(i, len(dataset_names)):
             pairwise_results[(dataset_names[i], dataset_names[j])] = []
 
     rng = np.random.RandomState(random_state)
-
-    # Subsampling and calculation of Jaccard indices
     for _ in range(iterations):
         subsamples = {}
         for dataset, seq_list in unique_dict.items():
-            # Randomly choose without replacement
             subsample = rng.choice(seq_list, size=min_size, replace=False)
             subsamples[dataset] = set(subsample)
-        # Calculate Jaccard index for each combination
         for i in range(len(dataset_names)):
             for j in range(i, len(dataset_names)):
                 setA = subsamples[dataset_names[i]]
@@ -304,55 +270,56 @@ def compute_pairwise_jaccard(data_dict: dict, iterations: int = 20, random_state
                 intersection = setA & setB
                 jacc = len(intersection) / len(union) if len(union) > 0 else 0
                 pairwise_results[(dataset_names[i], dataset_names[j])].append(jacc)
-
-    # Determine means and standard deviation for each pair
     results = {}
     for pair, values in pairwise_results.items():
         mean_val = np.mean(values)
         std_val = np.std(values)
         results[pair] = {'n': min_size, 'mean': mean_val, 'std': std_val}
-
-    # Build a symmetric matrix of the results.
     matrix = pd.DataFrame(index=dataset_names, columns=dataset_names, dtype=float)
     for i in range(len(dataset_names)):
         for j in range(len(dataset_names)):
-            # Ensure key is ordered alphabetically
             key = tuple(sorted((dataset_names[i], dataset_names[j])))
             matrix.iloc[i, j] = results[key]['mean']
-
     return results, matrix
+
 
 def sequence_similarity(seq1: str, seq2: str) -> float:
     """
     Calculates the similarity between two sequences using difflib's SequenceMatcher.
-    Returns a value between 0 (no similarity) and 1 (identical).
+
+    Parameters:
+        seq1 (str): The first sequence.
+        seq2 (str): The second sequence.
+
+    Returns:
+        float: A similarity ratio between 0 (no similarity) and 1 (identical).
     """
     return SequenceMatcher(None, seq1, seq2).ratio()
 
-# Not included in the basic repertoire characteristics
+
 def compute_pairwise_weighted_jaccard(data_dict: dict, iterations: int = 20, random_state: int = 42):
     """
-    Computes the weighted pairwise Jaccard Index between multiple sequence datasets,
-    taking into account not only exact matches but also similar CDR3s.
+    Computes the weighted pairwise Jaccard index between multiple sequence datasets.
 
-    For each dataset (key in data_dict):
-      - Unique sequences are extracted.
-      - The minimum dataset size is determined.
-      - 'iterations' rounds of subsampling (without replacement) are performed,
-        sampling 'min_size' sequences.
-      - For each pair, the weighted Jaccard Index is computed:
-          weighted J(A,B) = soft_intersection / soft_union,
-      where:
-          soft_intersection = sum over a in A of max_{b in B}(similarity(a, b))
-          soft_union = |A| + |B| - soft_intersection
+    For each dataset, unique sequences are extracted and the minimal set size is determined.
+    For a specified number of iterations, subsamples of size equal to the minimal set size are drawn without replacement.
+    For each pair, the weighted Jaccard index is computed as:
+        weighted J(A, B) = soft_intersection / soft_union,
+    where:
+        soft_intersection = sum over a in A of (max_{b in B} similarity(a, b))
+        soft_union = |A| + |B| - soft_intersection
+
+    Parameters:
+        data_dict (dict): Dictionary where keys are dataset names and values are lists or Pandas Series of sequences.
+        iterations (int): Number of subsampling iterations (default is 20).
+        random_state (int): Seed for reproducibility (default is 42).
 
     Returns:
-      - results: A dictionary with keys as tuples (set1, set2) and values as dictionaries:
-                 {'n': min_size, 'mean': mean_weighted_jaccard, 'std': std_weighted_jaccard}
-      - matrix: A symmetric Pandas DataFrame with dataset names as rows and columns,
-                containing the mean weighted Jaccard values.
+        tuple: A tuple (results, matrix) where:
+               - results (dict): Dictionary with keys as tuples (dataset1, dataset2) and values as a dict with:
+                                 'n' (minimal set size), 'mean' (mean weighted Jaccard index), and 'std' (standard deviation).
+               - matrix (pd.DataFrame): A symmetric DataFrame with dataset names as rows and columns containing the mean weighted Jaccard index.
     """
-    # Extract unique sequences
     unique_dict = {}
     for dataset, seqs in data_dict.items():
         if isinstance(seqs, pd.Series):
@@ -361,59 +328,40 @@ def compute_pairwise_weighted_jaccard(data_dict: dict, iterations: int = 20, ran
             seq_list = list(set(seqs))
         unique_dict[dataset] = seq_list
 
-    # Determine the minimal size
     min_size = min(len(seq_list) for seq_list in unique_dict.values())
-
-    # Sort dataset names for consistent key ordering
     dataset_names = sorted(list(unique_dict.keys()))
-
-    # Prepare dictionary for pairwise results for all combinations.
-    # Keys are tuples (dataset1, dataset2) with dataset1 <= dataset2 (alphabetically).
     pairwise_results = {}
     for i in range(len(dataset_names)):
         for j in range(i, len(dataset_names)):
             pairwise_results[(dataset_names[i], dataset_names[j])] = []
 
     rng = np.random.RandomState(random_state)
-
-    # Subsampling and calculation of weighted Jaccard indices
     for _ in range(iterations):
         subsamples = {}
         for dataset, seq_list in unique_dict.items():
-            # Randomly choose without replacement
             subsample = rng.choice(seq_list, size=min_size, replace=False)
             subsamples[dataset] = set(subsample)
-        # Calculate the weighted Jaccard Index for each pair
         for i in range(len(dataset_names)):
             for j in range(i, len(dataset_names)):
                 setA = subsamples[dataset_names[i]]
                 setB = subsamples[dataset_names[j]]
-                # Soft Intersection: For each a in setA, take the maximum similarity score to any b in setB
                 soft_intersection = 0.0
                 for a in setA:
-                    # It is assumed that sequence_similarity() returns a value between 0 and 1
                     best_sim = max(sequence_similarity(a, b) for b in setB)
                     soft_intersection += best_sim
-                # Define soft union analogous to the classical union
                 union_score = len(setA) + len(setB) - soft_intersection
                 jacc = soft_intersection / union_score if union_score > 0 else 0
                 pairwise_results[(dataset_names[i], dataset_names[j])].append(jacc)
-
-    # Compute means and standard deviations
     results = {}
     for pair, values in pairwise_results.items():
         mean_val = np.mean(values)
         std_val = np.std(values)
         results[pair] = {'n': min_size, 'mean': mean_val, 'std': std_val}
-
-    # Represent results in a symmetric matrix
     matrix = pd.DataFrame(index=dataset_names, columns=dataset_names, dtype=float)
     for i in range(len(dataset_names)):
         for j in range(len(dataset_names)):
-            # Retrieve the result using a key with consistent ordering
             key = tuple(sorted((dataset_names[i], dataset_names[j])))
             matrix.iloc[i, j] = results[key]['mean']
-
     return results, matrix
 
 #=====================
@@ -423,69 +371,72 @@ def compute_pairwise_weighted_jaccard(data_dict: dict, iterations: int = 20, ran
 def create_heatmap_with_annotations(
         df: pd.DataFrame,
         colorscale: str = 'reds',
-        margin_color = 'black',
-        margin_width = 1,
-        color_bar_title ="Colorbar"
+        margin_color='black',
+        margin_width=1,
+        color_bar_title="Colorbar"
 ) -> go.Figure:
     """
     Creates a heatmap with custom annotations for columns and rows.
 
+    This function generates a Plotly heatmap from the values in a DataFrame. The DataFrame's columns
+    and index are used as the labels for the x-axis and y-axis respectively. Additionally, the heatmap
+    includes a horizontal colorbar with a custom title, and grid lines are drawn around each cell.
+
     Parameters:
-      - df: DataFrame containing the values for the heatmap.
-            The columns and rows are used for the labels.
-      - color_dict: Dictionary that specifies the text color for the column and row names.
-      - colorscale: Colorscale for the heatmap (default: 'Viridis').
-      - col_annotation_y: y offset (in paper coordinates) for column labels.
-      - row_annotation_x: x offset (in paper coordinates) for row labels.
+        df (pd.DataFrame): DataFrame containing the numeric values for the heatmap. The DataFrame's columns
+                           and index are used as labels.
+        colorscale (str): Colorscale for the heatmap (default: 'reds').
+        margin_color (str): Color used for the borders around cells and the colorbar outline.
+        margin_width (int): Width of the borders around cells and the colorbar outline.
+        color_bar_title (str): Title for the colorbar.
 
     Returns:
-      - Plotly Figure (go.Figure) with the created heatmap and annotations.
+        go.Figure: A Plotly Figure object containing the heatmap with annotations.
     """
     n_rows, n_cols = df.shape
 
-    # Zellenmittelpunkte: x=0.5..(n_cols-0.5), y=0.5..(n_rows-0.5)
+    # Calculate cell center coordinates: x = 0.5 .. (n_cols - 0.5), y = 0.5 .. (n_rows - 0.5)
     xvals = np.arange(n_cols) + 0.5
     yvals = np.arange(n_rows) + 0.5
 
-    # Heatmap anlegen (numeric axes), horizontale Colorbar
+    # Create the heatmap (using numeric axes) with a horizontal colorbar.
     fig = go.Figure(data=go.Heatmap(
         x=xvals,
         y=yvals,
         z=df.values,
         colorscale=colorscale,
         colorbar=dict(
-            orientation='h',  # horizontal
-            x=0,  # linksbündig
-            y=-0.1,  # näher an der Heatmap
+            orientation='h',           # horizontal colorbar
+            x=0,                       # left-aligned
+            y=-0.1,                    # positioned closer to the heatmap
             xanchor='left',
             yanchor='top',
-            thickness=10,  # dünnere Leiste
-            len=1,  # so breit wie die Heatmap-Domain
-            outlinecolor = margin_color,  # Farbe der Colorbar-Umrandung
-            outlinewidth = margin_width, # Dicke der Umrandung
-            title=dict(  # Titel für die Colorbar
-                text=color_bar_title,  # Text des Titels
-                side='bottom',  # Titel unterhalb der Colorbar anzeigen
-                #font=dict(color='black', size=12)
+            thickness=10,              # thinner colorbar
+            len=1,                     # spans the entire width of the heatmap domain
+            outlinecolor=margin_color, # color of the colorbar border
+            outlinewidth=margin_width, # width of the colorbar border
+            title=dict(
+                text=color_bar_title,  # text for the colorbar title
+                side='bottom'          # display the title below the colorbar
             )
         )
     ))
 
-    # X-Achse (Spalten) oben
+    # Configure x-axis: place column labels at the top.
     fig.update_xaxes(
         side='top',
         tickmode='array',
         tickvals=xvals,
         ticktext=[str(col) for col in df.columns],
-        range=[0, n_cols],  # erlaubt Zeichnen von Linien bis n_cols
+        range=[0, n_cols],  # allow drawing lines up to n_cols
         showgrid=False,
         zeroline=False,
         showline=False,
-        scaleanchor='y',  # 1:1-Seitenverhältnis
+        scaleanchor='y',    # maintain a 1:1 aspect ratio
         scaleratio=1
     )
 
-    # Y-Achse (Zeilen) links, von oben nach unten
+    # Configure y-axis: place row labels on the left and reverse the order so that the first row is at the top.
     fig.update_yaxes(
         tickmode='array',
         tickvals=yvals,
@@ -494,11 +445,11 @@ def create_heatmap_with_annotations(
         showgrid=False,
         zeroline=False,
         showline=False,
-        autorange='reversed'  # oberste Zeile = df.index[0]
+        autorange='reversed'  # ensures the top row corresponds to the first index
     )
 
-    # Dünne Linien um jede Zelle (Shapes)
-    # => Grid aus horizontalen und vertikalen Linien
+    # Draw thin grid lines around each cell.
+    # Horizontal lines.
     for i in range(n_rows + 1):
         fig.add_shape(
             type='line',
@@ -506,8 +457,9 @@ def create_heatmap_with_annotations(
             x1=n_cols, y1=i,
             line=dict(color=margin_color, width=margin_width),
             xref='x', yref='y',
-            layer='above'  # Linie über der Heatmap
+            layer='above'  # draw the line above the heatmap
         )
+    # Vertical lines.
     for j in range(n_cols + 1):
         fig.add_shape(
             type='line',
@@ -518,8 +470,8 @@ def create_heatmap_with_annotations(
             layer='above'
         )
 
-    # Kompakte Abmessungen:
-    cell_size_px = 70  # Pixel pro Zelle
+    # Set compact layout dimensions.
+    cell_size_px = 70  # pixels per cell
     top_margin = 80
     bottom_margin = 50
     left_margin = 90
@@ -531,8 +483,7 @@ def create_heatmap_with_annotations(
         autosize=False,
         width=total_width,
         height=total_height,
-        margin=dict(l=left_margin, r=right_margin, t=top_margin, b=bottom_margin),
-        #plot_bgcolor='white'
+        margin=dict(l=left_margin, r=right_margin, t=top_margin, b=bottom_margin)
     )
 
     return fig

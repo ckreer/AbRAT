@@ -22,7 +22,7 @@ from abrat.core.repertoire_characteristics import (compute_gravy_scores,
                                                    get_sample_information,
                                                    compute_diversity_indices_for_subsampling,
                                                    compute_histogram,
-                                                   create_heatmap_with_annotations)
+                                                   )
 
 # FUNCTIONS: TODO: move to core, when set up
 

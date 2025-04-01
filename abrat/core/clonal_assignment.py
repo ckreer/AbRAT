@@ -50,17 +50,35 @@ clone_color_dict = {'palette': 'GnBu',
 # ==========
 
 def parse_clone_number(clone_label):
+    """
+    Parses the clone label and extracts the numeric clone number.
+
+    Parameters:
+        clone_label (str): The clone label in the format "Clone-<number>".
+
+    Returns:
+        int or float: The numeric clone number if found; otherwise, infinity.
+    """
     match = re.match(r'^Clone-(\d+)$', clone_label)
     if match:
         return int(match.group(1))
     else:
         return float('inf')
 
+
 def combine_clusters(row):
-    """Generates the combined cluster-ID depending on availability of sub-clusters"""
+    """
+    Generates a combined cluster ID based on the availability of heavy and light chain sub-clusters.
+
+    Parameters:
+        row (pd.Series): A DataFrame row containing the heavy chain and light chain cluster values.
+
+    Returns:
+        str or None: The combined cluster ID in the format "HC-LC" if available; otherwise, None.
+    """
     hc_val = row[(hc_col, hc_cluster_subcol)]
     lc_val = row[(lc_col, lc_cluster_subcol)]
-    # Hier sind hc_val und lc_val bereits int
+    # Here, hc_val and lc_val are already integers.
     if hc_val != 0 and lc_val != 0:
         return f"{hc_val}-{lc_val}"
     elif hc_val != 0:
@@ -70,17 +88,26 @@ def combine_clusters(row):
     else:
         return None
 
+
 def process_bcr_list(df, settings):
     """
-    Main function to process a bcr_list and perform grouping, clustering and clonal assignment
-    depending on the settings.
-    It stores the cluster IDs and the representative BCR (in column `representative_bcr_id`)
-    for heavy and light chains.
+    Processes a BCR list DataFrame to perform grouping, clustering, and clonal assignment based on provided settings.
+
+    This function standardizes missing values, performs clustering on heavy and light chains (if selected),
+    combines the clusters into a composite cluster ID, determines cluster sizes and clonality, assigns clone names,
+    and optionally applies coloring to clones.
+
+    Parameters:
+        df (pd.DataFrame): The BCR list DataFrame.
+        settings (dict): Dictionary with processing settings (e.g., heavy_chain, light_chain, autocolor).
+
+    Returns:
+        pd.DataFrame: The processed DataFrame with cluster IDs, representative BCRs, clone names, and additional clone information.
     """
     # Standardize missing values
     df = standardize_missing_values(df)
 
-    # Heavy-Chain Clustering if selected
+    # Heavy-chain clustering if selected
     if settings.get('heavy_chain', False) and hc_col in df.columns.levels[0]:
         heavy_df = df[hc_col]
         clusters, reps = cluster_bcr_chains(heavy_df, settings.get('heavy_chain', {}))
@@ -90,7 +117,7 @@ def process_bcr_list(df, settings):
         df[(hc_col, hc_cluster_subcol)] = 0
         df[(hc_col, representative_bcr_col)] = None
 
-    # Light-Chain Clustering if selected
+    # Light-chain clustering if selected
     if settings.get('light_chain', False) and lc_col in df.columns.levels[0]:
         light_df = df[lc_col]
         clusters, reps = cluster_bcr_chains(light_df, settings.get('light_chain', {}))
@@ -104,7 +131,7 @@ def process_bcr_list(df, settings):
     df[(hc_col, hc_cluster_subcol)] = df[(hc_col, hc_cluster_subcol)].fillna(0).astype(int)
     df[(lc_col, lc_cluster_subcol)] = df[(lc_col, lc_cluster_subcol)].fillna(0).astype(int)
 
-    # Combine heavy and light chains clusters into a composite cluster
+    # Combine heavy and light chain clusters into a composite cluster
     df[(sample_col, hclc_cluster_subcol)] = df.apply(combine_clusters, axis=1)
     # Determine cluster sizes and clonality
     df[(sample_col, cluster_size_subcol)] = df.groupby([(sample_col, hclc_cluster_subcol)])[[(sample_col, hclc_cluster_subcol)]].transform('count')
@@ -121,24 +148,22 @@ def cluster_bcr_chains(chain_df, settings):
     Clusters a chain DataFrame based on provided settings.
 
     If settings['group_by'] is specified, the DataFrame is split into subgroups.
-    Within each subgroup, clustering is applied using the algorithm specified in
-    settings['algorithm'] and the algorithm-specific parameters in settings['params'].
-    To ensure globally unique cluster IDs (with 0 reserved for "no cluster"),
-    an offset starting at 1 is used.
+    Within each subgroup, clustering is applied using the algorithm specified in settings['algorithm']
+    and its corresponding parameters in settings['params']. To ensure globally unique cluster IDs
+    (with 0 reserved for "no cluster"), an offset starting at 1 is used.
 
-    This function now returns two pandas Series:
-      - The first Series contains the unique numeric cluster IDs for each row.
-      - The second Series contains the representative BCR ID (i.e. the index of the representative)
-        for each row.
+    Parameters:
+        chain_df (pd.DataFrame): DataFrame for a chain (e.g., heavy or light).
+        settings (dict): Dictionary of clustering settings, including:
+                         - 'group_by': column name(s) to group by (optional).
+                         - 'algorithm': clustering algorithm to use (e.g., "Iterative CDR3 similarity",
+                                        "Matrix CDR3 similarity", "Hierarchical CDR3 Clustering").
+                         - 'params': dictionary of algorithm-specific parameters.
 
-    :param chain_df: pandas DataFrame for a chain (e.g., heavy or light)
-    :param settings: Dictionary of clustering settings.
-                     - 'group_by': column name(s) to group by (optional).
-                     - 'algorithm': specifies which clustering function to use
-                                    (e.g., "Iterative CDR3 similarity", "Matrix CDR3 similarity",
-                                     "Hierarchical CDR3 Clustering").
-                     - 'params': a dictionary of algorithm-specific parameters.
-    :return: Tuple (cluster_series, representative_series)
+    Returns:
+        tuple: (cluster_series, representative_series)
+            - cluster_series (pd.Series): Unique numeric cluster IDs for each row.
+            - representative_series (pd.Series): Representative BCR ID (i.e., the index of the representative) for each row.
     """
     # Determine the clustering function and algorithm-specific parameters.
     algorithm = settings.get('algorithm', 'Iterative CDR3 similarity')
@@ -160,13 +185,9 @@ def cluster_bcr_chains(chain_df, settings):
     np.random.seed(42)  # Ensure reproducibility for the first iteration
     all_num_singles = []
 
-    # Iterative search for the best (i.e. with fewest singles) clustering
+    # Iterative search for the best clustering (fewest singles)
     for i in range(iterations):
-        if iterations == 1:
-            random_state = 42
-        else:
-            random_state = np.random.randint(0, int(1e6))
-
+        random_state = 42 if iterations == 1 else np.random.randint(0, int(1e6))
         permuted_df = chain_df.sample(frac=1, random_state=random_state).copy()
 
         # Split the DataFrame into subgroups if grouping is specified.
@@ -188,12 +209,12 @@ def cluster_bcr_chains(chain_df, settings):
 
         # Iterate over subgroups
         for sub_df in sub_dfs:
-            # call the chose clustering method.
+            # Call the chosen clustering method.
             subgroup_clusters, subgroup_reps = clustering_function(sub_df, params)
 
             # Adjust cluster IDs by adding the current offset.
             subgroup_clusters = subgroup_clusters + offset
-            # rep_series contains initial BCR-IDs not need to offset them!
+            # rep_series contains the original BCR IDs (no offset needed).
 
             if not subgroup_clusters.empty:
                 offset = subgroup_clusters.max() + 1
@@ -204,50 +225,76 @@ def cluster_bcr_chains(chain_df, settings):
         concatenated_clusters = pd.concat(cluster_ids_list).sort_index()
         concatenated_reps = pd.concat(rep_series_list).sort_index()
 
-        # Evaluate: Count "singles" (Clusters with 1 Element)
+        # Evaluate: Count "singles" (clusters with only 1 element)
         cluster_counts = concatenated_clusters.value_counts()
         num_singles = (cluster_counts == 1).sum()
         all_num_singles.append(num_singles)
 
-        # Take iteration with lowest number of singles
+        # Select the iteration with the fewest singles.
         if num_singles < best_singles:
             best_singles = num_singles
             best_result = concatenated_clusters
             best_reps = concatenated_reps
 
-    #print("Number of singles per iteration:", all_num_singles)
+    # print("Number of singles per iteration:", all_num_singles)
     return best_result, best_reps
 
+
 def normalized_levenshtein(seq1, seq2):
-    """Berechnet die normalisierte Levenshtein-Distanz zwischen zwei Sequenzen."""
+    """
+    Computes the normalized Levenshtein distance between two sequences.
+
+    Parameters:
+        seq1 (str): The first sequence.
+        seq2 (str): The second sequence.
+
+    Returns:
+        float: Normalized Levenshtein distance (0 if both sequences are empty).
+    """
     lev = distance.Levenshtein.distance(seq1, seq2)
     max_len = max(len(seq1), len(seq2))
     return 0 if max_len == 0 else lev / max_len
 
+
 def standardize_missing_values(df, missing_indicators=["N/A", "nan", "NaN", "", "n/a"]):
     """
-    Replace common missing value indicators in the DataFrame with np.nan.
+    Replaces common missing value indicators in the DataFrame with np.nan.
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame to process.
+        missing_indicators (list): List of values to be considered as missing.
+
+    Returns:
+        pd.DataFrame: The DataFrame with missing indicators replaced by np.nan.
     """
     return df.replace(missing_indicators, np.nan)
 
+
 def assign_clone_names(df):
     """
-    Assigns clone names based on cluster sizes (Clone-1, Clone-2, ...).
-    Clusters with only one member are labeled "Non-clonal".
-    If the combined cluster (HC-LC_CLUSTER) is "0-0", it is labeled as "Undefined"
-    and the 'IS_CLONAL' flag is set to False.
+    Assigns clone names based on cluster sizes (e.g., Clone-1, Clone-2, ...).
+
+    Clusters with only one member are labeled "Non-clonal". If the combined cluster (HC-LC_CLUSTER)
+    is "0-0", it is labeled as "Undefined" and the 'IS_CLONAL' flag is set to False.
     Finally, the DataFrame is sorted by cluster size (descending), with "0-0" entries placed at the very end.
+
+    Parameters:
+        df (pd.DataFrame): DataFrame containing BCR clustering information.
+
+    Returns:
+        pd.DataFrame: DataFrame with clone names assigned in the ('SAMPLE_INFORMATION', 'CLONE') column,
+                      and cluster sizes in the ('SAMPLE_INFORMATION', 'CLUSTER_SIZE') column.
     """
     cluster_col = (sample_col, hclc_cluster_subcol)
 
-    # Compute cluster sizes based on the combined cluster column
+    # Compute cluster sizes based on the combined cluster column.
     cluster_sizes = df.groupby(cluster_col).size()
     cluster_size_map = cluster_sizes.to_dict()
 
     # Create mapping for clone names.
     clone_name_map = {}
 
-    # For clusters with more than one member, sort descending by size and assign clone names.
+    # For clusters with more than one member, assign clone names (sorted by size descending).
     multi_member_clusters = {cid: size for cid, size in cluster_size_map.items() if size > 1}
     sorted_clusters = sorted(multi_member_clusters.items(), key=lambda x: x[1], reverse=True)
     for rank, (cid, size) in enumerate(sorted_clusters, start=1):
@@ -258,24 +305,24 @@ def assign_clone_names(df):
         if size == 1:
             clone_name_map[cid] = "Non-clonal"
 
-    # Override: if the combined cluster is "0-0", label as "Undefined"
+    # Override: if the combined cluster is "0-0", label it as "Undefined".
     if "0-0" in clone_name_map:
         clone_name_map["0-0"] = "Undefined"
 
-    # Map the clone names to a new column ('SAMPLE_INFORMATION', 'CLONE')
+    # Map the clone names to a new column ('SAMPLE_INFORMATION', 'CLONE').
     df[(sample_col, clone_subcol)] = df[cluster_col].map(clone_name_map)
     df[(sample_col, clone_subcol)] = df[(sample_col, clone_subcol)].fillna("Non-clonal")
 
     # Map the cluster sizes into a new column for sorting and display.
     df[(sample_col, cluster_size_subcol)] = df[cluster_col].map(cluster_size_map)
 
-    # Create a temporary column to flag undefined clusters ("0-0")
+    # Create a temporary column to flag undefined clusters ("0-0").
     df['_undefined'] = (df[cluster_col] == "0-0").astype(int)
 
-    # re-extract clone rank from Clone name for final sorting
+    # Extract clone rank from the clone name for final sorting.
     df['clone_rank'] = df[(sample_col, clone_subcol)].apply(parse_clone_number)
 
-    # Sort the DataFrame: first by _undefined ascending (0 first), then by cluster size descending and re-sort by name
+    # Sort the DataFrame: first by _undefined ascending, then by cluster size descending, then by clone rank.
     df = df.sort_values(
         by=['_undefined', (sample_col, cluster_size_subcol), 'clone_rank'],
         ascending=[True, False, True]
@@ -292,42 +339,45 @@ def assign_clone_names(df):
 
 def color_clones(df, config):
     """
-    Assigns random colors to clones from the specified discrete colormap and stores the corresponding
-    hex codes in the column ('SAMPLE_INFORMATION', 'CLONE_COLOR'). Clones labeled "Non-Clonal" or
-    "Undefined" receive default colors as defined in the config dictionary.
+    Assigns colors to clones based on a discrete colormap and stores the corresponding hex codes in a column.
 
-    :param df: pandas DataFrame that contains a column ('SAMPLE_INFORMATION', 'CLONE')
-               with the clone labels.
-    :param config: Dictionary containing color configuration, e.g.:
-                   {
-                       'palette': 'GnBu_d',
-                       'non_clonal': '#D3D3D3',  # light gray
-                       'undefined': '#FFFFFF'    # white
-                   }
-    :return: DataFrame with an additional column ('SAMPLE_INFORMATION', 'CLONE_COLOR')
-             that contains the assigned hex color for each row.
+    Clones labeled "Non-clonal" or "Undefined" receive default colors as defined in the configuration.
+    The resulting colors are stored in the ('SAMPLE_INFORMATION', 'CLONE_COLOR') column.
+
+    Parameters:
+        df (pd.DataFrame): DataFrame containing clone labels in the ('SAMPLE_INFORMATION', 'CLONE') column.
+        config (dict): Dictionary containing color configuration, e.g.:
+                       {
+                           'palette': 'GnBu_d',
+                           'non_clonal': '#D3D3D3',  # light gray
+                           'undefined': '#FFFFFF'    # white
+                       }
+
+    Returns:
+        pd.DataFrame: DataFrame with an additional column ('SAMPLE_INFORMATION', 'CLONE_COLOR')
+                      containing the assigned hex color for each clone.
     """
-    # Retrieve the configuration parameters
+    # Retrieve configuration parameters.
     palette_name = config.get('palette', 'GnBu_d')
     default_non_clonal = config.get('non_clonal', "#D3D3D3")
     default_undefined = config.get('undefined', "#FFFFFF")
 
-    # Get unique clone labels from the CLONE column
+    # Get unique clone labels from the CLONE column.
     unique_clones = df[(sample_col, clone_subcol)].unique()
     unique_clones = [clone for clone in unique_clones if pd.notna(clone)]
 
-    # Determine which clones will receive a random color.
-    # "Non-Clonal" and "Undefined" will be assigned default colors.
+    # Determine which clones receive a random color.
+    # "Non-clonal" and "Undefined" will be assigned default colors.
     clones_to_color = [clone for clone in unique_clones if clone not in ["Non-clonal", "Undefined"]]
     n_colors = len(clones_to_color)
 
-    # Get the discrete colormap from Matplotlib using the provided palette name
+    # Retrieve the discrete colormap from Matplotlib.
     cmap = mpl.cm.get_cmap(palette_name, n_colors)
-    # Convert the colors to hex strings
+    # Convert colormap colors to hex strings.
     colors = [mpl.colors.rgb2hex(cmap(i)) for i in range(n_colors)]
     random.shuffle(colors)
 
-    # Build a dictionary mapping clone label to a color.
+    # Build a dictionary mapping clone labels to colors.
     clone_color_map = {}
     for clone in unique_clones:
         if clone == "Non-clonal":
@@ -339,107 +389,113 @@ def color_clones(df, config):
         else:
             clone_color_map[clone] = default_non_clonal  # Fallback
 
-    # Map the clone colors to a new column ('SAMPLE_INFORMATION', 'CLONE_COLOR')
+    # Map the clone colors to the ('SAMPLE_INFORMATION', 'CLONE_COLOR') column.
     df[(sample_col, clone_color_subcol)] = df[(sample_col, clone_subcol)].map(clone_color_map)
 
     return df
 
-## EXPORT FUNKTION
 
-def save_excel_with_row_colors(df, path_to_file, color_col=(sample_col,clone_color_subcol), sheet_name='Clustered'):
+def save_excel_with_row_colors(df, path_to_file, color_col=(sample_col, clone_color_subcol), sheet_name='Clustered'):
     """
-    Saves the DataFrame as an Excel file, including the index, and applies row coloring
-    to all data cells (excluding the index column) based on the hex color values in 'color_col'.
-    If an index name exists, an extra row in Excel is used for it. We handle that with an offset.
+    Saves the DataFrame as an Excel file and applies row coloring based on hex color codes.
 
-    :param df: pandas DataFrame to save.
-    :param path_to_file: Output file path.
-    :param color_col: Name (oder MultiIndex-Tuple) der Spalte in df, die den Hex-Farbcode enthält.
-    :param sheet_name: Name des Worksheets in der Excel-Datei.
+    The DataFrame is exported to an Excel file with its index. Cell background colors (excluding the index column)
+    are applied based on the hex color values from the specified color column. If an index name exists, the extra
+    header row is taken into account.
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame to save.
+        path_to_file (str or Path): Output file path.
+        color_col (str or tuple): The column (or MultiIndex tuple) in df containing hex color codes.
+        sheet_name (str): Worksheet name in the Excel file.
+
+    Returns:
+        None
     """
     with pd.ExcelWriter(path_to_file, engine='xlsxwriter') as writer:
-        # Schreibe den DataFrame mit Index
+        # Write the DataFrame with its index.
         df.to_excel(writer, index=True, sheet_name=sheet_name)
         workbook = writer.book
         worksheet = writer.sheets[sheet_name]
 
-        # Bestimme, wie viele Header-Zeilen wir haben (z.B. 2 bei einem Spalten-MultiIndex).
+        # Determine the number of header rows (e.g., 2 for a MultiIndex on columns).
         header_rows = df.columns.nlevels if isinstance(df.columns, pd.MultiIndex) else 1
 
-        # Wenn ein Index-Name existiert, wird Pandas eine zusätzliche Zeile dafür schreiben.
+        # Account for an extra row if an index name exists.
         if df.index.name is not None:
             header_rows += 1
 
-        # Insgesamt: DataFrame-Spalten + 1 (für den Index)
+        # Total number of columns = DataFrame columns + 1 (for the index).
         total_cols = df.shape[1] + 1
 
-        # Durchlaufe jede Zeile des DataFrames
+        # Iterate over each row of the DataFrame.
         for i in range(df.shape[0]):
-            # Excel-Zeile = Anzahl Headerzeilen + i
+            # Excel row index = header_rows + i.
             excel_row = header_rows + i
-            # Farbcode aus der entsprechenden Spalte
+            # Retrieve the hex color for the row.
             cell_color = df.iloc[i][color_col]
             if pd.isna(cell_color) or not isinstance(cell_color, str):
-                continue  # überspringe Zeilen ohne gültige Farbe
+                continue  # Skip rows without a valid color.
 
             cell_format = workbook.add_format({'bg_color': cell_color})
 
-            # Spalte 0 ist der Index, deshalb ab 1 anfangen
+            # Column 0 is the index; start from column 1.
             for col_idx in range(1, total_cols):
                 value = df.iloc[i, col_idx - 1]
                 if not np.isscalar(value):
-                    # Falls value ein Array oder eine Liste ist, wandle es in einen String um.
+                    # If value is a list or array, convert it to a string.
                     worksheet.write(excel_row, col_idx, str(value), cell_format)
                 elif pd.isna(value) or (isinstance(value, (int, float)) and not np.isfinite(value)):
                     worksheet.write(excel_row, col_idx, '', cell_format)
                 else:
                     worksheet.write(excel_row, col_idx, value, cell_format)
 
-## Pie chart plot
+
 def plot_clonality_donut_chart(df, clone_col, color_col):
     """
     Plots a clonality donut chart based on clone counts.
 
     Clones are sorted by size (largest first) and, among clones with equal counts,
     by their first occurrence in the DataFrame. Non-clonal entries ("Non-clonal" and "Undefined")
-    are appended at the end, regardless of their size. The function uses the 'IS_CLONAL'
-    column to identify clonal vs. non-clonal groups.
+    are appended at the end regardless of size. The function uses clone counts and assigns colors
+    based on the provided hex color codes.
 
-    :param df: pandas DataFrame containing clone information.
-    :param clone_col: Column name with clone labels (e.g., "CLONE").
-    :param color_col: Column name with the corresponding hex color codes.
-    :return: A Matplotlib Figure object.
+    Parameters:
+        df (pd.DataFrame): DataFrame containing clone information.
+        clone_col (str): Column name with clone labels (e.g., "CLONE").
+        color_col (str): Column name with corresponding hex color codes.
+
+    Returns:
+        matplotlib.figure.Figure: A Matplotlib Figure object representing the donut chart.
     """
     total = len(df)
 
-    # Calculate clone counts (unsorted)
+    # Calculate clone counts (unsorted).
     clone_counts = df[clone_col].value_counts()
 
-    # Erzeuge eine Abbildung des ersten Auftretens (basierend auf der Reihenfolge im DataFrame)
+    # Record the first occurrence of each clone based on DataFrame order.
     first_occ = {}
     for pos, clone in enumerate(df[clone_col]):
         if clone not in first_occ:
             first_occ[clone] = pos
 
-    # Trenne clonal von non-clonal Labels
+    # Separate clonal from non-clonal labels.
     clonal_labels = [label for label in clone_counts.index if label not in ["Non-clonal", "Undefined"]]
     non_clonal_labels = [label for label in clone_counts.index if label in ["Non-clonal", "Undefined"]]
 
-    # Sortiere die clonal Labels: zuerst nach Count (absteigend), dann nach erster Vorkommensposition (aufsteigend)
+    # Sort clonal labels: by count descending, then by first occurrence ascending.
     clonal_order = sorted(clonal_labels, key=lambda x: (-clone_counts[x], first_occ.get(x, float('inf'))))
-
-    # Sortiere die non-clonal Labels nach erster Vorkommensposition, damit deren Reihenfolge erhalten bleibt
+    # Sort non-clonal labels by first occurrence.
     non_clonal_order = sorted(non_clonal_labels, key=lambda x: first_occ.get(x, float('inf')))
-
     final_labels = clonal_order + non_clonal_order
 
-    # Build the color mapping: extrahiere die Farben in der Reihenfolge der final_labels.
+    # Build the color mapping: extract colors in the order of final_labels.
     colors_dict = df[[clone_col, color_col]].drop_duplicates().set_index(clone_col)[color_col].to_dict()
     colors = [colors_dict.get(label, "#000000") for label in final_labels]
 
     sizes = [clone_counts[label] for label in final_labels]
 
-    # Create legend labels based on final label order and corresponding counts.
+    # Create legend labels with clone counts and percentages.
     legend_labels = []
     for label in final_labels:
         count = clone_counts[label]
@@ -476,40 +532,51 @@ def plot_clonality_donut_chart(df, clone_col, color_col):
 # Clustering algorithms
 # ======================
 
-# original greedy clustering
+# Original cluster approach
 def iterative_greedy_cdr3_clustering(sub_df, params):
     """
-    Iterative greedy clustering of CDR3 sequences based on normalized Levenshtein distance
-    and an optional length difference filter. Returns two Series:
-      - cluster_series: Cluster IDs (int) for each row
-      - rep_series: representative BCR (B Cell ID, i.e. the index) per row, based on the first
-      candidate that is used for initializing the cluster
+    Iteratively performs greedy clustering of CDR3 sequences based on normalized Levenshtein distance
+    and an optional length difference filter.
 
-    Rows with missing CDR3_AA are assigned cluster 0 and no representative.
+    This function returns two pandas Series:
+      - cluster_series (pd.Series): Cluster IDs (int) for each row.
+      - rep_series (pd.Series): Representative BCR IDs (i.e., the index of the first candidate used
+        to initialize the cluster) for each row.
+
+    Rows with missing CDR3_AA values are assigned cluster 0 and have no representative.
+
+    Parameters:
+        sub_df (pd.DataFrame): DataFrame containing CDR3 sequences (in the column specified by `cdr3_aa_subcol`)
+                               and other related information.
+        params (dict): Dictionary of clustering parameters. Expected keys include:
+                       - 'lev_threshold' (float): Normalized Levenshtein distance threshold (default: 0.25).
+                       - 'length_threshold' (int or None): Maximum allowed length difference (default: 1).
+
+    Returns:
+        tuple: A tuple (cluster_series, rep_series) where:
+               - cluster_series (pd.Series): Cluster IDs for each row.
+               - rep_series (pd.Series): Representative BCR IDs for each row.
     """
-    # dictionary for the representative bcr
-    rep_dict = {}
-
-    # Separate valid and missing CDR3_AA rows
+    # Separate rows with valid and missing CDR3_AA sequences.
     valid_df = sub_df[sub_df[cdr3_aa_subcol].notna()].copy()
     missing_df = sub_df[sub_df[cdr3_aa_subcol].isna()].copy()
 
-    # If no valid sequences exist, assign 0 to all rows, None to representative cluster
+    # If no valid sequences exist, assign cluster 0 and no representative to all rows.
     if valid_df.empty:
         cluster_series = pd.Series(0, index=sub_df.index)
         rep_series = pd.Series([None] * len(sub_df), index=sub_df.index)
         return cluster_series, rep_series
 
-    # List of sequences and corresponding indices for valid rows
+    # List of sequences and corresponding indices for valid rows.
     sequences = valid_df[cdr3_aa_subcol].tolist()
     valid_indices = list(valid_df.index)
     n = len(sequences)
 
-    # Retrieve filter parameters
+    # Retrieve filtering parameters.
     lev_threshold = params.get('lev_threshold', 0.25)
     length_threshold = params.get('length_threshold', 1)
 
-    # Function to decide if two sequences pass the length filter
+    # Function to decide if two sequences pass the length difference filter.
     def passes_length_filter(seq1, seq2):
         diff = abs(len(seq1) - len(seq2))
         if length_threshold in [False, None]:
@@ -519,34 +586,34 @@ def iterative_greedy_cdr3_clustering(sub_df, params):
         else:
             return diff <= length_threshold
 
-    # Initialize cluster labels array for valid sequences (will be updated iteratively)
+    # Initialize cluster labels for valid sequences.
     cluster_labels = np.zeros(n, dtype=int)
-    current_cluster = 1  # start at 1 (0 is reserved for missing/unclusterable)
-    unclustered = list(range(n))  # use a list to preserve order
-    rep_dict = {} # representative clone dictionary
+    current_cluster = 1  # Start numbering clusters at 1 (0 is reserved for missing/unclusterable).
+    unclustered = list(range(n))  # List of indices for unclustered sequences.
+    rep_dict = {}  # Dictionary to store the representative for each cluster.
 
-    # Iterative greedy clustering loop
+    # Iterative greedy clustering loop.
     while unclustered:
-        # Start new cluster with the first candidate in the current unclustered list.
+        # Start a new cluster with the first candidate in the unclustered list.
         rep_idx = unclustered[0]
-        rep_dict[current_cluster] = valid_indices[rep_idx] # first selectes sequence is representative here
+        rep_dict[current_cluster] = valid_indices[rep_idx]  # The first selected sequence is the representative.
         current_cluster_members = [rep_idx]
 
-        # Remove the representative from unclustered
+        # Remove the representative from the unclustered list.
         unclustered.remove(rep_idx)
 
-        # Iterate over a copy of the unclustered list for safe removal
+        # Iterate over a copy of the unclustered list to safely remove elements.
         for candidate in unclustered.copy():
             candidate_seq = sequences[candidate]
-            # Check candidate against all sequences already in the cluster
             valid_candidate = True
+            # Check candidate against all sequences already in the cluster.
             for member in current_cluster_members:
                 member_seq = sequences[member]
-                # Check length filter first
+                # First, check the length difference filter.
                 if not passes_length_filter(candidate_seq, member_seq):
                     valid_candidate = False
                     break
-                # Then compute normalized Levenshtein distance
+                # Then, compute normalized Levenshtein distance.
                 if normalized_levenshtein(candidate_seq, member_seq) > lev_threshold:
                     valid_candidate = False
                     break
@@ -554,7 +621,7 @@ def iterative_greedy_cdr3_clustering(sub_df, params):
                 current_cluster_members.append(candidate)
                 unclustered.remove(candidate)
 
-        # Assign the current cluster number to all members in the cluster
+        # Assign the current cluster number to all members in the cluster.
         for idx in current_cluster_members:
             cluster_labels[idx] = current_cluster
         current_cluster += 1
@@ -563,21 +630,34 @@ def iterative_greedy_cdr3_clustering(sub_df, params):
     rep_series_missing = pd.Series([None] * len(missing_df), index=missing_df.index)
 
     cluster_series = pd.concat(
-        [pd.Series(cluster_labels, index=valid_indices), pd.Series(0, index=missing_df.index)]).sort_index()
+        [pd.Series(cluster_labels, index=valid_indices), pd.Series(0, index=missing_df.index)]
+    ).sort_index()
     rep_series = pd.concat([rep_series_valid, rep_series_missing]).sort_index()
 
     return cluster_series, rep_series
 
 
-# optimized greedy clustering
 def matrix_greedy_cdr3_clustering(sub_df, params):
     """
-    Deterministic greedy clustering of CDR3 sequences based on a full pairwise similarity matrix.
-    Returns two Series:
-      - cluster_series: Cluster IDs (int) for each row.
-      - rep_series: representative BCR IDs (fromvalid_df.index) per row, based on the candidate with maximal overlap.
+    Performs deterministic greedy clustering of CDR3 sequences using a full pairwise similarity matrix.
 
-    Rows with missing CDR3_AA are assigned cluster 0 and no representative.
+    This function returns two pandas Series:
+      - cluster_series (pd.Series): Cluster IDs (int) for each row.
+      - rep_series (pd.Series): Representative BCR IDs for each row, based on the candidate with maximal overlap.
+
+    Rows with missing CDR3_AA values are assigned cluster 0 and have no representative.
+
+    Parameters:
+        sub_df (pd.DataFrame): DataFrame containing CDR3 sequences (in the column specified by `cdr3_aa_subcol`)
+                               and other related information.
+        params (dict): Dictionary of clustering parameters. Expected keys include:
+                       - 'lev_threshold' (float): Normalized Levenshtein distance threshold (default: 0.25).
+                       - 'length_threshold' (int or None): Maximum allowed length difference.
+
+    Returns:
+        tuple: A tuple (cluster_series, rep_series) where:
+               - cluster_series (pd.Series): Cluster IDs for each row.
+               - rep_series (pd.Series): Representative BCR IDs for each row.
     """
     valid_df = sub_df[sub_df[cdr3_aa_subcol].notna()].copy()
     missing_df = sub_df[sub_df[cdr3_aa_subcol].isna()].copy()
@@ -600,6 +680,7 @@ def matrix_greedy_cdr3_clustering(sub_df, params):
     else:
         length_filter = (np.abs(np.subtract.outer(lengths, lengths)) <= length_threshold)
 
+    # Build the full pairwise normalized Levenshtein distance matrix.
     D = np.zeros((n, n))
     for i in range(n):
         for j in range(i, n):
@@ -612,14 +693,13 @@ def matrix_greedy_cdr3_clustering(sub_df, params):
     valid_filter = np.logical_and(length_filter, lev_filter)
 
     cluster_labels = np.zeros(n, dtype=int)
-    current_cluster = 0  # Startet hier bei 0, später kann man ggf. einen Offset hinzufügen.
+    current_cluster = 0  # Start at 0; an offset can be added later if needed.
     rep_dict = {}
     unclustered = set(range(n))
 
     while unclustered:
-        counts = {}
-        for i in unclustered:
-            counts[i] = np.sum([valid_filter[i, j] for j in unclustered])
+        # For each candidate, count how many sequences it can cluster with.
+        counts = {i: np.sum([valid_filter[i, j] for j in unclustered]) for i in unclustered}
         rep = max(counts, key=counts.get)
         rep_dict[current_cluster] = b_cell_ids[rep]
         cluster_members = {j for j in unclustered if valid_filter[rep, j]}
@@ -632,23 +712,37 @@ def matrix_greedy_cdr3_clustering(sub_df, params):
     rep_series_missing = pd.Series([None] * len(missing_df), index=missing_df.index)
 
     cluster_series = pd.concat(
-        [pd.Series(cluster_labels, index=b_cell_ids), pd.Series(0, index=missing_df.index)]).sort_index()
+        [pd.Series(cluster_labels, index=b_cell_ids), pd.Series(0, index=missing_df.index)]
+    ).sort_index()
     rep_series = pd.concat([rep_series_valid, rep_series_missing]).sort_index()
 
     return cluster_series, rep_series
 
 
-# hierarchical cdr3 clustering
 def hierarchical_cdr3_clustering(sub_df, params):
     """
-    Performs hierarchical clustering on a sub-dataframe of valid CDR3 sequences using
-    normalized Levenshtein distance and an optional length difference filter.
-    Returns two Series:
-      - cluster_series: Cluster IDs (int) for each row, based on fcluster.
-      - rep_series: representative BCR IDs per row, determined as Medoid of the cluster (i.e. the BCR with the lowes
-      mean distance to all other BCRs in the cluster)
+    Performs hierarchical clustering on valid CDR3 sequences using normalized Levenshtein distance
+    and an optional length difference filter.
 
-    Rows with missing CDR3_AA are assigned cluster 0 and no representative.
+    This function returns two pandas Series:
+      - cluster_series (pd.Series): Cluster IDs (int) for each row, determined using fcluster.
+      - rep_series (pd.Series): Representative BCR IDs for each row, determined as the medoid of the cluster
+        (i.e., the BCR with the lowest mean distance to all other BCRs in the cluster).
+
+    Rows with missing CDR3_AA values are assigned cluster 0 and have no representative.
+
+    Parameters:
+        sub_df (pd.DataFrame): DataFrame containing CDR3 sequences (in the column specified by `cdr3_aa_subcol`)
+                               and other related information.
+        params (dict): Dictionary of clustering parameters. Expected keys include:
+                       - 'lev_threshold' (float): Normalized Levenshtein distance threshold (default: 0.25).
+                       - 'length_threshold' (int or None): Maximum allowed length difference (default: 1).
+                       - 'hc_method' (str): Linkage method to use in hierarchical clustering (default: 'average').
+
+    Returns:
+        tuple: A tuple (cluster_series, rep_series) where:
+               - cluster_series (pd.Series): Cluster IDs for each row.
+               - rep_series (pd.Series): Representative BCR IDs for each row.
     """
     valid_df = sub_df[sub_df[cdr3_aa_subcol].notna()].copy()
     missing_df = sub_df[sub_df[cdr3_aa_subcol].isna()].copy()
@@ -675,7 +769,7 @@ def hierarchical_cdr3_clustering(sub_df, params):
     length_threshold = params.get('length_threshold', 1)
     hc_method = params.get('hc_method', 'average')
 
-    # Build distance matrix D
+    # Build the pairwise distance matrix D.
     D = np.zeros((n, n))
     for i in range(n):
         for j in range(i, n):
@@ -690,11 +784,10 @@ def hierarchical_cdr3_clustering(sub_df, params):
             D[j, i] = d
 
     condensed_D = squareform(D)
-
     Z = linkage(condensed_D, method=hc_method)
     cluster_labels = fcluster(Z, t=lev_threshold, criterion='distance')
 
-    # Get the Medoid per cluster:
+    # Determine the medoid for each cluster.
     rep_dict = {}
     unique_clusters = np.unique(cluster_labels)
     for cluster in unique_clusters:
@@ -703,8 +796,7 @@ def hierarchical_cdr3_clustering(sub_df, params):
             rep_dict[cluster] = b_cell_ids[indices[0]]
         else:
             sub_D = D[np.ix_(indices, indices)]
-            # Sum of distances per line
-            sum_dist = sub_D.sum(axis=1)
+            sum_dist = sub_D.sum(axis=1)  # Sum of distances per candidate.
             medoid_local_idx = indices[np.argmin(sum_dist)]
             rep_dict[cluster] = b_cell_ids[medoid_local_idx]
 
@@ -712,7 +804,8 @@ def hierarchical_cdr3_clustering(sub_df, params):
     rep_series_missing = pd.Series([None] * len(missing_df), index=missing_df.index)
 
     cluster_series = pd.concat(
-        [pd.Series(cluster_labels, index=b_cell_ids), pd.Series(0, index=missing_df.index)]).sort_index()
+        [pd.Series(cluster_labels, index=b_cell_ids), pd.Series(0, index=missing_df.index)]
+    ).sort_index()
     rep_series = pd.concat([rep_series_valid, rep_series_missing]).sort_index()
 
     return cluster_series, rep_series
