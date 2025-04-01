@@ -4,16 +4,19 @@ import argparse
 import subprocess
 import os
 import logging
+import pandas as pd
+import numpy as np
 
 from pathlib import Path
 from Bio import SeqIO
 
 from abrat.core.utils import (decompress,
                               get_indels,
+                              get_sequence,
                               translate_nt_to_aa,
                               generate_q_check_df,
+                              get_isotype_with_blast,
                               make_quality_check_excel,
-                              combine_ig_blast_and_q_check_data,
                               log_message, date_stamp,
                               str2bool)
 
@@ -112,7 +115,7 @@ def get_infos_from_igblast(blast_result):
 
     # workaround for getting the correct c-terminus
     c_term_offset = 0
-    fwr4_correction = False
+    fwr4_correction = 0
 
     parts = blast_result.split('# ')
     # initialize values for q-check
@@ -124,7 +127,7 @@ def get_infos_from_igblast(blast_result):
     chain_type, stop_codon, frame, productive = "N/A", "N/A", "N/A", "N/A"
     cdr3_nt, cdr3_aa, cdr3_start, cdr3_end = "N/A", "N/A", "N/A", "N/A"
     j_nt, fwr4_start, fwr4_end, fwr4_nt, fwr4_aa, fwr4_frame, fwr4_stop_codon = \
-        "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+        "N/A", "N/A", 0, "N/A", "N/A", "N/A", "N/A"
     fwr1_end, cdr1_start, cdr1_end, fwr2_start, fwr2_end = "N/A", "N/A", "N/A", "N/A", "N/A"
     cdr2_start, cdr2_end, fwr3_start, fwr3_end, v_identity = "N/A", "N/A", "N/A", "N/A", "N/A"
     cdr1_found, fwr2_found, cdr2_found, fwr3_found, cdr3_found, fwr4_found = False, False, False, False, False, False
@@ -276,6 +279,122 @@ def get_infos_from_igblast(blast_result):
                 'ORIENT_FOUND': orient_found, 'LENGTH_FOUND': v_length_found, 'FULL_V_ALIGNMENT': full_v_alignment,
                 'IGBLAST_PASSED': igblast_pass}
     return name, features
+
+
+def combine_ig_blast_and_q_check_data(q_check_df, igblast_dict, combi_ex_name, out_dir, isotype_determination):
+    """
+    Combines IgBLAST data with quality check data into a single DataFrame and exports the result as an Excel file.
+
+    This function merges a quality check DataFrame with IgBLAST results based on sample names,
+    computes sequence segments from the original sequence, optionally determines isotypes,
+    and generates an output Excel file containing the combined data.
+
+    Parameters:
+        q_check_df (pd.DataFrame): DataFrame containing quality check data.
+        igblast_dict (dict): Dictionary containing IgBLAST results keyed by sample name.
+        combi_ex_name (str): Name of the output Excel file.
+        out_dir (str or Path): Directory where the output Excel file will be saved.
+        isotype_determination (bool): Flag indicating whether isotype determination should be performed.
+
+    Returns:
+        pd.DataFrame: Combined DataFrame with merged and computed information.
+    """
+    # Create a DataFrame from igblast_dict, using the dictionary keys as sample names
+    igblast_df = pd.DataFrame.from_dict(igblast_dict, orient='index').reset_index()
+    igblast_df.rename(columns={'index': 'SAMPLE_NAME'}, inplace=True)
+
+    # Add a SAMPLE_NAME column to q_check_df by removing the '.ab1' suffix from FILE_NAME
+    q_check_df['SAMPLE_NAME'] = q_check_df['FILE_NAME'].str.replace('.ab1', '')
+
+    # Select a subset of columns from q_check_df
+    subset_q_check = q_check_df[['SAMPLE_NAME', 'SUBSET', 'TISSUE', 'CHAIN_PCR',
+                                 'IGBLAST_PASSED', 'MEAN_PHRED_PASSED', 'INNER_N_PASSED',
+                                 'LENGTH_PASSED', 'INNER_N', 'QCHECK_PASSED', 'ORIGINAL_SEQ',
+                                 'TRIMMED_SEQ', 'MASKED_SEQ', 'COHORT', 'SUBJECT',
+                                 'TIME_POINT', 'PLATE', 'PRIMER_SET', 'WELL',
+                                 'SOURCE', 'SUBSOURCE',
+                                 # Add any additional columns as needed
+                                 ]]
+
+    # Merge the quality check data with the IgBLAST DataFrame on SAMPLE_NAME
+    combined_df = pd.merge(subset_q_check, igblast_df, on='SAMPLE_NAME', how='left')
+
+    # Calculate sequence segments based on the original sequence.
+    # Assumption: get_sequence and translate_nt_to_aa are imported and functioning.
+    combined_df['FWR1_NT'] = combined_df.apply(
+        lambda row: get_sequence(row['FWR1_START'], row['FWR1_END'], row['ORIGINAL_SEQ'], -1), axis=1)
+    combined_df['CDR1_NT'] = combined_df.apply(
+        lambda row: get_sequence(row['CDR1_START'], row['CDR1_END'], row['ORIGINAL_SEQ'], -1), axis=1)
+    combined_df['CDR1_AA'] = combined_df['CDR1_NT'].apply(translate_nt_to_aa)
+    combined_df['FWR2_NT'] = combined_df.apply(
+        lambda row: get_sequence(row['FWR2_START'], row['FWR2_END'], row['ORIGINAL_SEQ'], -1), axis=1)
+    combined_df['CDR2_NT'] = combined_df.apply(
+        lambda row: get_sequence(row['CDR2_START'], row['CDR2_END'], row['ORIGINAL_SEQ'], -1), axis=1)
+    combined_df['CDR2_AA'] = combined_df['CDR2_NT'].apply(translate_nt_to_aa)
+    combined_df['FWR3_NT'] = combined_df.apply(
+        lambda row: get_sequence(row['FWR3_START'], row['FWR3_END'], row['ORIGINAL_SEQ'], -1), axis=1)
+
+    # FWR4: If a correction is required, calculate FWR4_NT and FWR4_AA
+    if combined_df['FWR4_CORRECTION'].iloc[0]:
+        combined_df['FWR4_NT'] = combined_df.apply(
+            lambda row: get_sequence(row['FWR4_START'], int(row['FWR4_END']) + int(row['FWR4_CORRECTION']),
+                                     row['ORIGINAL_SEQ'], -1),
+            axis=1
+        )
+        combined_df['FWR4_AA'] = combined_df['FWR4_NT'].apply(translate_nt_to_aa)
+    else:
+        combined_df['FWR4_NT'] = None
+        combined_df['FWR4_AA'] = None
+
+    # Compute length information for CDR3
+    combined_df['CDR3_NT_LENGTH'] = combined_df['CDR3_NT'].apply(lambda x: len(x) if x != "N/A" else "N/A")
+    combined_df['CDR3_AA_LENGTH'] = combined_df['CDR3_AA'].apply(lambda x: len(x) if x != "N/A" else "N/A")
+
+    # Calculate C_NT and C_AA (assumes that C_START is available in the IgBLAST result)
+    combined_df['C_NT'] = combined_df.apply(
+        lambda row: get_sequence(row['C_START'], len(row['ORIGINAL_SEQ']) - 20, row['ORIGINAL_SEQ'], -1), axis=1)
+    combined_df['C_AA'] = combined_df['C_NT'].apply(translate_nt_to_aa)
+
+    # Isotype determination
+    if isotype_determination:
+        print(log_message("Determining Isotypes"), flush=True)
+        combined_df['ISOTYPE'] = get_isotype_with_blast(combined_df['C_NT'], out_dir)
+        combined_df['TOP_ISOTYPE'] = combined_df['ISOTYPE'].apply(lambda x: x.split("*")[0])
+    else:
+        combined_df['ISOTYPE'] = "N.D."
+        combined_df['TOP_ISOTYPE'] = "N.D."
+
+    # If desired: Correct the isotype column for light chains
+    change_index = combined_df[combined_df['CHAIN_PCR'] != "HC"].index
+    combined_df.loc[change_index, "ISOTPYE"] = np.nan
+
+    # Generate a B_CELL_ID using several columns
+    combined_df['B_CELL_ID'] = combined_df[
+        ['COHORT', 'SUBJECT', 'TIME_POINT', 'TISSUE', 'SUBSET', 'PLATE', 'WELL']].apply(
+        lambda x: "_".join(x.astype(str)), axis=1
+    )
+
+    # Reorder columns (e.g., 'SELECT_HC', 'SELECT_KC', 'SELECT_LC', etc.)
+    features = ['B_CELL_ID', 'SAMPLE_NAME', 'COHORT', 'SUBJECT', 'TIME_POINT',
+                'TISSUE', 'SUBSET', 'PLATE', 'WELL', 'PRIMER_SET', 'SOURCE', 'SUBSOURCE', 'IGBLAST_PASSED', 'V_GENE',
+                'TOP_V', 'D_GENE', 'TOP_D', 'J_GENE', 'TOP_J', 'V_IDENTITY', 'CHAIN_PCR', 'STOP_CODON', 'FRAME',
+                'PRODUCTIVE', 'ORIENTATION', 'FULL_V_ALIGNMENT', 'FWR1_START', 'FWR1_END', 'FWR1_NT', 'CDR1_START',
+                'CDR1_END', 'CDR1_NT', 'FWR2_START', 'FWR2_END', 'FWR2_NT', 'CDR2_START', 'CDR2_END', 'CDR2_NT',
+                'FWR3_START', 'FWR3_END',
+                'FWR3_NT', 'CDR3_NT', 'CDR3_NT_LENGTH', 'CDR3_AA', 'CDR3_AA_LENGTH', 'V_BTOP', 'J_START', 'J_END',
+                'J_BTOP', 'FWR4_START', 'FWR4_END', 'FWR4_CORRECTION', 'FWR4_NT', 'FWR4_AA', 'FWR4_FRAME',
+                'FWR4_STOP_CODON', 'C_START', 'C_NT', 'C_AA', 'ISOTYPE', 'TOP_ISOTYPE', 'V_LENGTH', 'LENGTH_PASSED',
+                'INNER_N',
+                'INNER_N_PASSED', 'MEAN_PHRED_PASSED', 'QCHECK_PASSED', 'TRIMMED_SEQ', 'MASKED_SEQ', 'ORIGINAL_SEQ']
+    combined_df = combined_df.reindex(columns=features)
+
+    # Export the combined DataFrame as an Excel file
+    path_to_combined_excel = Path(out_dir).joinpath(combi_ex_name)
+    with pd.ExcelWriter(path_to_combined_excel) as writer:
+        combined_df.to_excel(writer, sheet_name="Full_Information", index=False)
+
+    print(log_message(f"{combi_ex_name} exported to {out_dir}"), flush=True)
+    return combined_df
 
 def main():
     parser = argparse.ArgumentParser(description="Sequence annotation and quality check")

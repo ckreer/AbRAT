@@ -360,7 +360,7 @@ def generate_q_check_df(data_dir, q_co, mean_q_co, min_l, in_n, igblast_d):
     columns = ["COHORT", "SUBJECT", "TIME_POINT", "TISSUE", "SUBSET", "PLATE", "WELL", "PRIMER_SET", "CHAIN_PCR",
                "SOURCE", "SUBSOURCE", "REV_PRIMER", "COMPANY", "SEQ_COUNTER", "RAW_LENGTH", "RAW_MEAN_Q",
                "IGBLAST_PASSED", "FULL_V_ALIGNMENT", "V_to_J_LENGTH", "LENGTH_PASSED", "MEAN_Q", "MEAN_PHRED_PASSED", "INNER_N",
-               "INNER_N_PASSED", "PASSED", "STOP_CODON", "FRAME", "PRODUCTIVE", "TRIMMED_SEQ", "MASKED_SEQ",
+               "INNER_N_PASSED", "QCHECK_PASSED", "STOP_CODON", "FRAME", "PRODUCTIVE", "TRIMMED_SEQ", "MASKED_SEQ",
                "ORIGINAL_SEQ", "FILE_NAME"]
 
     return pd.DataFrame(q_check_list, columns=columns).sort_values(
@@ -368,9 +368,9 @@ def generate_q_check_df(data_dir, q_co, mean_q_co, min_l, in_n, igblast_d):
 
 def highlight_passed(row):
     """Helper Function to format excel rows."""
-    if row['PASSED'] and (row['PRODUCTIVE'] == "Yes"):
+    if row['QCHECK_PASSED'] and (row['PRODUCTIVE'] == "Yes"):
         return ['background-color: ' + green for _ in row]
-    elif row['PASSED'] and (row['PRODUCTIVE'] == "No"):
+    elif row['QCHECK_PASSED'] and (row['PRODUCTIVE'] == "No"):
         return ['background-color: ' + orange for _ in row]
     else:
         return ['background-color: ' + red for _ in row]
@@ -630,125 +630,6 @@ def get_isotype_with_blast(input_column, output_folder, blast_db="CH1_DB"):
             isotype_list.append("N/A")
     #print(isotype_list)
     return isotype_list
-
-
-# TODO: change logic for combining dataframes and probably copy to analyze_ab1_filey.py
-def combine_ig_blast_and_q_check_data(q_check_df, igblast_dict, combi_ex_name, out_dir, isotype_determination):
-    """
-    Kombiniert die IgBLAST-Daten mit den Qualitätsprüfungsdaten zu einem DataFrame.
-    Optimierte Version: sammelt die einzelnen DataFrames in einer Liste und führt einmalig ein pd.concat aus.
-    """
-    df_list = []  # Liste für alle Zwischen-DataFrames
-
-    for idx, entry in q_check_df.iterrows():
-        # Dateiname ohne Suffix
-        file_name = entry['FILE_NAME'].replace('.ab1', '')
-        orig_seq = entry['ORIGINAL_SEQ']
-
-        # Hole IgBLAST-Ergebnis (als Dictionary) und extrahiere benötigte Werte
-        igblast_result = igblast_dict.get(file_name, {})
-        cdr3_nt = igblast_result.get('CDR3_NT', "N/A")
-        cdr3_aa = igblast_result.get('CDR3_AA', "N/A")
-
-        # Erstelle ein DataFrame aus dem IgBLAST-Ergebnis
-        new_df = pd.DataFrame([igblast_result])
-        new_df['SAMPLE_NAME'] = file_name
-        new_df['SUBSET'] = entry['SUBSET']
-        new_df['TISSUE'] = entry['TISSUE']
-        new_df['CHAIN_PCR'] = entry['CHAIN_PCR']
-        new_df['IGBLAST_PASSED'] = entry['IGBLAST_PASSED']
-        new_df['MEAN_PHRED_PASSED'] = entry['MEAN_PHRED_PASSED']
-        new_df['INNER_N_PASSED'] = entry['INNER_N_PASSED']
-        new_df['LENGTH_PASSED'] = entry['LENGTH_PASSED']
-        new_df['INNER_N'] = entry['INNER_N']
-        new_df['QCHECK_PASSED'] = bool(entry['PASSED'])  # explizite Typumwandlung
-        new_df['ORIG_SEQ'] = orig_seq
-        new_df['TRIMMED_SEQ'] = entry['TRIMMED_SEQ']
-        new_df['MASKED_SEQ'] = entry['MASKED_SEQ']
-        new_df['COHORT'] = entry['COHORT']
-        new_df['SUBJECT'] = entry['SUBJECT']
-        new_df['TIME_POINT'] = entry['TIME_POINT']
-        new_df['PLATE'] = entry['PLATE']
-        new_df['PRIMER_SET'] = entry['PRIMER_SET']
-        new_df['WELL'] = entry['WELL']
-        new_df['SOURCE'] = entry['SOURCE']
-        new_df['SUBSOURCE'] = entry['SUBSOURCE']
-
-        # Berechne Sequenzsegmente anhand der originalen Sequenz
-        # (Annahme: get_sequence und translate_nt_to_aa sind importiert und funktionsfähig)
-        new_df['FWR1_NT'] = new_df.apply(lambda row: get_sequence(row['FWR1_START'], row['FWR1_END'], orig_seq, -1), axis=1)
-        new_df['CDR1_NT'] = new_df.apply(lambda row: get_sequence(row['CDR1_START'], row['CDR1_END'], orig_seq, -1), axis=1)
-        new_df['CDR1_AA'] = new_df['CDR1_NT'].apply(translate_nt_to_aa)
-        new_df['FWR2_NT'] = new_df.apply(lambda row: get_sequence(row['FWR2_START'], row['FWR2_END'], orig_seq, -1), axis=1)
-        new_df['CDR2_NT'] = new_df.apply(lambda row: get_sequence(row['CDR2_START'], row['CDR2_END'], orig_seq, -1), axis=1)
-        new_df['CDR2_AA'] = new_df['CDR2_NT'].apply(translate_nt_to_aa)
-        new_df['FWR3_NT'] = new_df.apply(lambda row: get_sequence(row['FWR3_START'], row['FWR3_END'], orig_seq, -1), axis=1)
-
-        # FWR4: Falls Korrektur erforderlich, berechne FWR4_NT und FWR4_AA
-        if new_df['FWR4_CORRECTION'].iloc[0]:
-            new_df['FWR4_NT'] = new_df.apply(
-                lambda row: get_sequence(row['FWR4_START'], row['FWR4_END'] + row['FWR4_CORRECTION'], orig_seq, -1),
-                axis=1
-            )
-            new_df['FWR4_AA'] = new_df['FWR4_NT'].apply(translate_nt_to_aa)
-        else:
-            new_df['FWR4_NT'] = None
-            new_df['FWR4_AA'] = None
-
-        # Längenangaben für CDR3
-        new_df['CDR3_NT'] = igblast_result.get('CDR3_NT', "N/A")
-        new_df['CDR3_NT_LENGTH'] = len(cdr3_nt) if cdr3_nt != "N/A" else "N/A"
-        new_df['CDR3_AA'] = igblast_result.get('CDR3_AA', "N/A")
-        new_df['CDR3_AA_LENGTH'] = len(cdr3_aa) if cdr3_aa != "N/A" else "N/A"
-
-        # Berechne C_NT und C_AA (hier wird angenommen, dass C_START im IgBLAST-Ergebnis vorliegt)
-        new_df['C_NT'] = new_df.apply(lambda row: get_sequence(row['C_START'], len(orig_seq) - 20, orig_seq, -1), axis=1)
-        new_df['C_AA'] = new_df['C_NT'].apply(translate_nt_to_aa)
-
-        # Sammle diesen DataFrame
-        df_list.append(new_df)
-
-    # Führe einmaliges Concatenaten aller DataFrames durch
-    combined_dataframe = pd.concat(df_list, ignore_index=True)
-
-    # Isotyp-Bestimmung
-    if isotype_determination:
-        print(log_message("Determining Isotypes"), flush=True)
-        combined_dataframe['ISOTYPE'] = get_isotype_with_blast(combined_dataframe['C_NT'], out_dir)
-        combined_dataframe['TOP_ISOTYPE'] = combined_dataframe['ISOTYPE'].apply(lambda x: x.split("*")[0])
-    else:
-        combined_dataframe['ISOTYPE'] = "N.D."
-        combined_dataframe['TOP_ISOTYPE'] = "N.D."
-
-        # Falls gewünscht: Korrigiere falsche Isotyp-Spalte für Light Chains
-    change_index = combined_dataframe[combined_dataframe['CHAIN_PCR'] != "HC"].index
-    combined_dataframe.loc[change_index, "ISOTPYE"] = np.nan
-
-    # Erzeuge eine B_CELL_ID anhand mehrerer Spalten
-    combined_dataframe['B_CELL_ID'] = combined_dataframe[['COHORT', 'SUBJECT', 'TIME_POINT', 'TISSUE', 'SUBSET', 'PLATE', 'WELL']].apply(
-        lambda x: "_".join(x.astype(str)), axis=1
-    )
-
-    # Change column order #'SELECT_HC', 'SELECT_KC', 'SELECT_LC',
-    features = ['B_CELL_ID', 'SAMPLE_NAME', 'COHORT', 'SUBJECT', 'TIME_POINT',
-                'TISSUE', 'SUBSET', 'PLATE', 'WELL', 'PRIMER_SET', 'SOURCE', 'SUBSOURCE', 'IGBLAST_PASSED', 'V_GENE',
-                'TOP_V', 'D_GENE', 'TOP_D', 'J_GENE', 'TOP_J', 'V_IDENTITY', 'CHAIN_PCR', 'STOP_CODON', 'FRAME',
-                'PRODUCTIVE', 'ORIENTATION', 'FULL_V_ALIGNMENT', 'FWR1_START', 'FWR1_END', 'FWR1_NT', 'CDR1_START',
-                'CDR1_END', 'CDR1_NT', 'FWR2_START', 'FWR2_END', 'FWR2_NT', 'CDR2_START', 'CDR2_END', 'CDR2_NT', 'FWR3_START', 'FWR3_END',
-                'FWR3_NT', 'CDR3_NT', 'CDR3_NT_LENGTH', 'CDR3_AA', 'CDR3_AA_LENGTH', 'V_BTOP', 'J_START', 'J_END',
-                'J_BTOP', 'FWR4_START', 'FWR4_END', 'FWR4_CORRECTION', 'FWR4_NT', 'FWR4_AA', 'FWR4_FRAME',
-                'FWR4_STOP_CODON', 'C_START', 'C_NT', 'C_AA', 'ISOTYPE', 'TOP_ISOTYPE', 'V_LENGTH', 'LENGTH_PASSED', 'INNER_N',
-                'INNER_N_PASSED', 'MEAN_PHRED_PASSED', 'QCHECK_PASSED', 'TRIMMED_SEQ', 'MASKED_SEQ', 'ORIG_SEQ']
-
-    combined_dataframe = combined_dataframe.reindex(columns=features)
-
-    # Exportiere den kombinierten DataFrame als Excel-Datei
-    path_to_combined_excel = Path(out_dir).joinpath(combi_ex_name)
-    with pd.ExcelWriter(path_to_combined_excel) as writer:
-        combined_dataframe.to_excel(writer, sheet_name="Full_Information", index=False)
-
-    print(log_message(f"{combi_ex_name} exported to {out_dir}"), flush=True)
-    return combined_dataframe
 
 
 def dict_to_str(d, indent=0):

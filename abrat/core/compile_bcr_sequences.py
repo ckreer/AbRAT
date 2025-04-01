@@ -73,7 +73,7 @@ def compile_bcrs(composite_df, h_ident, k_ident, l_ident, col_co):
                   'CDR3_NT', 'CDR3_NT_LENGTH',
                   'V_IDENTITY', 'V_BTOP',
                   'INNER_N', 'QCHECK_PASSED', 'MIDI_WARNING', 'COLLISIONS', 'FWR4_WARNING',
-                  'ALTERNATIVE_SEQ', 'ORIG_SEQ', 'TRIMMED_SEQ', 'MASKED_SEQ']
+                  'ALTERNATIVE_SEQ', 'ORIGINAL_SEQ', 'TRIMMED_SEQ', 'MASKED_SEQ']
 
     light_chain_columns = ['LIGHT_FOUND', 'PCR_ISOTYPE', 'ISOTYPE', 'TOP_ISOTYPE', 'LC_SUBCLUSTER', 'CLUSTER_REPRESENTATIVE', 'SAMPLE_NAME', 'SOURCE', 'SUBSOURCE',
                            'V_GENE', 'TOP_V', 'J_GENE', 'TOP_J',
@@ -83,7 +83,7 @@ def compile_bcrs(composite_df, h_ident, k_ident, l_ident, col_co):
                            'V_IDENTITY', 'V_BTOP',
                            'INNER_N', 'QCHECK_PASSED', 'MIDI_WARNING', 'COLLISIONS', 'FWR4_WARNING',
                            'ALTERNATIVE_SEQ',
-                           'ORIG_SEQ', 'TRIMMED_SEQ', 'MASKED_SEQ']
+                           'ORIGINAL_SEQ', 'TRIMMED_SEQ', 'MASKED_SEQ']
 
     kc_columns = ['KAPPA_FOUND', 'SAMPLE_NAME', 'SOURCE', 'SUBSOURCE',
                   'V_GENE', 'J_GENE',
@@ -93,7 +93,7 @@ def compile_bcrs(composite_df, h_ident, k_ident, l_ident, col_co):
                   'V_IDENTITY', 'V_BTOP',
                   'INNER_N', 'QCHECK_PASSED', 'MIDI_WARNING', 'COLLISIONS', 'FWR4_WARNING',
                   'ALTERNATIVE_SEQ',
-                  'ORIG_SEQ', 'TRIMMED_SEQ', 'MASKED_SEQ']
+                  'ORIGINAL_SEQ', 'TRIMMED_SEQ', 'MASKED_SEQ']
 
     lc_columns = ['LAMBDA_FOUND', 'SAMPLE_NAME', 'SOURCE', 'SUBSOURCE',
                   'V_GENE', 'J_GENE', 'V_BTOP',
@@ -103,7 +103,7 @@ def compile_bcrs(composite_df, h_ident, k_ident, l_ident, col_co):
                   'V_IDENTITY',
                   'INNER_N', 'QCHECK_PASSED', 'MIDI_WARNING', 'COLLISIONS', 'FWR4_WARNING',
                   'ALTERNATIVE_SEQ',
-                  'ORIG_SEQ', 'TRIMMED_SEQ', 'MASKED_SEQ']
+                  'ORIGINAL_SEQ', 'TRIMMED_SEQ', 'MASKED_SEQ']
 
     fin_df = pd.DataFrame()
 
