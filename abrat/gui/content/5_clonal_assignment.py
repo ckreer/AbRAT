@@ -86,23 +86,41 @@ clone_color_dict = {'palette': 'GnBu_d',
 
 def reset_verification():
     """
-    Reset session state for files.
+    Resets the session state for file verification.
+
+    This function is intended to reset any session state flags related to file verification.
+    Currently, the relevant session state updates are commented out.
+
+    Returns:
+        None
     """
-    #st.session_state.sequence_xlsx_verified = False
-    #st.session_state.sequence_xlsx_to_combine = False
+    # st.session_state.sequence_xlsx_verified = False
+    # st.session_state.sequence_xlsx_to_combine = False
     pass
+
 
 def check_input_files(input_folder, search_string):
     """
-    Check input files before loading
-    :return:
+    Checks for input files in the specified folder that match a given search string.
+
+    This function recursively searches the specified folder for files whose names contain the provided
+    search string. If matching files are found, the function sets the session state flag 'bcr_xlsx_verified'
+    to True, displays a success message, and returns a list of Path objects representing the found files.
+    If no matching files are found or if an error occurs, it displays an error message and returns False.
+
+    Parameters:
+        input_folder (str or Path): The folder in which to search for input files.
+        search_string (str): The string to search for in the file names.
+
+    Returns:
+        list or bool: A list of Path objects for the matching files if found; otherwise, False.
     """
     try:
-        files = [p for p in Path(input_folder).rglob("*"+search_string)]
+        files = [p for p in Path(input_folder).rglob("*" + search_string)]
         if not files:
-            raise FileNotFoundError("No '"+search_string+"'-files found in "+input_folder)
+            raise FileNotFoundError("No '" + search_string + "' files found in " + str(input_folder))
         st.session_state.bcr_xlsx_verified = True
-        #check_files_for_duplicates(input_folder)
+        # Optionally, check for duplicates here.
         st.success("Files found!")
         return files
     except FileNotFoundError as e:
@@ -381,7 +399,3 @@ else:
             clonality_pie = st.session_state.bcr_results['clustered_bcrs'][filename]['clonality_pie']
             st.caption(filename)
             st.pyplot(clonality_pie)
-
-
-
-

@@ -78,15 +78,25 @@ color_map = {
 
 def bcr_df_quality_statistics(bcr_df, hc_col, kc_col, lc_col, qc_col, prod_col):
     """
-    Extracts information from bcr_df and returns an Altair bar chart that shows
-    the total number of quality passed and productive sequences for heavy and light chains.
-    The legend is interactive: when categories (groups) are selected/deselected in the legend,
-    both the bars and the aggregated total update dynamically.
+    Extracts quality statistics from a BCR DataFrame and returns an interactive Altair bar chart.
 
-    The tooltip displays the Group, Count, and Percentage (of the row's total).
+    This function summarizes the total number of sequences that passed quality check and are productive for each chain type
+    (Heavy, Kappa, and Lambda). The resulting bar chart is interactive: selecting or deselecting groups in the legend
+    dynamically updates both the individual bar segments and the aggregated totals. The tooltip for each bar displays the
+    Group, Count, and Percentage (relative to the total for that chain type).
+
+    Parameters:
+        bcr_df (pd.DataFrame): The DataFrame containing BCR sequence information.
+        hc_col (str): The column name for heavy chains.
+        kc_col (str): The column name for kappa chains.
+        lc_col (str): The column name for lambda chains.
+        qc_col (str): The quality check column name (expected boolean; True/False).
+        prod_col (str): The productivity column name (expected values "Yes" or "No").
+
+    Returns:
+        alt.Chart: An interactive Altair bar chart showing the summarized quality statistics.
     """
-
-    # Summarize the data
+    # Summarize the data for each chain type and QC/productivity group.
     summary_data = {
         "Passed, productive": [
             sum((bcr_df[(hc_col, qc_col)] == True) & (bcr_df[(hc_col, prod_col)] == "Yes")),
@@ -110,16 +120,15 @@ def bcr_df_quality_statistics(bcr_df, hc_col, kc_col, lc_col, qc_col, prod_col):
         ],
     }
 
-    # Create a DataFrame with rows for Heavy Chains and Light Chains
+    # Create a DataFrame with rows for each chain type.
     df = pd.DataFrame(summary_data, index=['Heavy Chains', 'Kappa Chains', 'Lambda Chains'])
-    # Convert to long format for Altair
+    # Convert to long format for Altair.
     df_long = df.reset_index().melt(id_vars='index', var_name='Group', value_name='Count')
 
     # Define an interactive multi-selection bound to the legend.
-    # With empty='all', if nothing is selected, all data is shown.
     selection = alt.selection_point(fields=['Group'], bind='legend', empty=True)
 
-    # Define the color encoding
+    # Define the color encoding with a fixed domain and range.
     color = alt.Color(
         'Group:N',
         scale=alt.Scale(
@@ -130,58 +139,54 @@ def bcr_df_quality_statistics(bcr_df, hc_col, kc_col, lc_col, qc_col, prod_col):
                 "Not passed, non-productive"
             ],
             range=[
-                "#caebca",  # for "Passed, productive"
-                "#ffa95b",  # for "Passed, non-productive"
-                "#FFB19A",  # for "Not passed, productive"
-                "#FA8072"  # for "Not passed, non-productive"
+                "#caebca",  # Light green for "Passed, productive"
+                "#ffa95b",  # Orange for "Passed, non-productive"
+                "#FFB19A",  # Light red for "Not passed, productive"
+                "#FA8072"   # Salmon for "Not passed, non-productive"
             ]
         ),
         legend=alt.Legend(
             title="Group (Shift+click for multiple selections)",
             titleLimit=1000,
             orient='bottom',
-            direction='vertical',  # Arrange items vertically
+            direction='vertical',  # Arrange legend items vertically.
             columns=1,
             titleAnchor='start',
             labelLimit=200
         )
     )
 
-    # Create the bar chart.
-    # First, filter the data according to the selection.
-    # Then use transform_joinaggregate to compute the total Count per row (grouped by 'index'),
-    # and transform_calculate to compute the percentage for each row.
+    # Create the horizontal bar chart with aggregated totals.
     bars = alt.Chart(df_long).transform_filter(selection) \
         .transform_joinaggregate(total='sum(Count)', groupby=['index']) \
         .transform_calculate(percentage='datum.Count / datum.total') \
         .mark_bar(orient='horizontal') \
         .encode(
-        y=alt.Y('index:N', axis=alt.Axis(title=None)),
-        x=alt.X('Count:Q',
-                stack='zero',
-                title="Sum",
-                scale=alt.Scale(domain=[0, df_long['Count'].max() * 1.1])
-                ),
-        color=color,
-        tooltip=[
-            alt.Tooltip('Group:N', title="Group"),
-            alt.Tooltip('Count:Q', title="Count"),
-            alt.Tooltip('percentage:Q', format=".1%", title="Percent")
-        ]
-    ).add_params(selection)
+            y=alt.Y('index:N', axis=alt.Axis(title=None)),
+            x=alt.X('Count:Q',
+                    stack='zero',
+                    title="Sum",
+                    scale=alt.Scale(domain=[0, df_long['Count'].max() * 1.1])
+                    ),
+            color=color,
+            tooltip=[
+                alt.Tooltip('Group:N', title="Group"),
+                alt.Tooltip('Count:Q', title="Count"),
+                alt.Tooltip('percentage:Q', format=".1%", title="Percent")
+            ]
+        ).add_params(selection)
 
-    # Create the central text that shows the aggregated sum per row.
-    # We aggregate the total Count per row (Heavy and Light) from the filtered data.
+    # Create central text to show the aggregated total per chain type.
     sum_text = alt.Chart(df_long).transform_filter(selection) \
         .transform_aggregate(total='sum(Count)', groupby=['index']) \
         .mark_text(align='left', dx=3, color='black') \
         .encode(
-        y=alt.Y('index:N'),
-        x=alt.X('total:Q', title="Sum"),
-        text=alt.Text('total:Q', format='d')
-    )
+            y=alt.Y('index:N'),
+            x=alt.X('total:Q', title="Sum"),
+            text=alt.Text('total:Q', format='d')
+        )
 
-    # Combine the layers: bars plus aggregated total text.
+    # Combine the bar chart and the central total text.
     final_chart = (bars + sum_text).properties(
         width=200,
         height=300
@@ -189,37 +194,66 @@ def bcr_df_quality_statistics(bcr_df, hc_col, kc_col, lc_col, qc_col, prod_col):
 
     return final_chart
 
+
 def reset_verification():
     """
-    Reset session state for files.
+    Resets the session state flags for sequence Excel file verification and merging.
+
+    This function sets the session state variables 'sequence_xlsx_verified' and 'sequence_xlsx_to_combine'
+    to False, indicating that file verification and merging have not yet been performed.
+
+    Returns:
+        None
     """
     st.session_state.sequence_xlsx_verified = False
     st.session_state.sequence_xlsx_to_combine = False
-    # st.session_state.bcr_results = False
+    # st.session_state.bcr_results = False  # Uncomment if needed.
+
 
 def merge_sequence_excel_files(paths_to_files):
     """
-        Check input files for duplicates
-        :return:
-        """
+    Merges multiple Excel files into a single DataFrame.
+
+    This function reads all Excel files provided in the list 'paths_to_files' and concatenates them into
+    a single DataFrame. If only one file is provided, it simply returns the DataFrame read from that file.
+    It is intended to help check for duplicates by merging data from multiple sources.
+
+    Parameters:
+        paths_to_files (list): List of file paths to the Excel files.
+
+    Returns:
+        pd.DataFrame: A concatenated DataFrame containing data from all the input files.
+    """
     if len(paths_to_files) > 1:
-    # check if sequence names are identical in different lists
+        # Concatenate DataFrames from all files.
         return pd.concat([pd.read_excel(path) for path in paths_to_files], ignore_index=True)
     else:
         return pd.read_excel(paths_to_files[0])
-    pass
+
 
 def check_input_files(input_folder):
     """
-    Check input files before loading
-    :return:
+    Checks for input files in the specified folder before loading them.
+
+    The function searches for files in the input folder that match the pattern defined by
+    the session state's 'annotations_file_name'. If files are found, it sets the session state flag
+    'sequence_xlsx_verified' to True and displays a success message. If no files are found or if
+    a formatting error occurs, an error message is displayed.
+
+    Parameters:
+        input_folder (str or Path): The folder in which to search for input files.
+
+    Returns:
+        list: A list of Path objects corresponding to the found files if successful.
+        bool: False if no files are found or a formatting error occurs.
     """
     try:
-        files = [p for p in Path(input_folder).rglob("*"+st.session_state.annotations_file_name)]
+        files = [p for p in Path(input_folder).rglob("*" + st.session_state.annotations_file_name)]
         if not files:
-            raise FileNotFoundError("No '"+st.session_state.annotations_file_name+"'-files found in "+input_folder)
+            raise FileNotFoundError(
+                "No '" + st.session_state.annotations_file_name + "' files found in " + str(input_folder))
         st.session_state.sequence_xlsx_verified = True
-        #check_files_for_duplicates(input_folder)
+        # Optionally, check for duplicates: check_files_for_duplicates(input_folder)
         st.success("Files successfully evaluated!")
         return files
     except FileNotFoundError as e:
@@ -230,31 +264,45 @@ def check_input_files(input_folder):
         return False
 
 def get_productive_chain_pairing_counts(df):
-    """Takes a bcr dataframe with
-    hc_column = "HEAVY_CHAIN"
-    kappa_column = "KAPPA_CHAIN"
-    lambda_column = "LAMBDA_CHAIN"
-    qc_column = "QCHECK_PASSED" #True/False
-    prod_column = "PRODUCTIVE" #Yes/No
-
-    and filters for productive and qc-passed sequences to generate a statistics dictionary.
-
-    Returns  prod_pairing_stats and all_passed_sequences
     """
-    passed_hcs = df[(hc_column,prod_column)].replace({'Yes': True, 'No': False, 'N/A':np.nan}).fillna(False).astype(bool)&\
-                 df[(hc_column, qc_column)]
-    passed_kcs = df[(kappa_column, prod_column)].replace({'Yes': True, 'No': False, 'N/A':np.nan}).fillna(False).astype(bool)&\
-                 df[(kappa_column, qc_column)]
-    passed_lcs = df[(lambda_column, prod_column)].replace({'Yes': True, 'No': False, 'N/A':np.nan}).fillna(False).astype(bool)&\
-                 df[(lambda_column, qc_column)]
+    Computes statistics for productive chain pairings from a BCR DataFrame.
+
+    The function expects the DataFrame to have MultiIndex columns for different chain types:
+      - Heavy chain: column "HEAVY_CHAIN" with a sub-column "PRODUCTIVE" (values "Yes" or "No")
+      - Kappa chain: column "KAPPA_CHAIN" with a sub-column "PRODUCTIVE" (values "Yes" or "No")
+      - Lambda chain: column "LAMBDA_CHAIN" with a sub-column "PRODUCTIVE" (values "Yes" or "No")
+      - Additionally, a quality check column "QCHECK_PASSED" (boolean) should be present for each chain.
+
+    The function first filters the DataFrame to identify sequences that are both quality-passed and productive
+    for each chain type. It then computes counts for various pairing scenarios:
+      - Unpaired heavy chains (only heavy chain is productive)
+      - Unpaired kappa chains (only kappa chain is productive)
+      - Unpaired lambda chains (only lambda chain is productive)
+      - Two light chains (both kappa and lambda chains are productive without a heavy chain)
+      - Paired heavy/kappa chains (both heavy and kappa chains are productive, lambda is not)
+      - Paired heavy/lambda chains (both heavy and lambda chains are productive, kappa is not)
+      - Double positives (all three chains are productive)
+
+    Parameters:
+        df (pd.DataFrame): The BCR DataFrame containing chain information and quality check results.
+
+    Returns:
+        tuple: A tuple containing:
+            - prod_pairing_stats (dict): A dictionary with pairing scenario labels as keys and their counts as values.
+            - total_sum (int): The total count of all productive chain pairings (sum of all values in prod_pairing_stats).
+    """
+    passed_hcs = df[(hc_column, prod_column)].replace({'Yes': True, 'No': False, 'N/A': np.nan}).fillna(False).astype(bool) & df[(hc_column, qc_column)]
+    passed_kcs = df[(kappa_column, prod_column)].replace({'Yes': True, 'No': False, 'N/A': np.nan}).fillna(False).astype(bool) & df[(kappa_column, qc_column)]
+    passed_lcs = df[(lambda_column, prod_column)].replace({'Yes': True, 'No': False, 'N/A': np.nan}).fillna(False).astype(bool) & df[(lambda_column, qc_column)]
+
     prod_pairing_stats = {
-        'Unpaired heavy chains': sum(passed_hcs&~passed_kcs&~passed_lcs),
-        'Unpaired kappa chains': sum(~passed_hcs&passed_kcs&~passed_lcs),
-        'Unpaired lambda chains': sum(~passed_hcs&~passed_kcs&passed_lcs),
-        'Two light chains (KL)': sum(~passed_hcs&passed_kcs&passed_lcs),
-        'Paired heavy/kappa chains': sum(passed_hcs&passed_kcs&~passed_lcs),
-        'Paired heavy/lambda chains': sum(passed_hcs&~passed_kcs&passed_lcs),
-        'Double positives (HKL)': sum(passed_hcs&passed_kcs&passed_lcs)
+        'Unpaired heavy chains': sum(passed_hcs & ~passed_kcs & ~passed_lcs),
+        'Unpaired kappa chains': sum(~passed_hcs & passed_kcs & ~passed_lcs),
+        'Unpaired lambda chains': sum(~passed_hcs & ~passed_kcs & passed_lcs),
+        'Two light chains (KL)': sum(~passed_hcs & passed_kcs & passed_lcs),
+        'Paired heavy/kappa chains': sum(passed_hcs & passed_kcs & ~passed_lcs),
+        'Paired heavy/lambda chains': sum(passed_hcs & ~passed_kcs & passed_lcs),
+        'Double positives (HKL)': sum(passed_hcs & passed_kcs & passed_lcs)
     }
 
     total_sum = sum(prod_pairing_stats.values())
@@ -263,65 +311,72 @@ def get_productive_chain_pairing_counts(df):
 
 def plot_productive_chain_pairing_donut(prod_pairing_stats, color_map):
     """
-    Erzeugt einen interaktiven Donut-Chart mit Legende. Beim Hover über Segmente
-    werden sowohl der Count als auch der prozentuale Anteil angezeigt.
-    Wenn nichts selektiert ist, zeigt der Chart die Gesamtdaten.
+    Creates an interactive donut chart with a legend displaying productive chain pairing statistics.
+
+    When hovering over segments, both the count and the percentage of the total are shown.
+    If no selection is made, the chart displays data for all groups.
+
+    Parameters:
+        prod_pairing_stats (dict): Dictionary with group names as keys and counts as values.
+        color_map (dict): Dictionary mapping group names to corresponding color codes.
+
+    Returns:
+        alt.Chart: An Altair chart object representing the interactive donut chart.
     """
-    # DataFrame erstellen
+    # Create a DataFrame from the pairing statistics.
     data = pd.DataFrame({
         'Group': list(prod_pairing_stats.keys()),
         'Count': list(prod_pairing_stats.values())
     })
 
-    # Interaktive Mehrfachselektion, die an die Legende gebunden ist.
-    # Mit empty='all' werden bei keiner Selektion alle Daten angezeigt.
+    # Define an interactive multi-selection bound to the legend.
+    # With empty='all', all data is shown when nothing is selected.
     selection = alt.selection_point(fields=['Group'], bind='legend', empty=True)
 
-    # Donut-Chart:
-    # Zuerst filtern wir die Daten mit der Selektion.
-    # Dann aggregieren wir (mit joinaggregate) den Gesamtwert (total) der Count-Spalte
-    # und berechnen anschließend den Prozentwert für jede Zeile.
+    # Create the donut chart:
+    # First, filter the data according to the selection.
+    # Then, aggregate the total count and calculate the percentage for each segment.
     donut = alt.Chart(data).transform_filter(selection) \
         .transform_joinaggregate(total='sum(Count)') \
         .transform_calculate(percentage='datum.Count / datum.total') \
         .mark_arc(innerRadius=50, outerRadius=80) \
         .encode(
-        theta=alt.Theta(field='Count', type='quantitative'),
-        color=alt.Color(
-            'Group:N',
-            scale=alt.Scale(
-                domain=list(prod_pairing_stats.keys()),
-                range=[color_map[key] for key in prod_pairing_stats.keys()]
+            theta=alt.Theta(field='Count', type='quantitative'),
+            color=alt.Color(
+                'Group:N',
+                scale=alt.Scale(
+                    domain=list(prod_pairing_stats.keys()),
+                    range=[color_map[key] for key in prod_pairing_stats.keys()]
+                ),
+                legend=alt.Legend(
+                    title="Group (Shift+click for multiple selections)",
+                    titleLimit=1000,
+                    orient='bottom',
+                    direction='vertical',  # Arrange legend items vertically.
+                    columns=2,
+                    symbolType='square'
+                )
             ),
-            legend=alt.Legend(
-                title="Group (Shift+click for multiple selections)",
-                titleLimit=1000,
-                orient='bottom',
-                direction='vertical',  # Items vertikal anordnen
-                columns=2,
-                symbolType='square'
-            )
-        ),
-        tooltip=[
-            alt.Tooltip('Group:N', title="Group"),
-            alt.Tooltip('Count:Q', title="Count"),
-            alt.Tooltip('percentage:Q', format=".1%", title="Percent")
-        ]
-    ).add_params(selection)
+            tooltip=[
+                alt.Tooltip('Group:N', title="Group"),
+                alt.Tooltip('Count:Q', title="Count"),
+                alt.Tooltip('percentage:Q', format=".1%", title="Percent")
+            ]
+        ).add_params(selection)
 
-    # Zentraler Text: Aggregiere die Summe der selektierten Daten
+    # Create central text that displays the aggregated total count of the selected data.
     selected_text = alt.Chart(data).transform_filter(selection) \
         .transform_aggregate(total='sum(Count)') \
         .mark_text(
-        size=24,
-        align='center',
-        baseline='middle',
-        color='black'
-    ).encode(
-        text=alt.Text('total:Q', format='d')
-    )
+            size=24,
+            align='center',
+            baseline='middle',
+            color='black'
+        ).encode(
+            text=alt.Text('total:Q', format='d')
+        )
 
-    # Layering: Donut-Chart plus zentraler Text
+    # Layer the donut chart and the central text.
     chart = alt.layer(
         donut,
         selected_text

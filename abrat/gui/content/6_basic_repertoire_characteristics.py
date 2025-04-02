@@ -60,31 +60,36 @@ marker_list = ["circle-open", "square-open", "diamond-open", "cross", "x",
 
 def collapse_clone_data(df, target_column, clone_col=None, mode='unique_values'):
     """
-    Reduces the DataFrame by returning only the unique TOP gene segment values per clone.
+    Collapses a DataFrame by reducing entries in a specified target column, optionally grouping by clone.
 
-    If a clone column is provided, groups the DataFrame by that clone column and
-    takes the unique values of the specified top_gene_col within each group.
-    If no clone column is provided, it simply drops duplicate values in the top_gene_col.
+    If a clone column is provided and exists in the DataFrame, the function groups the DataFrame by that column.
+    Within each group, it either computes the mean (if mode is 'mean') or retains only the unique values
+    (if mode is 'unique_values') of the target column. If no clone column is provided, the function simply drops
+    duplicate values in the target column.
 
-    :param mode: 'unique_values' to reduce data in target_column to unique values or 'mean' to calculate a mean value
-    :param df: pandas DataFrame containing gene segment data.
-    :param target_column: Tuple representing the target column (e.g., ('HEAVY_CHAIN', 'TOP_V')).
-    :param clone_col: Tuple representing the clone identifier column (e.g., (SAMPLE_INFORMATION, hclc_cluster_subcol)).
-                      If provided, collapse is done within each clone.
-    :return: A reduced DataFrame containing only the unique TOP gene segments.
+    Parameters:
+        df (pd.DataFrame): DataFrame containing gene segment data.
+        target_column (tuple): A tuple representing the target column (e.g., ('HEAVY_CHAIN', 'TOP_V')).
+        clone_col (tuple, optional): A tuple representing the clone identifier column (e.g., ('SAMPLE_INFORMATION', 'hclc_cluster_subcol')).
+                                     If provided, collapse is performed within each clone. Default is None.
+        mode (str, optional): Collapse mode. 'unique_values' (default) retains only unique values,
+                              'mean' computes the mean value for the group.
+
+    Returns:
+        pd.DataFrame: A reduced DataFrame containing the collapsed values from the target column.
     """
     if clone_col is not None and clone_col in df.columns:
         if mode == 'mean':
-            # Group by the clone identifier and take unique gene segment values per group
+            # Group by the clone identifier and compute the mean for the target column.
             collapsed = df.groupby(clone_col)[[target_column]].apply(lambda x: x.mean())
-        else: # for everything else make 'unique_values'
-            # Group by the clone identifier and take unique gene segment values per group
+        else:
+            # Group by the clone identifier and drop duplicate values for the target column.
             collapsed = df.groupby(clone_col)[[target_column]].apply(lambda x: x.drop_duplicates())
 
-        # collapsed is a Series with a MultiIndex (clone, row index) – you may want to reset the index
+        # Reset index and remove the clone column from the result.
         collapsed_df = collapsed.reset_index().drop(columns=[clone_col])
     else:
-        # No clone column provided, simply drop duplicates in the top_gene column
+        # If no clone column is provided, simply drop duplicate values in the target column.
         collapsed_df = df.drop_duplicates(subset=[target_column])
 
     return collapsed_df
@@ -93,11 +98,47 @@ def get_repertoire_statistics(df):
     """
     Computes basic repertoire statistics from the given DataFrame.
 
-    Returns a dictionary with various statistics that can later be displayed
-    on the dashboard.
+    This function calculates various statistics from the BCR repertoire data which can later be
+    displayed on the dashboard. The statistics include clonality metrics (such as counts of undefined,
+    non-clonal, and clonal sequences; number of clones; mean and median clone sizes; clone sizes; and
+    clone color mapping), as well as V(D)J gene segment, isotype, and V gene identity statistics for
+    heavy and light chains. Additionally, it computes CDR3-related statistics including length distribution,
+    hydrophobicity (using both Eisenberg and Kyte-Doolittle scales), and net charge.
 
-    :param df: pandas DataFrame containing the repertoire data.
-    :return: Dictionary with calculated statistics.
+    Parameters:
+        df (pd.DataFrame): A pandas DataFrame containing the repertoire data with MultiIndex columns.
+                           Expected keys include:
+                           - Sample information columns: sample_col, clone_subcol, clone_color_subcol,
+                             cluster_size_subcol, and hclc_cluster_subcol.
+                           - Heavy chain columns (hc_col) and light chain columns (lc_col) with various sub-columns
+                             such as TOP_V, TOP_D, TOP_J, TOP_ISOTYPE (or PCR_ISOTYPE), V_IDENT (v_ident_subcol),
+                             CDR3_AA (cdr3_aa_subcol), and CDR3_AA_LENGTH (cdr3_aa_len_subcol).
+
+    Returns:
+        dict: A dictionary with the following keys:
+              - 'clonality': A dictionary with clonality statistics, including:
+                  • 'undefined': Count of undefined clone entries.
+                  • 'non_clonal': Count of non-clonal sequences.
+                  • 'clonal': Number of clonal sequences.
+                  • 'number_of_clones': Number of unique clones.
+                  • 'mean_clone_size': Mean size of the clones.
+                  • 'median_clone_size': Median size of the clones.
+                  • 'clone_sizes': DataFrame of clone sizes.
+                  • 'clone_colors': Mapping of clone identifiers to their assigned colors.
+              - For each chain type ('heavy_chain', 'light_chain', 'kappa_light_chain', 'lambda_light_chain'):
+                  For both 'not_collapsed' and 'collapsed' modes:
+                    • Gene segment statistics for each gene in the chain (e.g., TOP_V, TOP_D, TOP_J, TOP_ISOTYPE)
+                      including counts and percentages (with and without missing values).
+                    • V gene identity statistics including histograms, mean, standard deviation, geometric mean,
+                      and geometric standard deviation.
+              - Additionally, for each chain type and for both 'all' and 'unique' modes:
+                  • CDR3-related statistics including the CDR3 amino acid sequences, length distribution, hydrophobicity
+                    (for both Kyte-Doolittle and Eisenberg scales), and net charge.
+
+    Note:
+        This function depends on external variables (e.g., sample_col, clone_subcol, clone_color_subcol, cluster_size_subcol,
+        hc_col, lc_col, v_ident_subcol, cdr3_aa_subcol, cdr3_aa_len_subcol, hclc_cluster_subcol) and helper functions such as
+        collapse_clone_data, compute_histogram, and compute_gravy_scores.
     """
     stats = {}
 
@@ -116,20 +157,20 @@ def get_repertoire_statistics(df):
     clone_sizes = df[(sample_col, clone_subcol)].value_counts().reindex(clone_order).reset_index()
 
     stats['clonality'] = {
-        'undefined':sum(df[(sample_col, clone_subcol)]=='Undefined')+sum(df[(sample_col, clone_subcol)].isnull()),
-        'non_clonal':sum(df[(sample_col, clone_subcol)]=='Non-clonal'),
-        'clonal':len(clone_df),
-        'number_of_clones':len(clone_df[(sample_col, clone_subcol)].unique()),
-        'mean_clone_size':clone_df.drop_duplicates((sample_col, clone_subcol))[
+        'undefined': sum(df[(sample_col, clone_subcol)] == 'Undefined') + sum(df[(sample_col, clone_subcol)].isnull()),
+        'non_clonal': sum(df[(sample_col, clone_subcol)] == 'Non-clonal'),
+        'clonal': len(clone_df),
+        'number_of_clones': len(clone_df[(sample_col, clone_subcol)].unique()),
+        'mean_clone_size': clone_df.drop_duplicates((sample_col, clone_subcol))[
             (sample_col, cluster_size_subcol)].mean(),
-        'median_clone_size':clone_df.drop_duplicates((sample_col, clone_subcol))[
+        'median_clone_size': clone_df.drop_duplicates((sample_col, clone_subcol))[
             (sample_col, cluster_size_subcol)].median(),
-        'clone_sizes':clone_sizes,
-        'clone_colors':color_dict
+        'clone_sizes': clone_sizes,
+        'clone_colors': color_dict
     }
 
     # ------------------------------------------
-    # V(D)J gene segments, Isotype and V gene identities
+    # V(D)J Gene Segments, Isotype, and V Gene Identities
     # ------------------------------------------
     chain_genes = {
         'heavy_chain': ['TOP_V', 'TOP_D', 'TOP_J', 'TOP_ISOTYPE'],
@@ -138,15 +179,15 @@ def get_repertoire_statistics(df):
         'lambda_light_chain': ['TOP_V', 'TOP_J', 'TOP_ISOTYPE']
     }
 
-    # Composite cluster as clone identifier
+    # Use composite cluster as the clone identifier.
     clone_identifier = (sample_col, hclc_cluster_subcol)
 
     for mode in ['not_collapsed', 'collapsed']:
         for chain, gene_list in chain_genes.items():
-            # Initialize nested dictionary for the chain and mode
+            # Initialize nested dictionary for the chain and mode.
             stats.setdefault(chain, {})[mode] = {}
 
-            # Set the chain key and determine working DataFrame based on chain type
+            # Determine the appropriate DataFrame subset based on chain type.
             if chain == 'heavy_chain':
                 chain_key = hc_col
                 working_df = df.copy()
@@ -157,7 +198,7 @@ def get_repertoire_statistics(df):
                 elif chain == 'lambda_light_chain':
                     working_df = df[df[(chain_key, 'PCR_ISOTYPE')] != "KC"]
                 else:
-                    working_df = df.copy()  # for chain 'light_chain'
+                    working_df = df.copy()
             else:
                 chain_key = chain.upper()
                 working_df = df.copy()
@@ -165,17 +206,16 @@ def get_repertoire_statistics(df):
             for gene in gene_list:
                 v_gene_col = (chain_key, gene)
                 if mode == 'collapsed':
-                    # If a representative column is not available, collapse based on unique gene segment values
                     working_df_mode = collapse_clone_data(working_df, target_column=v_gene_col, clone_col=clone_identifier).copy()
                 else:
                     working_df_mode = working_df
 
-                # Calculate counts and percentages including NaNs
+                # Calculate counts and percentages including NaNs.
                 with_nans_count = working_df_mode[v_gene_col].fillna('N.D.').value_counts()
                 with_nans_percent = 100 * with_nans_count / with_nans_count.sum()
 
-                # Calculate counts and percentages excluding NaNs
-                no_nans_count = working_df_mode[v_gene_col].replace('N.D.',np.nan).value_counts() # value_counts() does not autommatically include NaNs
+                # Calculate counts and percentages excluding NaNs.
+                no_nans_count = working_df_mode[v_gene_col].replace('N.D.', np.nan).value_counts()
                 no_nans_percent = 100 * no_nans_count / no_nans_count.sum()
 
                 stats[chain][mode][gene.lower()] = {
@@ -183,42 +223,39 @@ def get_repertoire_statistics(df):
                     'no_nans': {'counts': no_nans_count, 'percent': no_nans_percent}
                 }
 
-            # V gene identity
+            # V gene identity.
             v_ident_col = (chain_key, v_ident_subcol)
             if mode == 'collapsed':
-                working_df_vident = collapse_clone_data(working_df, target_column=v_ident_col,clone_col=clone_identifier).copy()
+                working_df_vident = collapse_clone_data(working_df, target_column=v_ident_col, clone_col=clone_identifier).copy()
             else:
                 working_df_vident = working_df
 
-            # V ident => nans are replaced by 0
-            v_with_nans_count = compute_histogram(working_df_vident[v_ident_col].fillna(0), bin_size=1, min_val=-0,
-                                                  max_val=101)
+            # Calculate histograms for V gene identity; NaNs are replaced by 0 for one histogram.
+            v_with_nans_count = compute_histogram(working_df_vident[v_ident_col].fillna(0), bin_size=1, min_val=-0, max_val=101)
             v_with_nans_percent = 100 * v_with_nans_count / v_with_nans_count.sum()
 
             v_no_nans_count = compute_histogram(working_df_vident[v_ident_col], bin_size=1, min_val=0, max_val=101)
             v_no_nans_percent = 100 * v_no_nans_count / v_no_nans_count.sum()
 
             stats[chain][mode]['v_identity'] = {
-                'with_nans': {'counts': v_with_nans_count,
-                              'percent': v_with_nans_percent,
-                              },
-                'no_nans': {'identities': working_df_vident[v_ident_col].dropna(),
-                            'counts': v_no_nans_count,
-                            'percent': v_no_nans_percent,
-                            'mean': working_df_vident[v_ident_col].dropna().mean(),
-                            'std': working_df_vident[v_ident_col].dropna().std(),
-                            'geomean': np.exp(np.log(working_df_vident[v_ident_col].dropna()).mean()),
-                            'geostd': np.exp(np.log(working_df_vident[v_ident_col].dropna()).std())
-                            }
+                'with_nans': {'counts': v_with_nans_count, 'percent': v_with_nans_percent},
+                'no_nans': {
+                    'identities': working_df_vident[v_ident_col].dropna(),
+                    'counts': v_no_nans_count,
+                    'percent': v_no_nans_percent,
+                    'mean': working_df_vident[v_ident_col].dropna().mean(),
+                    'std': working_df_vident[v_ident_col].dropna().std(),
+                    'geomean': np.exp(np.log(working_df_vident[v_ident_col].dropna()).mean()),
+                    'geostd': np.exp(np.log(working_df_vident[v_ident_col].dropna()).std())
+                }
             }
 
     # -------------------
     # CDR3 and Mutations
     # -------------------
-
     for chain in chain_genes:
         for mode in ['all', 'unique']:
-            # Initialize nested dictionary for the chain and mode
+            # Initialize nested dictionary for the chain and mode.
             stats.setdefault(chain, {})[mode] = {}
             if chain == 'heavy_chain':
                 chain_key = hc_col
@@ -230,12 +267,12 @@ def get_repertoire_statistics(df):
                 elif chain == 'lambda_light_chain':
                     working_df = df[df[(chain_key, 'PCR_ISOTYPE')] != "KC"]
                 else:
-                    working_df = df.copy()  # for chain 'light_chain'
+                    working_df = df.copy()
             else:
                 chain_key = chain.upper()
                 working_df = df.copy()
 
-            cdr3_aa_col =  (chain_key, cdr3_aa_subcol)
+            cdr3_aa_col = (chain_key, cdr3_aa_subcol)
             cdr3_aa_len_col = (chain_key, cdr3_aa_len_subcol)
 
             if mode == 'unique':
@@ -247,36 +284,55 @@ def get_repertoire_statistics(df):
             cdr3_length_counts = working_df_mode[cdr3_aa_len_col].dropna().value_counts()
             cdr3_length_percent = 100 * cdr3_length_counts / cdr3_length_counts.sum()
             cdr3_gravy_eisenberg = compute_gravy_scores(cdr3s, 'eisenberg')
-            cdr3_gravy_kyte= compute_gravy_scores(cdr3s, 'kyte-doolittle')
-
+            cdr3_gravy_kyte = compute_gravy_scores(cdr3s, 'kyte-doolittle')
             cdr3_net_charges = cdr3s.apply(lambda seq: peptides.Peptide(seq).charge(pH=7.4))
 
             stats[chain][mode]['CDR3_AA'] = {
                 'cdr3s': cdr3s,
                 'cdr3_length_distribution': {'counts': cdr3_length_counts, 'percent': cdr3_length_percent},
-                'cdr3_hydrophobicity': {'kyte-doolittle':cdr3_gravy_kyte,
-                                        'eisenberg': cdr3_gravy_eisenberg
-                                        },
-                'cdr3_net_charges':cdr3_net_charges
-                }
+                'cdr3_hydrophobicity': {'kyte-doolittle': cdr3_gravy_kyte, 'eisenberg': cdr3_gravy_eisenberg},
+                'cdr3_net_charges': cdr3_net_charges
+            }
 
     return stats
 
-def get_gene_segment_stats(data_dict, chain, gene_segment, collapsed = 'not_collapsed', nans='no_nans', output='percent'):
-    """Generates a dataframe with statistics taken from data_dict.
-    Data_dict should be the dictionary of filenames that carry the respective stats.
+def get_gene_segment_stats(data_dict, chain, gene_segment, collapsed='not_collapsed', nans='no_nans', output='percent'):
+    """
+    Generates a DataFrame with gene segment statistics from the given data dictionary.
+
+    The data_dict is expected to be a dictionary where each key corresponds to a dataset (e.g., a filename)
+    and contains an 'alias' and a nested 'statistics' dictionary. This function extracts the specified gene segment
+    statistic for the given chain from each dataset, using the provided parameters to determine whether to use
+    collapsed data and whether to include missing values (NaNs). The output statistic can be chosen (e.g., 'percent' or 'counts').
+
+    Parameters:
+        data_dict (dict): Dictionary of datasets with their respective statistics.
+        chain (str): The chain type to extract statistics for (e.g., 'heavy_chain', 'light_chain').
+        gene_segment (str): The gene segment statistic to extract (e.g., 'top_v').
+        collapsed (str, optional): Either 'not_collapsed' or 'collapsed', indicating whether to use collapsed data.
+                                   Default is 'not_collapsed'.
+        nans (str, optional): Specifies whether to use values including NaNs ('with_nans') or excluding them ('no_nans').
+                              Default is 'no_nans'.
+        output (str, optional): The output statistic to retrieve, such as 'percent' or 'counts'. Default is 'percent'.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the extracted gene segment statistics, with dataset aliases as columns.
     """
     gene_segment_data = {}
     for dataset in data_dict.keys():
         dataset_alias = data_dict[dataset]['alias']
         gene_segment_data[dataset_alias] = data_dict[dataset]['statistics'][chain][collapsed][gene_segment][nans][output]
-
     gene_segment_df = pd.DataFrame(data=gene_segment_data).fillna(0).sort_index()
-
     return gene_segment_df
 
 def update_aliases():
-    # Dieser Callback wird direkt ausgeführt, wenn sich der Data Editor ändert.
+    """
+    Callback function that is executed immediately when the data editor is modified.
+
+    This function reads the edited aliases from the 'edited_aliases_df' DataFrame in the session state,
+    creates a dictionary mapping file names to aliases, and updates the corresponding alias in the
+    'clustered_bcrs' section of 'bcr_results' in the session state.
+    """
     alias_dict = st.session_state.edited_aliases_df.set_index('File Name')['Alias'].to_dict()
     for file_name, alias in alias_dict.items():
         st.session_state.bcr_results['clustered_bcrs'][file_name]['alias'] = alias
@@ -286,15 +342,21 @@ def plot_grouped_bar_chart(df, color_dict, x_axis_title="X-Axis", y_axis_title="
     """
     Plots a grouped bar chart using Plotly.
 
-    The DataFrame's index is used as x-values and each column is plotted as a separate dataset,
-    using the column names as legend labels. The figure will be approximately three times as wide as high.
-    The legend is placed horizontally centered below the graph.
+    The DataFrame's index is used as the x-values, and each column is plotted as a separate dataset,
+    with the column names used as legend labels. The chart is set to have an approximately 3:1 width-to-height ratio,
+    and the legend is horizontally centered below the chart.
 
-    :param df: pandas DataFrame where index are x values and columns are y values.
-    :return: A Plotly Figure object.
+    Parameters:
+        df (pd.DataFrame): DataFrame where the index represents x-values and the columns contain y-values.
+        color_dict (dict): Dictionary mapping each column name to a base color code.
+        x_axis_title (str): Title for the x-axis.
+        y_axis_title (str): Title for the y-axis.
+
+    Returns:
+        go.Figure: A Plotly Figure object representing the grouped bar chart.
     """
     traces = []
-    # Create a bar trace for each column in the DataFrame
+    # Create a bar trace for each column in the DataFrame.
     for col in df.columns:
         base_color = color_dict.get(col, "#000000")
         fill_color = hex_to_rgba(base_color, alpha=0.6)
@@ -308,26 +370,26 @@ def plot_grouped_bar_chart(df, color_dict, x_axis_title="X-Axis", y_axis_title="
             )
         ))
 
-    # Create figure with the traces
+    # Create the figure with the generated traces.
     fig = go.Figure(data=traces)
 
-    # Update layout: use 'group' mode, set size and legend position (legend horizontal below the chart)
+    # Update the layout: use group mode, set figure size, and position the legend below the chart.
     fig.update_layout(
         barmode='group',
-        width=900,  # Adjust width for a 3:1 aspect ratio
+        width=900,  # Approximately 3:1 aspect ratio.
         height=300,
         legend=dict(
             orientation="h",
             x=0.5,
             xanchor="center",
-            y=-1.1  # Legende unterhalb des Plots
+            y=-1.1  # Place the legend below the plot.
         ),
         margin=dict(l=50, r=50, t=30, b=100),
         xaxis_title=x_axis_title,
         yaxis_title=y_axis_title
-        # extra margin for legend if needed
     )
 
+    # Limit the number of y-axis ticks.
     fig.update_yaxes(nticks=6)
 
     return fig
@@ -338,11 +400,11 @@ def hex_to_rgba(hex_color, alpha=0.5):
     Converts a hex color string to an rgba string.
 
     Parameters:
-        hex_color (str): The color in hex format (e.g. "#FF5733").
-        alpha (float): The alpha (opacity) value.
+        hex_color (str): The color in hex format (e.g., "#FF5733").
+        alpha (float): The alpha (opacity) value (default is 0.5).
 
     Returns:
-        str: The color in rgba format.
+        str: The color represented in rgba format (e.g., "rgba(255, 87, 51, 0.5)").
     """
     hex_color = hex_color.lstrip('#')
     r, g, b = tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
@@ -352,45 +414,44 @@ def hex_to_rgba(hex_color, alpha=0.5):
 def plot_interactive_line_plot(df, color_dict, x_axis_title="X-Axis", y_axis_title="Y-Axis",
                                fill_plot=False,
                                marker_list=None,
-                               x_axis_minor_ticks = 5,
+                               x_axis_minor_ticks=5,
                                x_axis_range=None,
-                               title=''
-                               ):
+                               title=''):
     """
-    Erstellt einen interaktiven Linienplot mit Plotly.
+    Creates an interactive line plot using Plotly.
 
-    Jede Spalte des DataFrames wird als eigener Datensatz (Linie) dargestellt. Die Farben werden
-    über color_dict zugewiesen. Optional kann per fill_plot=True die Fläche unter der Linie mit 50%
-    Opazität gefüllt werden. Über marker_list können Marker-Symbole spezifiziert werden, wobei bei
-    zu wenigen Symbolen die Liste zyklisch wiederverwendet wird.
+    Each column in the DataFrame is plotted as a separate line. The colors for each line are assigned
+    using the provided color_dict. Optionally, if fill_plot is True, the area under each line is filled with 50%
+    opacity. Marker symbols can be specified via marker_list; if there are fewer markers than columns, the list
+    is cycled through.
 
-    :param df: pandas DataFrame, wobei der Index die x-Werte und die Spalten die y-Werte darstellen.
-    :param color_dict: Dictionary, das Spaltennamen auf Farbwerte (Hex-Code) abbildet.
-    :param x_axis_title: Titel der x-Achse.
-    :param y_axis_title: Titel der y-Achse.
-    :param fill_plot: Bool, ob die Fläche unter der Linie gefüllt werden soll (default: False).
-    :param marker_list: Liste von Marker-Symbolen (z.B. ['circle', 'square', 'diamond']). Default ist None.
-    :return: Ein Plotly Figure Objekt.
+    Parameters:
+        df (pd.DataFrame): DataFrame where the index represents x-values and columns represent y-values.
+        color_dict (dict): Dictionary mapping column names to color codes (hex format).
+        x_axis_title (str): Title for the x-axis.
+        y_axis_title (str): Title for the y-axis.
+        fill_plot (bool): If True, fills the area under the lines with a semi-transparent color (default: False).
+        marker_list (list): List of marker symbols (e.g., ['circle', 'square', 'diamond']). Default is None.
+        x_axis_minor_ticks (int): Number of minor ticks to display on the x-axis.
+        x_axis_range (list or tuple): Range for the x-axis (e.g., [min, max]). Default is None.
+        title (str): The chart title.
+
+    Returns:
+        go.Figure: A Plotly Figure object representing the interactive line plot.
     """
     traces = []
 
+    # Create a trace for each column in the DataFrame.
     for i, col in enumerate(df.columns):
         color = color_dict.get(col, "#000000")
         line_color = hex_to_rgba(color, 0.8)
-        # Bestimme den Marker, falls eine Liste übergeben wurde
+        # Determine the marker symbol if a marker list is provided.
         marker_symbol = marker_list[i % len(marker_list)] if marker_list else None
 
-        # Bestimme den Modus: "lines" oder "lines+markers"
+        # Set the mode to include markers if a marker symbol is provided.
         mode = "lines+markers" if marker_symbol is not None else "lines"
 
-        # Marker werden als nicht gefüllte Symbole mit Linienumriss definiert
-        marker_props = dict(
-            symbol=marker_symbol,
-            color="rgba(0,0,0,0)",  # transparente Füllung
-            line=dict(color=line_color, width=0.5)
-        )
-
-        # Erstelle das Scatter-Objekt
+        # Create the scatter trace.
         trace = go.Scatter(
             x=df.index,
             y=df[col],
@@ -403,40 +464,38 @@ def plot_interactive_line_plot(df, color_dict, x_axis_title="X-Axis", y_axis_tit
         )
         traces.append(trace)
 
-    # Erstelle die Figur
+    # Create the figure with all traces.
     fig = go.Figure(data=traces)
 
-    # Aktualisiere das Layout: Achsentitel, Legendenposition, Größe etc.
+    # Update the layout: axis titles, legend position, figure size, and margins.
     fig.update_layout(
         title=title,
-        width=900,  # ca. 3:1 Verhältnis
+        width=900,  # Approximately 3:1 aspect ratio.
         height=300,
         legend=dict(
             orientation="h",
             x=0.5,
             xanchor="center",
-            y=-0.3  # Legende unterhalb des Plots
+            y=-0.3  # Legend placed below the plot.
         ),
         margin=dict(l=50, r=50, t=30, b=100),
         xaxis_title=x_axis_title,
         yaxis_title=y_axis_title
     )
 
-    # Versuche, mehr Major-Ticks auf der y-Achse zu zeigen
-    fig.update_yaxes(nticks=6,
-                     title_standoff=13
-                     )
+    # Update y-axis: set a fixed number of major ticks and adjust standoff.
+    fig.update_yaxes(nticks=6, title_standoff=13)
 
-    # Minor-Ticks auf der x-Achse
+    # Update x-axis: set minor ticks, grid properties, and optionally the range.
     fig.update_xaxes(
         title_standoff=8,
         tickmode='auto',
         showgrid=True,
         linewidth=1,
         linecolor='grey',
-        ticks="outside",  # Zeichnet die Ticks außerhalb der Achse
-        ticklen=5,  # Länge der Ticks
-        tickwidth=1,  # Breite der Ticks
+        ticks="outside",  # Draw ticks outside the axis.
+        ticklen=5,        # Tick length.
+        tickwidth=1,      # Tick width.
         tickcolor="grey",
         minor=dict(
             showgrid=True,
@@ -451,10 +510,25 @@ def plot_interactive_line_plot(df, color_dict, x_axis_title="X-Axis", y_axis_tit
     return fig
 
 # move to gui_shared
-def plot_interactive_donut_chart(group_count_df,
-                                 color_map,
-                                 group='Group',
-                                 inner_radius=50):
+def plot_interactive_donut_chart(group_count_df, color_map, group='Group', inner_radius=50):
+    """
+    Creates an interactive donut chart with an associated legend using Altair.
+
+    The function takes a DataFrame (group_count_df) containing group labels and counts, renames its first two columns
+    to "Group" and "Count", and then generates a donut chart where the donut segments represent the counts per group.
+    An interactive legend is created that allows multiple selections (via Shift+click) to filter the donut chart.
+    Additional layers display the aggregated total in the center of the donut and an outer ring indicating clonal data.
+
+    Parameters:
+        group_count_df (pd.DataFrame): DataFrame with at least two columns, where the first column contains group labels
+                                       and the second column contains numeric counts.
+        color_map (dict): Dictionary mapping each group label to a corresponding hex color code.
+        group (str): Title for the group in the legend (default: "Group").
+        inner_radius (int): The inner radius (in pixels) of the donut chart (default: 50).
+
+    Returns:
+        alt.Chart: An Altair Chart object representing the combined interactive donut chart and legend.
+    """
     data = group_count_df.copy()
     data.rename(columns={
         data.columns[0]: 'Group',
@@ -463,7 +537,7 @@ def plot_interactive_donut_chart(group_count_df,
     col1, col2 = data.columns[0:2]
     data['order'] = range(len(data))
 
-    if not "Undefined" in color_map:
+    if "Undefined" not in color_map:
         color_map['Undefined'] = '#FFFFFF'
 
     data[col1] = data[col1].fillna('Undefined')
@@ -471,23 +545,19 @@ def plot_interactive_donut_chart(group_count_df,
     if all(data[col2].isnull()):
         st.warning('No valid clone data.')
 
-    # set the order of groups as in dataframe
+    # Preserve the order of groups as they appear in the DataFrame.
     groups = data[col1].to_list()
-
     data[col1] = pd.Categorical(data[col1], categories=groups, ordered=True)
 
-    # set selection
+    # Define an interactive multi-selection bound to the legend.
     selection = alt.selection_point(
         fields=[col1],
-        bind = 'legend'
-        #empty=True,
-        #toggle=True,
-        #clear=False
+        bind='legend'
     )
 
     legend_columns = math.ceil(len(data) / 8)
 
-    # 2) Legend-Chart (separat)
+    # Legend Chart (separate): This chart is used solely to display the legend.
     legend_chart = (
         alt.Chart(data)
         .mark_point(
@@ -498,35 +568,35 @@ def plot_interactive_donut_chart(group_count_df,
         )
         .encode(
             color=alt.Color(
-                    f"{col1}:N",
-                    scale=alt.Scale(
-                        domain=groups,
-                        range=[color_map[g] for g in groups]
-                    ),
-                    legend=alt.Legend(
-                        title=f"{group} (Shift+click for multiple selections)",
-                        titleLimit=1000,
-                        orient='right',
-                        direction='horizontal',
-                        columns=legend_columns,
-                        symbolType='square',
-                        symbolLimit=9999,
-                        offset=-150,
-                        values=groups
-                    )
+                f"{col1}:N",
+                scale=alt.Scale(
+                    domain=groups,
+                    range=[color_map[g] for g in groups]
+                ),
+                legend=alt.Legend(
+                    title=f"{group} (Shift+click for multiple selections)",
+                    titleLimit=1000,
+                    orient='right',
+                    direction='horizontal',
+                    columns=legend_columns,
+                    symbolType='square',
+                    symbolLimit=9999,
+                    offset=-150,
+                    values=groups
+                )
             )
         )
-        # Trick: kein sichtbarer Plot, wir wollen nur die Legende
+        # Trick: No visible plot is displayed; only the legend is shown.
         .transform_filter("false")
         .add_params(selection)
         .properties(width=150, height=200)
     )
 
-    # 3) Donut-Chart (ohne eigene Legende)
+    # Donut Chart (without its own legend)
     donut = (
         alt.Chart(data)
         .transform_filter(selection)
-        .transform_joinaggregate(total=f"sum({col2})") # Summe für die prozentuale Berechnung
+        .transform_joinaggregate(total=f"sum({col2})")  # Aggregate total for percentage calculation.
         .transform_calculate(percentage=f"datum.{col2} / datum.total")
         .mark_arc(innerRadius=inner_radius, outerRadius=75)
         .encode(
@@ -537,7 +607,7 @@ def plot_interactive_donut_chart(group_count_df,
                     domain=groups,
                     range=[color_map[g] for g in groups]
                 ),
-                legend=None  # <--- Keine integrierte Legende!
+                legend=None  # Disable the built-in legend.
             ),
             order=alt.Order('order:Q'),
             tooltip=[
@@ -549,40 +619,36 @@ def plot_interactive_donut_chart(group_count_df,
         .properties(width=200, height=200)
     )
 
-    # 4) Zentraler Text mit aktualisierter Summe
-    selected_text = (
-        alt.Chart(data)
-        .transform_filter(selection)
-        .transform_aggregate(total=f"sum({col2})")
-        .mark_text(size=24, align="center", baseline="middle", color="black")
+    # Central text displaying the aggregated total count.
+    selected_text = alt.Chart(data).transform_filter(selection) \
+        .transform_aggregate(total=f"sum({col2})") \
+        .mark_text(size=24, align='left', dx=3, color='black') \
         .encode(
-            text=alt.Text("total:Q", format="d")
+            y=alt.Y(f"{col1}:N"),
+            x=alt.X(f"total:Q", title="Sum"),
+            text=alt.Text("total:Q", format='d')
         )
-    )
 
-    # Background for outer clonal layer
+    # Outer background arc for the total (used as a background for the outer clonal layer).
     outer_total = (
         alt.Chart(data)
         .transform_filter(selection)
         .transform_joinaggregate(total_all='sum(Count)')
-        # Hier haben wir nur 1 Zeile mit total_all
+        # Only one aggregated value is present, filling the entire circle.
         .mark_arc(innerRadius=83, outerRadius=91, color="#f3f3f3")
         .encode(
-            # Ein einzelner Wert => füllt den ganzen Kreis
             theta=alt.Theta("total_all:Q", stack=None)
         )
     )
 
-    # Outer Arc = "Clonal": everything except Undefined & Non-clonal
+    # Outer arc representing "clonal" counts (everything except Undefined and Non-clonal).
     outer_clonal = (
         alt.Chart(data)
         .transform_filter(selection)
-        .transform_joinaggregate(
-            total_all='sum(Count)')
+        .transform_joinaggregate(total_all='sum(Count)')
         .transform_calculate(
             clonal_expr="(datum.Group != 'Undefined' && datum.Group != 'Non-clonal') ? datum.Count : 0")
-        .transform_joinaggregate(
-            clonal='sum(clonal_expr)')
+        .transform_joinaggregate(clonal='sum(clonal_expr)')
         .transform_calculate(
             percentage="datum.total_all > 0 ? datum.clonal / datum.total_all : 0")
         .mark_arc(innerRadius=83, outerRadius=91, color="gray")
@@ -590,21 +656,18 @@ def plot_interactive_donut_chart(group_count_df,
             theta=alt.Theta("clonal:Q", stack=None),
             tooltip=[
                 alt.Tooltip("clonal:Q", title="Clonal Count"),
-#                alt.Tooltip("total_all:Q", title="Total Count"),
                 alt.Tooltip("percentage:Q", format=".1%", title="Percent (Clonal)")
             ]
         )
     )
 
-    # Outer donut layer
-    donut_outer = alt.layer(
-        outer_total,
-        outer_clonal
-    )
+    # Combine the outer arcs into one layer.
+    donut_outer = alt.layer(outer_total, outer_clonal)
 
+    # Combine the outer donut layer, the inner donut chart, and the central text.
     donut_layer = alt.layer(donut_outer, donut, selected_text)
 
-    # Combine chart and legend next to each other
+    # Horizontally concatenate the donut chart and the legend chart.
     combined = alt.hconcat(
         donut_layer,
         legend_chart,
@@ -613,7 +676,6 @@ def plot_interactive_donut_chart(group_count_df,
         color='independent'
     )
 
-    # 6) In Streamlit anzeigen
     return combined
 
 
@@ -632,32 +694,36 @@ def plot_interactive_box_plot(
         orientation: str = 'h'
     ) -> go.Figure:
     """
-        Creates an interactive Plotly boxplot or violin plot of GRAVY scores.
+    Creates an interactive Plotly box plot or violin plot from the given DataFrame.
 
-        The plot displays each group on a numeric y-axis so that the plots can be placed
-        closer together. The GRAVY score is on the x-axis. For each group:
-          - The summary (box or violin) is drawn with a black border (line width 0.8).
-          - The fill color (with 0.5 alpha) is taken from the provided color_dict.
-          - The median is highlighted by an inner box (line width 1.3).
-          - Individual data points are overlaid as circles with line width 0.5, colored according 
-            to the color dictionary, with an opacity of 0.5.
+    Each group (as defined by the 'group_col') is assigned a unique y position, and for each group,
+    the distribution of the values in the specified 'data_col' is plotted as a box plot or violin plot.
+    Optionally, individual data points are overlaid as scatter points. The plot supports both horizontal
+    ('h') and vertical ('v') orientations.
 
-        Parameters:
-            df (pd.DataFrame): DataFrame containing at least the columns "Group" and "GRAVY".
-            plot_type (str): Either "box" or "violin", to select the plot type.
-            color_dict (dict): Dictionary mapping group names to colors (hex strings).
-            vertical_gap (float): The numeric gap between groups on the y-axis. Default is 0.3.
-            figure_height (int): Overall figure height. If None, it's calculated based on the number of groups.
+    Parameters:
+        df (pd.DataFrame): DataFrame containing at least the columns specified by 'group_col' and 'data_col'.
+        plot_type (str): Type of plot to create; either "box" or "violin". Raises ValueError for other values.
+        color_dict (dict): Dictionary mapping group names to color codes (hex strings). If not provided, a default color is used.
+        vertical_gap (float): Numeric gap between groups on the y-axis. Default is 1.
+        figure_height (int): Overall figure height in pixels. If None, the height is computed based on the number of groups.
+        xaxis_title (str): Title for the x-axis.
+        xaxis_resolution (float): Resolution for the x-axis ticks (major ticks are set at twice this value; default is 0.5).
+        yaxis_resolution (float): Resolution for the y-axis minor ticks (default is 1).
+        yaxis_title (str): Title for the y-axis.
+        data_col (str): Column name in df to be used as data values (default is "GRAVY").
+        group_col (str): Column name in df to be used as group labels (default is "Group").
+        orientation (str): Plot orientation, 'h' for horizontal or 'v' for vertical. Default is 'h'.
 
-        Returns:
-            go.Figure: The interactive Plotly figure.
-        """
+    Returns:
+        go.Figure: The interactive Plotly Figure object containing the box/violin plot.
+    """
     if plot_type not in ["box", "violin"]:
         raise ValueError("plot_type must be either 'box' or 'violin'.")
 
     fig = go.Figure()
 
-    # Sort groups and assign each a numeric y position
+    # Sort groups and assign each a numeric y position.
     groups = sorted(df[group_col].unique())
     y_positions = {group: i * vertical_gap for i, group in enumerate(groups)}
 
@@ -670,11 +736,11 @@ def plot_interactive_box_plot(
         x = group_df[data_col]
         y = [y_val] * len(group_df)
 
-        if orientation=='v':
-            # change x and y values
+        if orientation == 'v':
+            # Swap x and y values for vertical orientation.
             new_y = x.copy()
             x = y.copy()
-            y =  new_y
+            y = new_y
 
         if plot_type == "box":
             fig.add_trace(go.Box(
@@ -682,16 +748,12 @@ def plot_interactive_box_plot(
                 y=y,
                 name=group,
                 orientation=orientation,
-                boxpoints=False,  # We'll add custom scatter points below.
+                boxpoints=False,  # Custom scatter points added below.
                 line=dict(width=0.8, color="black"),
                 fillcolor=fill_color,
                 showlegend=False,
-                hoverlabel=dict(
-                    font=dict(color=color)
-                    )
-                )
-            )
-
+                hoverlabel=dict(font=dict(color=color))
+            ))
         elif plot_type == "violin":
             fig.add_trace(go.Violin(
                 x=x,
@@ -703,20 +765,17 @@ def plot_interactive_box_plot(
                 fillcolor=fill_color,
                 box=dict(visible=True, fillcolor=fill_color, line=dict(width=1.3, color="black")),
                 showlegend=False,
-                hoverlabel=dict(
-                    font=dict(color=color),
-                )
+                hoverlabel=dict(font=dict(color=color))
             ))
 
         # Add individual data points as scatter traces.
         x_vals = group_df[data_col].values
         y_vals = [y_val] * len(group_df)
 
-        if orientation=='v':
-            # change x and y values
+        if orientation == 'v':
             new_y_vals = x_vals.copy()
             x_vals = y_vals.copy()
-            y_vals =  new_y_vals
+            y_vals = new_y_vals
 
         fig.add_trace(go.Scatter(
             x=x_vals,
@@ -727,58 +786,55 @@ def plot_interactive_box_plot(
                 symbol="circle",
                 size=8,
                 line=dict(width=0.5, color=color),
-                color="rgba(0,0,0,0)",
+                color="rgba(0,0,0,0)",  # Transparent fill.
                 opacity=0.6
             ),
             showlegend=False
         ))
 
     if orientation == 'v':
-        # Configure the y-axis
+        # Configure y-axis for vertical orientation.
         fig.update_yaxes(
             type="linear",
             tickmode="linear",
             gridcolor="lightgrey",
-            gridwidth= 0.5,
-            dtick=yaxis_resolution * 5,  # Abstand der Major Ticks (z.B. alle 5 Einheiten)
-            minor=dict(  # Einstellungen für Minor Ticks
+            gridwidth=0.5,
+            dtick=yaxis_resolution * 5,
+            minor=dict(
                 tickmode="linear",
                 dtick=yaxis_resolution,
                 showgrid=True,
                 gridcolor="#F0F0F0"
             )
         )
-
-        # Configure the x-axis
+        # Configure x-axis for vertical orientation.
         fig.update_xaxes(
             showline=True,
             linewidth=1,
             linecolor='grey',
             tickmode="array",
-            ticks="outside",  # Zeichnet die Ticks außerhalb der Achse
-            ticklen=5,  # Länge der Ticks
-            tickwidth=1,  # Breite der Ticks
+            ticks="outside",
+            ticklen=5,
+            tickwidth=1,
             tickcolor="grey",
-            tick0=0,  # Startwert für die Major Ticks
+            tick0=0,
             tickvals=list(y_positions.values()),
-            ticktext=list(y_positions.keys()),
+            ticktext=list(y_positions.keys())
         )
-
         fig.update_layout(
             height=300,
             legend=dict(
                 orientation="h",
                 x=0.5,
                 xanchor="center",
-                y=-0.3  # Legende unterhalb des Plots
+                y=-0.3
             ),
             margin=dict(l=50, r=50, t=30, b=100),
             xaxis_title=xaxis_title,
             yaxis_title=yaxis_title
         )
-
     else:
-        # Configure the y-axis
+        # Configure y-axis for horizontal orientation.
         fig.update_yaxes(
             type="linear",
             tickmode="array",
@@ -786,10 +842,9 @@ def plot_interactive_box_plot(
             ticktext=list(y_positions.keys()),
             range=[-0.5, (len(groups) - 1) * vertical_gap + 0.5],
             title_text=yaxis_title,
-            autorange="reversed" # to invert the order
+            autorange="reversed"  # Invert order.
         )
-
-        # Configure the x-axis
+        # Configure x-axis for horizontal orientation.
         fig.update_xaxes(
             title_text=xaxis_title,
             showline=True,
@@ -797,21 +852,19 @@ def plot_interactive_box_plot(
             linecolor='grey',
             tickmode="linear",
             showgrid=True,
-            ticks="outside",  # Zeichnet die Ticks außerhalb der Achse
-            ticklen=5,  # Länge der Ticks
-            tickwidth=1,  # Breite der Ticks
+            ticks="outside",
+            ticklen=5,
+            tickwidth=1,
             tickcolor="grey",
-            tick0=0,  # Startwert für die Major Ticks
-            dtick=xaxis_resolution*2,  # Abstand der Major Ticks (z.B. alle 5 Einheiten)
-            minor=dict(  # Einstellungen für Minor Ticks
+            tick0=0,
+            dtick=xaxis_resolution * 2,
+            minor=dict(
                 tickmode="linear",
                 dtick=xaxis_resolution,
                 showgrid=True,
                 gridcolor="#F0F0F0"
             )
         )
-
-        # Configure layout
         fig.update_layout(
             margin=dict(l=50, r=20, t=30, b=50),
             height=figure_height if figure_height is not None else 200 + 50 * len(groups)
@@ -829,17 +882,24 @@ def plot_interactive_bargraph_from_dict(results: dict,
     """
     Plots an interactive Plotly bar chart from a dictionary of results.
 
+    The input dictionary should have keys as dataset names and values as dictionaries with keys
+    'n', 'mean', and 'std'. Here, 'n' is the total sample count, 'mean' is the average value (e.g., diversity index),
+    and 'std' is the standard deviation. The function assigns colors to the bars using the provided color_dict.
+
     Parameters:
-        results (dict): Dictionary with keys as dataset names and values as dicts with keys
-                        'n', 'mean' and 'std'. 'n' is the total sample count, 'mean' the average
-                        diversity index and 'std' its standard deviation.
-        color_dict (dict): Dictionary mapping dataset names to hex colors.
+        results (dict): Dictionary with dataset names as keys and dictionaries as values containing:
+                        - 'n': Total sample count.
+                        - 'mean': The average value.
+                        - 'std': The standard deviation.
+        color_dict (dict): Dictionary mapping dataset names to hex color codes.
+        y_title (str): Title for the y-axis.
+        avg (str): Key to use for the average value (default is 'Mean').
+        std (str): Key to use for the standard deviation (default is 'Std').
 
     Returns:
-        go.Figure: The resulting interactive bar chart.
+        go.Figure: The resulting interactive Plotly bar chart.
     """
-
-    # Extrahiere Labels, Mittelwerte, Standardabweichungen und sample counts.
+    # Extract labels, mean values, standard deviations, and sample counts.
     x_labels, y_values, std_values, customdata = [], [], [], []
     for key, val in results.items():
         x_labels.append(key)
@@ -853,10 +913,10 @@ def plot_interactive_bargraph_from_dict(results: dict,
         error_y=dict(
             type="data",
             array=std_values,
-            thickness=0.5,  # Error bar line thickness
-            width=15,  # Error bar cap width in pixels (~50% of the bar width)
+            thickness=0.5,  # Error bar line thickness.
+            width=15,       # Error bar cap width in pixels (~50% of the bar width).
             color="black",
-            visible = True
+            visible=True
         ),
         marker=dict(
             color=[hex_to_rgba(color_dict.get(key, "#1f77b4"), 0.3) for key in x_labels],
@@ -865,9 +925,10 @@ def plot_interactive_bargraph_from_dict(results: dict,
         customdata=customdata,
         hovertemplate=(
             "<b>%{x}</b><br>"
-            +avg+": %{y:.2f}<br>"
-            +std+": %{customdata[1]:.2f}<br>"
-            "n: %{customdata[0]}<extra></extra>")
+            + avg + ": %{y:.2f}<br>"
+            + std + ": %{customdata[1]:.2f}<br>"
+            "n: %{customdata[0]}<extra></extra>"
+        )
     ))
 
     fig.update_xaxes(
@@ -876,10 +937,10 @@ def plot_interactive_bargraph_from_dict(results: dict,
         linecolor='grey',
         tickmode="linear",
         showgrid=True,
-        ticks="outside",  # Zeichnet die Ticks außerhalb der Achse
-        ticklen=5,  # Länge der Ticks
-        tickwidth=1,  # Breite der Ticks
-        tickcolor="grey",
+        ticks="outside",  # Draws the ticks outside the axis.
+        ticklen=5,        # Length of the ticks.
+        tickwidth=1,      # Width of the ticks.
+        tickcolor="grey"
     )
 
     fig.update_layout(
@@ -1143,23 +1204,47 @@ with (tab2):
 
 def display_gene_segment_panel(bcr_chain, gene_segment, color_dict,
                                x_label='Gene segment', y_label='Abundance', title="Gene segments"):
-    st.write("**"+title+"**")
-    # get data for figure
+    """
+    Displays a gene segment panel with a grouped bar chart for BCR gene segment statistics.
+
+    This function writes a title to the Streamlit app, retrieves gene segment statistics from the clustered BCR results
+    stored in the session state, and generates a grouped bar chart using the provided color mapping. For light chains,
+    if the requested gene segment is 'top_isotype', it is replaced with 'pcr_isotype'. The function returns both the
+    DataFrame containing gene segment statistics and the corresponding Plotly figure.
+
+    Parameters:
+        bcr_chain (str): The BCR chain type (e.g., 'heavy_chain' or 'light_chain').
+        gene_segment (str): The gene segment to display (e.g., 'top_v', 'top_isotype').
+        color_dict (dict): Dictionary mapping group names to color codes (hex strings).
+        x_label (str): Label for the x-axis of the chart.
+        y_label (str): Label for the y-axis of the chart.
+        title (str): Title of the panel.
+
+    Returns:
+        tuple: A tuple (gene_segment_df, gene_segment_figure) where gene_segment_df is a DataFrame containing
+               gene segment statistics and gene_segment_figure is the corresponding grouped bar chart as a Plotly Figure.
+    """
+    st.write("**" + title + "**")
+    # Get data for the figure.
     if bcr_chain == 'light_chain' and gene_segment == 'top_isotype':
         gene_segment = 'pcr_isotype'
-    gene_segment_df = get_gene_segment_stats(st.session_state.bcr_results['clustered_bcrs'],
-                                             bcr_chain,
-                                             gene_segment,
-                                             collapsed=data_reduction,
-                                             nans=gene_segment_nans,
-                                             output=gene_segment_y_format)
+    gene_segment_df = get_gene_segment_stats(
+        st.session_state.bcr_results['clustered_bcrs'],
+        bcr_chain,
+        gene_segment,
+        collapsed=data_reduction,
+        nans=gene_segment_nans,
+        output=gene_segment_y_format
+    )
 
-    # make figure
-    gene_segment_figure = plot_grouped_bar_chart(gene_segment_df,
-                                                                 color_dict,
-                                                                 x_axis_title=x_label,
-                                                                 y_axis_title=y_label)
-    #return data and figure
+    # Create the figure.
+    gene_segment_figure = plot_grouped_bar_chart(
+        gene_segment_df,
+        color_dict,
+        x_axis_title=x_label,
+        y_axis_title=y_label
+    )
+    # Return both the data and the figure.
     return gene_segment_df, gene_segment_figure
 
 with tab3:
@@ -1388,142 +1473,243 @@ with tab4:
                                y_format='percent',
                                cdr3_selection='all',
                                cdr3_marker_list=None,
-                               fill_curves = False,
+                               fill_curves=False,
                                title=''):
-        '''returns dataframe and figure'''
-        # get data for figure
+        """
+        Computes CDR3 length statistics from the BCR results and creates an interactive line plot.
 
+        This function extracts CDR3 length distribution data for a specified BCR chain from the
+        clustered BCR results stored in the session state. For each file in the results, it retrieves
+        the length distribution (formatted according to the provided y_format), assigns the dataset alias
+        as the series name, and concatenates all series into a single DataFrame. The DataFrame is then reindexed
+        to cover the full range of observed CDR3 lengths (with a one-unit padding on both ends) and missing values
+        are filled with zero.
+
+        Next, a color dictionary is generated based on the alias and color information in the session state.
+        Minor tick settings are specified for the x-axis (with a default for heavy_chain). Finally, the function
+        creates an interactive line plot using the plot_interactive_line_plot function, with options for filling
+        the area under the curve and specifying marker symbols.
+
+        Parameters:
+            bcr_chain (str): The BCR chain type (e.g., 'heavy_chain', 'light_chain') for which to compute statistics.
+            x_label (str): Label for the x-axis (default: "CDR3 length (aa)").
+            y_label (str): Label for the y-axis (default: "Frequency (%)").
+            y_format (str): Format for the y-axis values, e.g., 'percent' (default: 'percent').
+            cdr3_selection (str): Specifies which CDR3 data to use; 'all' or 'unique' (default: 'all').
+            cdr3_marker_list (list): List of marker symbols to be used in the plot (default: None).
+            fill_curves (bool): If True, fills the area under the line curves (default: False).
+            title (str): Title of the plot (default is an empty string).
+
+        Returns:
+            tuple: A tuple (combined_df, cdr3_length_figure) where:
+                - combined_df (pd.DataFrame): DataFrame with CDR3 length statistics.
+                - cdr3_length_figure (go.Figure): Interactive Plotly figure of the CDR3 length distribution.
+        """
         dfs = []
         for f in st.session_state.bcr_results['clustered_bcrs'].keys():
-            df = st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][cdr3_selection]['CDR3_AA']\
-            ['cdr3_length_distribution'][y_format]
-
-            df.name = st.session_state.bcr_results['clustered_bcrs'][f]['alias']
-            dfs.append(df)
+            # Extract the CDR3 length distribution for the specified chain and selection.
+            df_series = \
+            st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][cdr3_selection]['CDR3_AA'] \
+                ['cdr3_length_distribution'][y_format]
+            df_series.name = st.session_state.bcr_results['clustered_bcrs'][f]['alias']
+            dfs.append(df_series)
 
         combined_df = pd.concat(dfs, axis=1)
-        combined_df = combined_df.reindex(range(int(combined_df.index.min()-1),
-                                                int(combined_df.index.max()+2))).fillna(0)
+        combined_df = combined_df.reindex(
+            range(int(combined_df.index.min() - 1), int(combined_df.index.max() + 2))
+        ).fillna(0)
 
-        # get colors
-        color_dict = {st.session_state.bcr_results['clustered_bcrs'][f]['alias']:
-                          st.session_state.bcr_results['clustered_bcrs'][f]['color']
-                      for f in st.session_state.bcr_results['clustered_bcrs'].keys()
-                      }
-        x_minor_ticks = {'heavy_chain':5}
+        # Generate a color dictionary from the session state's clustered BCR results.
+        color_dict = {
+            st.session_state.bcr_results['clustered_bcrs'][f]['alias']:
+                st.session_state.bcr_results['clustered_bcrs'][f]['color']
+            for f in st.session_state.bcr_results['clustered_bcrs'].keys()
+        }
+        x_minor_ticks = {'heavy_chain': 5}
 
-        # make figure
-        cdr3_length_figure = plot_interactive_line_plot(combined_df,
-                                                        color_dict,
-                                                        x_axis_title=x_label,
-                                                        y_axis_title=y_label,
-                                                        fill_plot=fill_curves,
-                                                        marker_list=cdr3_marker_list,
-                                                        x_axis_minor_ticks=x_minor_ticks.get(bcr_chain, 2),
-                                                        title=''
+        # Create the interactive line plot.
+        cdr3_length_figure = plot_interactive_line_plot(
+            combined_df,
+            color_dict,
+            x_axis_title=x_label,
+            y_axis_title=y_label,
+            fill_plot=fill_curves,
+            marker_list=cdr3_marker_list,
+            x_axis_minor_ticks=x_minor_ticks.get(bcr_chain, 2),
+            title=title
         )
 
-        # return data and figure
         return combined_df, cdr3_length_figure
 
-    def cdr3_hydro_statistics(bcr_chain,
-                               x_label="CDR3 Hydrophobicity",
-                               y_label="Frequency (%)",
-                               cdr3_selection='all',
-                               cdr3_marker_list=None,
-                               scale='kyte-doolittle',
-                               title=''):
-        '''returns dataframe and figure'''
-        # get data and color for figure
 
+    def cdr3_hydro_statistics(bcr_chain,
+                              x_label="CDR3 Hydrophobicity",
+                              y_label="Frequency (%)",
+                              cdr3_selection='all',
+                              cdr3_marker_list=None,
+                              scale='kyte-doolittle',
+                              title=''):
+        """
+        Computes CDR3 hydrophobicity statistics for a given BCR chain and creates an interactive box plot.
+
+        The function extracts hydrophobicity data (e.g., GRAVY scores) from the clustered BCR results stored in
+        the session state for the specified BCR chain and CDR3 selection. For each file in the results, it retrieves
+        the hydrophobicity series corresponding to the given scale ('kyte-doolittle' or 'eisenberg'), associates the
+        dataset alias and its assigned color, and compiles these series into a combined DataFrame. Then, it creates an
+        interactive box plot using the plot_interactive_box_plot function.
+
+        Parameters:
+            bcr_chain (str): The BCR chain type (e.g., 'heavy_chain' or 'light_chain').
+            x_label (str): Label for the x-axis (default: "CDR3 Hydrophobicity").
+            y_label (str): Label for the y-axis (default: "Frequency (%)").
+            cdr3_selection (str): Specifies whether to use 'all' CDR3 sequences or a 'unique' subset (default: 'all').
+            cdr3_marker_list (list): List of marker symbols for the plot (default is None).
+            scale (str): Hydrophobicity scale to use ('kyte-doolittle' or 'eisenberg'; default is 'kyte-doolittle').
+            title (str): Title for the panel (default is an empty string).
+
+        Returns:
+            tuple: A tuple (combined_df, cdr3_hydro_figure) where:
+                - combined_df (pd.DataFrame): DataFrame with CDR3 hydrophobicity statistics.
+                - cdr3_hydro_figure (go.Figure): Interactive Plotly figure (box plot) displaying the GRAVY scores.
+        """
         df_list = []
         color_dict = {}
-        x_res = {'kyte-doolittle':0.5,
-                 'eisenberg':0.2}
+        # Define x-axis resolution based on the selected scale.
+        x_res = {'kyte-doolittle': 0.5, 'eisenberg': 0.2}
+
+        # Iterate over each file in the clustered BCR results.
         for f in st.session_state.bcr_results['clustered_bcrs'].keys():
-            series = st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][cdr3_selection]['CDR3_AA']\
-            ['cdr3_hydrophobicity'][scale]
+            # Extract the hydrophobicity series for the given chain and CDR3 selection.
+            series = \
+            st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][cdr3_selection]['CDR3_AA'] \
+                ['cdr3_hydrophobicity'][scale]
             alias = st.session_state.bcr_results['clustered_bcrs'][f]['alias']
             color = st.session_state.bcr_results['clustered_bcrs'][f]['color']
 
+            # Create a temporary DataFrame with the hydrophobicity values and group label.
             temp_df = pd.DataFrame({"GRAVY": series})
             temp_df["Group"] = alias
             df_list.append(temp_df)
-            color_dict[alias]=color
+            color_dict[alias] = color
 
+        # Combine all temporary DataFrames into one.
         combined_df = pd.concat(df_list, ignore_index=True)
 
-        # make figure
-        cdr3_hydro_figure = plot_interactive_box_plot(combined_df,
-                                                      plot_type= "box",
-                                                      color_dict = color_dict,
-                                                      xaxis_title = "GRAVY score",
-                                                      xaxis_resolution = x_res[scale],
-                                                      yaxis_title="Dataset",
-                                                      data_col="GRAVY",
-                                                      group_col="Group")
+        # Create the interactive box plot.
+        cdr3_hydro_figure = plot_interactive_box_plot(
+            combined_df,
+            plot_type="box",
+            color_dict=color_dict,
+            x_axis_title="GRAVY score",
+            xaxis_resolution=x_res[scale],
+            yaxis_title="Dataset",
+            data_col="GRAVY",
+            group_col="Group"
+        )
 
-        # return data and figure
         return combined_df, cdr3_hydro_figure
 
+
     def cdr3_charge_statistics(bcr_chain,
-                               x_label="CDR3 Hydrophobicity",
+                               x_label="Net charge at pH7.4",
                                y_label="Frequency (%)",
                                cdr3_selection='all',
                                cdr3_marker_list=None,
                                title=''):
-        '''returns dataframe and figure'''
-        # get data and color for figure
+        """
+        Computes CDR3 net charge statistics for a given BCR chain and creates an interactive box plot.
 
+        This function extracts the CDR3 net charge data from the clustered BCR results stored in the session state
+        for the specified BCR chain and CDR3 selection. For each file in the results, it retrieves the net charge series,
+        associates the dataset alias and its assigned color, and compiles these series into a single DataFrame.
+        Then, an interactive box plot is created using the plot_interactive_box_plot function.
+
+        Parameters:
+            bcr_chain (str): The BCR chain type (e.g., 'heavy_chain' or 'light_chain').
+            x_label (str): Label for the x-axis (default: "Net charge at pH7.4").
+            y_label (str): Label for the y-axis (default: "Frequency (%)").
+            cdr3_selection (str): Specifies whether to use 'all' CDR3 sequences or a 'unique' subset (default: 'all').
+            cdr3_marker_list (list): List of marker symbols for the plot (default: None).
+            title (str): Title for the panel (default is an empty string).
+
+        Returns:
+            tuple: A tuple (combined_df, cdr3_charge_figure) where:
+                - combined_df (pd.DataFrame): DataFrame with CDR3 net charge statistics.
+                - cdr3_charge_figure (go.Figure): Interactive Plotly figure (box plot) displaying the net charge distribution.
+        """
         df_list = []
         color_dict = {}
 
+        # Iterate over each file in the clustered BCR results.
         for f in st.session_state.bcr_results['clustered_bcrs'].keys():
-            series = st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][cdr3_selection]['CDR3_AA']\
-            ['cdr3_net_charges']
+            # Extract the CDR3 net charge series for the specified chain and selection.
+            series = \
+            st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][cdr3_selection]['CDR3_AA'] \
+                ['cdr3_net_charges']
             alias = st.session_state.bcr_results['clustered_bcrs'][f]['alias']
             color = st.session_state.bcr_results['clustered_bcrs'][f]['color']
 
+            # Create a temporary DataFrame for the current dataset.
             temp_df = pd.DataFrame({"Charge": series})
             temp_df["Group"] = alias
             df_list.append(temp_df)
-            color_dict[alias]=color
+            color_dict[alias] = color
 
+        # Combine all temporary DataFrames into a single DataFrame.
         combined_df = pd.concat(df_list, ignore_index=True)
 
-        # make figure
-        cdr3_charge_figure = plot_interactive_box_plot(combined_df,
-                                                       plot_type= "box",
-                                                       color_dict = color_dict,
-                                                       xaxis_title = "Net charge at pH7.4",
-                                                       xaxis_resolution = 0.5,
-                                                       yaxis_title="Dataset",
-                                                       data_col="Charge",
-                                                       group_col="Group")
+        # Create the interactive box plot for CDR3 net charge.
+        cdr3_charge_figure = plot_interactive_box_plot(
+            combined_df,
+            plot_type="box",
+            color_dict=color_dict,
+            x_axis_title=x_label,
+            xaxis_resolution=0.5,
+            yaxis_title="Dataset",
+            data_col="Charge",
+            group_col="Group"
+        )
 
-        # return data and figure
         return combined_df, cdr3_charge_figure
+
 
     def cdr3_diversity_indices(bcr_chain,
                                color_dict,
-                               index_type = 'shannon',
-                               y_title = 'Y axis',
+                               index_type='shannon',
+                               y_title='Y axis',
                                cdr3_selection='all',
-                               resampling=20
-                               ):
+                               resampling=20):
+        """
+        Computes CDR3 diversity indices for the specified BCR chain and generates an interactive bar chart.
 
+        This function extracts diversity index values from the clustered BCR results stored in the session state.
+        For each file in the 'clustered_bcrs', it retrieves the diversity index (e.g., Shannon or Inverse Simpson)
+        associated with the given BCR chain and CDR3 selection. It then creates an interactive bar chart using the
+        plot_interactive_bargraph_from_dict function, where each bar corresponds to a dataset's diversity index.
+
+        Parameters:
+            bcr_chain (str): The BCR chain type (e.g., 'heavy_chain' or 'light_chain').
+            color_dict (dict): A dictionary mapping dataset aliases to color codes (hex strings).
+            index_type (str): The type of diversity index to use ('shannon' or 'inverse_simpson'). Default is 'shannon'.
+            y_title (str): Title for the y-axis of the bar chart.
+            cdr3_selection (str): Specifies whether to use all CDR3 sequences ('all') or a unique subset ('unique'). Default is 'all'.
+            resampling (int): Number of resampling iterations (currently not used in the computation). Default is 20.
+
+        Returns:
+            tuple: A tuple (diversity_results, div_figure) where:
+                - diversity_results (dict): Dictionary with dataset aliases as keys and their diversity index values.
+                - div_figure (go.Figure): Interactive Plotly bar chart of the diversity indices.
+        """
         diversity_results = {}
-
         for f in st.session_state.bcr_results['clustered_bcrs'].keys():
             name = st.session_state.bcr_results['clustered_bcrs'][f]['alias']
-            diversity_results[name] = st.session_state.bcr_results['clustered_bcrs'][f]['statistics']\
-                [bcr_chain][cdr3_selection]['CDR3_AA'][index_type]
+            diversity_results[name] = \
+            st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][cdr3_selection]['CDR3_AA'][
+                index_type]
 
         div_figure = plot_interactive_bargraph_from_dict(diversity_results,
                                                          color_dict,
-                                                         y_title = y_title
-                                                         )
-
+                                                         y_title=y_title)
         return diversity_results, div_figure
 
     st.subheader("CDR3 Properties:")
@@ -1658,66 +1844,95 @@ def v_ident_statistics(bcr_chain,
                        y_label="Frequency (%)",
                        y_format='percent',
                        collapsed='non_collapsed',
-                       curve_fill = False,
+                       curve_fill=False,
                        nans='no_nans',
                        clone_marker_list=None,
                        avg='mean',
                        std='std',
                        title=''):
-    '''returns dataframe and figure'''
-    # get data for figure
+    """
+    Computes V gene identity statistics for a given BCR chain and generates interactive plots.
 
+    This function extracts V gene identity distribution data from the clustered BCR results stored in the
+    session state for the specified BCR chain and data reduction mode (collapsed or non-collapsed). It constructs
+    two interactive plots:
+      1. A line plot displaying the V gene identity distribution across datasets.
+      2. A violin plot summarizing the V gene identity values (referred to as 'identities') for each dataset.
+    The x-axis range for the line plot is dynamically determined based on the minimum non-zero index of the distribution.
+
+    Parameters:
+        bcr_chain (str): The BCR chain type (e.g., 'heavy_chain' or 'light_chain').
+        color_dict (dict): Dictionary mapping dataset aliases to color codes (hex strings).
+        x_label (str): Label for the x-axis of the distribution plot (default: "V gene germline identity (%)").
+        y_label (str): Label for the y-axis of the distribution plot (default: "Frequency (%)").
+        y_format (str): Format key for the histogram data (default: 'percent').
+        collapsed (str): Data reduction mode, either 'non_collapsed' or 'collapsed' (default: 'non_collapsed').
+        curve_fill (bool): If True, fills the area under the distribution curves (default: False).
+        nans (str): Specifies whether to use values including NaNs ('with_nans') or excluding them ('no_nans').
+        clone_marker_list (list): List of marker symbols for the interactive line plot (default is None).
+        avg (str): Key for the average value to be used in the statistics (default: 'mean').
+        std (str): Key for the standard deviation (default: 'std').
+        title (str): Title for the panel (default is an empty string).
+
+    Returns:
+        tuple: A tuple (combined_df, v_ident_distribution, avg_figure) where:
+            - combined_df (pd.DataFrame): DataFrame containing the V gene identity distribution for each dataset.
+            - v_ident_distribution (go.Figure): Interactive line plot showing the V gene identity distribution.
+            - avg_figure (go.Figure): Interactive violin plot summarizing the V gene identity values per dataset.
+    """
     dist_dfs = []
     flat_dfs = []
     for f in st.session_state.bcr_results['clustered_bcrs'].keys():
-        df = st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][collapsed]['v_identity']\
-        [nans][y_format]
+        # Extract the distribution of V gene identities.
+        df_series = st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][collapsed]['v_identity'][nans][y_format]
         name = st.session_state.bcr_results['clustered_bcrs'][f]['alias']
-        df.name = name
-        dist_dfs.append(df)
+        df_series.name = name
+        dist_dfs.append(df_series)
 
-        series = st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][collapsed]['v_identity']\
-        [nans]['identities']
+        # Extract the raw identity values.
+        series = st.session_state.bcr_results['clustered_bcrs'][f]['statistics'][bcr_chain][collapsed]['v_identity'][nans]['identities']
         temp_df = pd.DataFrame({"Identities": series})
         temp_df["Group"] = name
         flat_dfs.append(temp_df)
 
-
     flat_df = pd.concat(flat_dfs, ignore_index=True)
-
     combined_df = pd.concat(dist_dfs, axis=1)
 
+    # Determine the x-axis range based on the minimal index where data exists.
     max_index = combined_df.index[(combined_df != 0).any(axis=1)].min()
     if max_index > 5:
         max_index -= 5
     else:
         max_index = 0
     x_range = [max_index, 100]
-    # make figure
-    v_ident_distribution = plot_interactive_line_plot(combined_df,
-                                                color_dict,
-                                                x_axis_title=x_label,
-                                                y_axis_title=y_label,
-                                                fill_plot = curve_fill,
-                                                marker_list=clone_marker_list,
-                                                x_axis_minor_ticks=5,
-                                                x_axis_range=x_range,
-                                                title=''
+
+    # Create an interactive line plot for the V gene identity distribution.
+    v_ident_distribution = plot_interactive_line_plot(
+        combined_df,
+        color_dict,
+        x_axis_title=x_label,
+        y_axis_title=y_label,
+        fill_plot=curve_fill,
+        marker_list=clone_marker_list,
+        x_axis_minor_ticks=5,
+        x_axis_range=x_range,
+        title=''
     )
 
-    avg_figure = plot_interactive_box_plot(flat_df,
-                                            plot_type= "violin",
-                                            color_dict= color_dict,
-                                            figure_height = None,
-                                            xaxis_title = "Datasets",
-                                            xaxis_resolution = 0.5,
-                                            yaxis_title = "%",
-                                            data_col = "Identities",
-                                            group_col = "Group",
-                                            orientation = 'v'
+    # Create an interactive violin plot summarizing the V gene identity values.
+    avg_figure = plot_interactive_box_plot(
+        flat_df,
+        plot_type="violin",
+        color_dict=color_dict,
+        figure_height=None,
+        xaxis_title="Datasets",
+        xaxis_resolution=0.5,
+        yaxis_title="%",
+        data_col="Identities",
+        group_col="Group",
+        orientation='v'
     )
 
-    # return data and figure
     return combined_df, v_ident_distribution, avg_figure
 
 with tab5:

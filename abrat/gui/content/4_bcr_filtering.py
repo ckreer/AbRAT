@@ -78,21 +78,45 @@ delete_message = "  \n=> delete complete BCR if not matching  \n"
 # Define functions
 # =================
 def delete_alternate_message(col):
-    return "  \n=> delete only "+str(col[0])+" entries, if not matching  \n"
+    """
+    Returns a message instructing to delete only the entries for the specified column level if they do not match.
+
+    Parameters:
+        col (list or tuple): A collection where the first element represents the column name.
+
+    Returns:
+        str: A formatted message.
+    """
+    return "  \n=> delete only " + str(col[0]) + " entries, if not matching  \n"
+
 
 def reset_verification():
     """
-    Reset session state for files.
+    Resets the session state for file verification.
+
+    Currently, the session state variables for file verification are commented out.
+
+    Returns:
+        None
     """
-    #st.session_state.sequence_xlsx_verified = False
-    #st.session_state.sequence_xlsx_to_combine = False
+    # st.session_state.sequence_xlsx_verified = False
+    # st.session_state.sequence_xlsx_to_combine = False
     # st.session_state.bcr_results = False
+
 
 def get_default_delete_toggle(col):
     """
-    Legt fest, ob der Filter standardmäßig die komplette Zeile löschen soll oder nur
-    den Wert im jeweiligen Level. Bei HEAVY_CHAIN wird standardmäßig alles gelöscht,
-    bei LIGHT_CHAIN, KAPPA_CHAIN und LAMBDA_CHAIN hingegen nur der einzelne Wert.
+    Determines the default deletion toggle for a column based on its level 0 name.
+
+    For "HEAVY_CHAIN", the default is to delete the entire row.
+    For "LIGHT_CHAIN", "KAPPA_CHAIN", and "LAMBDA_CHAIN", the default is to delete only the specific value.
+    For all other columns, the default is to delete the entire row.
+
+    Parameters:
+        col (list or tuple): A collection where the first element represents the column name.
+
+    Returns:
+        bool: True if the default is to delete the entire row; False if only the individual value should be deleted.
     """
     if col[0] == "HEAVY_CHAIN":
         return True
@@ -101,9 +125,17 @@ def get_default_delete_toggle(col):
     else:
         return True
 
+
 def get_group_columns(input_df, col):
     """
-    Find all columns in the dataframe with the same level 0 as in col.
+    Finds all columns in the DataFrame that share the same level 0 value as the provided column.
+
+    Parameters:
+        input_df (pd.DataFrame): The DataFrame containing columns with a MultiIndex.
+        col (list or tuple): A column identifier where the first element is used for matching.
+
+    Returns:
+        list: A list of columns from the DataFrame with the same level 0 value as col[0].
     """
     return [c for c in input_df.columns if c[0] == col[0]]
 
@@ -420,6 +452,3 @@ else:
 
         # reset other pages to pass latest data folder
         reset_page_initialization(other_pages)
-
-#else:
-#    st.write("No data loaded.")

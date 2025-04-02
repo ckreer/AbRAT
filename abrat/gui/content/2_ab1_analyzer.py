@@ -44,26 +44,42 @@ default_airr_export = False
 # =================
 
 def verify_files(folder_path):
-    """Function to check input files and retrieve information from file-names."""
+    """
+    Checks input files in the specified folder and extracts information from their file names.
+
+    The function searches for all .ab1 files within the folder (recursively) and verifies that each file name
+    contains at least 13 segments (separated by underscores). It then compiles a set of unique values for each
+    segment position and stores the summary in the session state.
+
+    Parameters:
+        folder_path (str or Path): The path to the folder containing the .ab1 files.
+
+    Returns:
+        None
+
+    Side Effects:
+        Updates st.session_state.ab1file_info with file information and sets st.session_state.ab1files_verified to True.
+        Displays success or error messages via Streamlit.
+    """
     try:
         files = [p.stem for p in Path(folder_path).rglob("*.ab1")]
         if not files:
-            raise FileNotFoundError("No .ab1-files found in "+folder_path)
+            raise FileNotFoundError("No .ab1-files found in " + str(folder_path))
 
         num_files = len(files)
         splitted_files = []
 
         for f in files:
-            if len(f.split('_')) < 13:
-                raise ValueError(f"File '{f}' has {len(f.split('_'))} segments, expected: 13.")
+            segments = f.split('_')
+            if len(segments) < 13:
+                raise ValueError(f"File '{f}' has {len(segments)} segments, expected: 13.")
             else:
-                splitted_files.append(f.split('_'))
+                splitted_files.append(segments)
 
         transposed = zip(*splitted_files)
-
         all_positions = [set(column) for column in transposed]
 
-        # Weitere Überprüfungen können hier hinzugefügt werden
+        # Additional checks can be added here.
         st.session_state.ab1file_info = {
             "Number of files": num_files,
         }
@@ -77,27 +93,56 @@ def verify_files(folder_path):
     except ValueError as e:
         st.error(f"Formatting error: {e}")
 
+
 def reset_verification():
     """
-    Reset session state for files.
+    Resets the session state for file verification.
+
+    Clears the verification status and file information stored in the session state.
+
+    Returns:
+        None
     """
     st.session_state.ab1files_verified = False
     st.session_state.ab1file_info = {}
 
+
 def run_process(cmd):
-    """Runs the analysis script and returns the output."""
+    """
+    Runs the analysis script as a subprocess and returns the process object.
+
+    Parameters:
+        cmd (list): The command to execute as a list of arguments.
+
+    Returns:
+        subprocess.Popen: The process object for the running subprocess.
+    """
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     return process
 
+
 def display_output(process, output_container, error_container):
-    """Display Output of process in realtime."""
+    """
+    Displays output and error messages from a subprocess in real time.
+
+    Reads lines from the subprocess's stdout and stderr, appending them to buffers stored in the session state,
+    and updates the provided Streamlit text areas with the latest output.
+
+    Parameters:
+        process (subprocess.Popen): The running subprocess.
+        output_container: Streamlit container for displaying standard output.
+        error_container: Streamlit container for displaying error output.
+
+    Returns:
+        None
+    """
     if 'output_buffer' not in st.session_state:
         st.session_state.output_buffer = ""
     if 'error_buffer' not in st.session_state:
         st.session_state.error_buffer = ""
 
     while True:
-        # Lesen Sie die Ausgaben der Subprozesse
+        # Read output and error from the subprocess.
         output = process.stdout.readline()
         error = process.stderr.readline()
 
@@ -107,20 +152,32 @@ def display_output(process, output_container, error_container):
 
         if error:
             st.session_state.error_buffer += error
-            error_container.text_area("Errors during processing (stderr):", value=st.session_state.error_buffer,
-                                      height=100)
+            error_container.text_area("Errors during processing (stderr):", value=st.session_state.error_buffer, height=100)
 
-        # Überprüfen Sie, ob der Prozess beendet wurde
+        # Break the loop if the process has terminated.
         if output == '' and error == '' and process.poll() is not None:
             break
 
+
 def run_annotation(s, f):
-    """Run the quality check and annotation script based on settings (s) and file information (f)."""
+    """
+    Runs the quality check and annotation script based on the provided settings and file information.
+
+    This function creates the output folder (if it doesn't exist), exports the settings to a CSV file, constructs
+    the command for running the analysis script, executes it as a subprocess, and displays the output in real time.
+
+    Parameters:
+        s (dict): Dictionary of settings.
+        f (dict): File information (not directly used here, but typically contains additional file parameters).
+
+    Returns:
+        int: The return code of the subprocess.
+    """
     with st.spinner("Running..."):
-        # Check if output folder is available
+        # Ensure the output folder exists.
         Path(output_folder).mkdir(parents=True, exist_ok=True)
 
-        # Command for starting the analysis script
+        # Build the command for running the analysis script.
         cmd = [
             "python", "abrat/core/analyze_ab1_files.py",
             "--input", data_folder,
@@ -134,24 +191,24 @@ def run_annotation(s, f):
             "--airr_export", str(airr_export)
         ]
 
-        # export settings
+        # Export settings with a timestamp.
         stamped_settings = {'TIME-STAMP': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         for k, v in s.items():
-            stamped_settings[k]=v
+            stamped_settings[k] = v
         settings_csv_file = Path(output_folder).joinpath(date_stamp("qc-settings.csv"))
         pd.DataFrame([stamped_settings]).to_csv(settings_csv_file, index=False)
 
-        # Run command
+        # Run the command.
         process = run_process(cmd)
 
-        # Streamlit elements for output
+        # Create Streamlit elements for output.
         output_text = st.empty()
         error_text = st.empty()
 
-        # Display output
+        # Display the output in real time.
         display_output(process, output_text, error_text)
 
-        # Check return from subprocess
+        # Get the return code from the subprocess.
         return_code = process.poll()
 
         return return_code
