@@ -4,6 +4,7 @@ import altair as alt
 import plotly.io as pio
 import matplotlib.pyplot as plt
 
+abrat = '<span style="color: #4682B4; font-style: italic;">AbRAT</span>'
 
 def apply_theme_configurations():
     """

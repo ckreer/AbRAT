@@ -146,8 +146,8 @@ def main():
                                 title="Basic Repertoire Characteristics",
                                 icon=":material/grouped_bar_chart:")
     documentation = st.Page("content/7_quickguide.py",
-                            title="AbRAT - Quick Guide",
-                            icon=":material/menu_book:")
+                             title="AbRAT - Quick Guide",
+                             icon=":material/menu_book:")
 
     # Generate navigation menu
     pg = st.navigation(

@@ -3,6 +3,34 @@
 import os
 import streamlit as st
 from importlib.resources import files
+from pathlib import Path
+from abrat.gui.gui_shared import abrat
+
+def remove_sphinx_code_and_images(text):
+    """
+    Removes lines containing Sphinx-specific directives and image embeddings from the given text.
+
+    This function removes:
+      - Lines that start with a code fence for Sphinx directives (e.g., "```{panels}")
+      - Lines that start with "::::" (used for panels and columns in Sphinx)
+      - Lines that contain image embeddings (lines that include "![")
+
+    Parameters:
+        text (str): The input multiline string (e.g. Markdown content).
+
+    Returns:
+        str: The modified text with the Sphinx-specific lines removed.
+    """
+    filtered_lines = []
+    for line in text.splitlines():
+        if line.lstrip().startswith("```{"):
+            continue
+        if line.lstrip().startswith("::::"):
+            continue
+        if "![" in line and "](" in line:
+            continue
+        filtered_lines.append(line)
+    return "\n".join(filtered_lines)
 
 # ==============================================
 # Global settings passed from session state
@@ -12,6 +40,25 @@ page_name = os.path.splitext(os.path.basename(__file__))[0]
 workflow_path = files('abrat.gui.assets') / 'workflow.png'
 workflow_caption = ("The typical workflow of AbRAT consists of (1) Data Preparation, (2) Clonal Assignment, "
                     "and (3) Exploratory & Comparative Analysis.")
+#workflow_md = Path("../../../docs/source/quickguide/quickguide_workflow.md").read_text(encoding="utf-8")
+
+docs_path = Path("docs/source/quickguide")
+
+# load chapters
+workflow_md = remove_sphinx_code_and_images(
+    (docs_path / "quickguide_workflow.md").read_text(encoding="utf-8")).replace(
+    "### |AbRAT| Workflow", "").replace("|AbRAT|", abrat)
+folder_structure_md = remove_sphinx_code_and_images(
+    (docs_path / "quickguide_folder_structure.md").read_text(encoding="utf-8")).replace("|AbRAT|", abrat)
+data_format_md = remove_sphinx_code_and_images(
+    (docs_path / "quickguide_data_format.md").read_text(encoding="utf-8")).replace("|AbRAT|", abrat)
+clonal_assignment_md = remove_sphinx_code_and_images(
+    (docs_path / "quickguide_clonal_assignment.md").read_text(encoding="utf-8")).replace("|AbRAT|", abrat)
+repertoire_char_md = remove_sphinx_code_and_images(
+    (docs_path / "quickguide_repertoire_characteristics.md").read_text(encoding="utf-8")).replace("|AbRAT|", abrat)
+citation_md = remove_sphinx_code_and_images(
+    (docs_path / "quickguide_citation_references.md").read_text(encoding="utf-8")).replace("|AbRAT|", abrat)
+
 
 st.title("Quick Guide")
 
@@ -25,271 +72,21 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 ])
 
 with tab1:
-    st.subheader(":blue[_AbRAT_] Workflow")
+    st.markdown("### "+abrat+" Workflow", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 2], vertical_alignment="top")
     with col1:
         st.image(str(workflow_path), caption=workflow_caption)
     with col2:
-        st.markdown("""
-**1. Data Preparation**
-
-- **Quality Control & Annotation:**  
-  In the first step, the module processes _*.ab1_ files from a dedicated **ab1files** folder (see *Folder Structure*). 
-  These files must be renamed according to a specific naming scheme (see *Data Format*). Using IgBLAST and BLAST for sequence annotation, 
-  along with Biopython’s SeqIO for quality score extraction, several user-defined quality metrics are evaluated. 
-  The resulting sequence data and quality measures are saved in an _**all-sequences.xlsx**_ file.
-
-- **Compile B-Cell Receptors:**  
-  Next, use this module to combine the best available heavy and light chain sequences from one or more _**all-sequences.xlsx**_ file(s) 
-  into individual B-cell receptors. The resulting data is saved as a _**b-cell-receptors.xlsx**_ file.
-
-- **Filter & Split B-Cell Receptors:**  
-  Finally, the combined B-cell receptor data is filtered for specific quality or sequence features (e.g., only productive chains) 
-  and split into subgroups (e.g., by donor). A separate _**filtered_subgroup.xlsx**_ file is generated for each subgroup. 
-  These tables represent your refined repertoire data, ready for downstream analyses.
-
-**2. Clonal Assignment**
-
-- **Clonal Clustering:**  
-  The goal is to assess clonal relationships among individual B cells. This module provides a modular framework with configurable 
-  filter settings and clustering algorithms to infer clonal relationships based on sequence similarities. 
-  Clustered BCRs are labeled with a unique clone name and optionally a color within the _**filtered_subgroup.xlsx**_ files.
-  Detailed information on the implemented clustering algorithms is provided separately.
-  _Note: You may also infer clonal relationships using an external tool and simply record the results in the designated columns._
-
-**3. Exploratory & Comparative Analysis**
-
-- **Basic Repertoire Characteristics:**  
-  Finally, explore your filtered and clustered repertoire data (from the _**filtered_subgroup.xlsx**_ files) using this module.
-  Key metrics are computed and presented on an interactive dashboard, enabling you to save individual graphs.
-  _Note: Any tables following the **b-cell-receptors.xlsx** layout can also be uploaded and analyzed here._
-        """)
+        st.markdown(workflow_md, unsafe_allow_html=True)
 
 with tab2:
-    st.subheader("Folder Structure")
-    st.markdown("""
-:blue[_AbRAT_] runs inside a Docker container that interacts with your computer’s file system exclusively via the **data/** folder. 
-This means that :blue[_AbRAT_] can only access files within this folder – all data exchange must occur here. Within **data/**, 
-:blue[_AbRAT_] expects a predefined folder structure essential for its proper operation. **Please do not move or rename these folders.**
- 
-    ```
-    data/
-    ├── database/
-    │   ├── blastdb/
-    │   └── igblastdb/
-    └── userdata/
-        ├── ab1files/
-        │   └── ...
-        └── output/
-            └── ...
-
-    ```
-    
-The **database/** folder holds the databases required by IgBLAST and BLAST. It is strongly recommended not to alter these folders 
-unless you are completely sure of your actions. If necessary, you can add your custom databases into **igblastdb/** or **blastdb/**.
-
-The **userdata/** folder is designated for your data exchange:
-- Place your correctly renamed _*.ab1_ files (see *Data Format*) in the **ab1files/** folder. You can organize your sequencing data 
-  by creating custom subfolder hierarchies.
-- The **output/** folder is the default destination for all results generated by :blue[_AbRAT_]. It is highly recommended to use 
-  separate subfolders for different projects (this is also the default configuration in :blue[_AbRAT_]).
-
-    ``` 
-    └── userdata/
-        ├── ab1files/
-        │   ├── Project_1/
-        │   │   ├── Subject_1/
-        │   │   │   ├── Heavy_Chains_1/
-        │   │   │   ├── Kappa_Chains_1/
-        │   │   │   ├── Lambda_Chains_1/
-        │   │   │   └── ...
-        │   │   └── ...
-        │   ├── Project_2/
-        │   │   ├── Subject_1/
-        │   │   │   └── ...
-        │   │   └── ...
-        │   └── ...
-        └── output/
-            ├── YYMMDD_Project_1/
-            │   └── ...
-            └── ...
-    ```
-           
-    """, unsafe_allow_html=True )
-
+    st.markdown(folder_structure_md, unsafe_allow_html=True)
 with tab3:
-    st.subheader("Data Format")
-    st.markdown("""
-In :blue[_AbRAT_], the names of _ab1-files_ serve as a **unique identifier** for a specific sequence. Therefore, 
-_ab1-files_ must follow a strict naming convention with **13 positions** separated by underscores ('_').
-
-```
-COHORT_SUBJECT_TIMEPOINT_SAMPLE_SUBSET_PLATE_WELL_CHAIN_PRIMERSET_SOURCE-SUBSOURCE_SEQPRIMER_SEQCOMPANY_SEQ-REPEAT.ab1
-```
-    
-The file name is divided into 4 blocks that contain information on:
-1. **Sample:** Details about the study cohort, subject ID, timepoint, sample material, and subset.
-2. **Cell Position:** Information about the physical location (plate and well) of the cell.
-3. **PCR Details:** Information on the PCR performed, including chain (must be HC, KC, or LC), primer set, and source. 
-   The subsource is derived from the string after the dash '-' and is optional but recommended.
-4. **Sequencing:** Information on the sequencing process, including the sequencing primer, company, and sequence run number.
-
-**Sample Block:**
-    ```
-    COHORT_SUBJECT_TIMEPOINT_SAMPLE_SUBSET_
-    ```
-- Includes study cohort, subject ID, timepoint (required for longitudinal samples), sample material, and cell subset.
-- The sample and subset fields are flexible; for example, the sample field might indicate the tissue type (e.g., PBMCs, lymph node) 
-  or a preselection (e.g., CD20-IgG for gating during FACS analysis). The subset might include the bait protein used for antigen-specific sorting.
-
-**Cell Position Block:**
-    ```
-    PLATE_WELL
-    ```
-- Contains the cell's physical storage information: the plate number (sequentially numbered) and the well (formatted as A1–H12).
-- Together with the sample block, this information forms the unique *B_CELL_ID*.
-
-**PCR Block:**
-    ```
-    CHAIN_PRIMERSET_SOURCE-SUBSOURCE
-    ```
-- Encodes information about the PCR, including the chain (HC, KC, or LC), primer set, and source.
-- **Important:** _CHAIN_ must be one of **HC**, **KC**, or **LC** to ensure proper assembly of the B cell receptor. 
-  The subsource, if present, is the first string after the dash '-' and aids in identifying repeated PCR events or plasmid batches.
-
-**Sequencing Block:**
-    ```
-    SEQPRIMER_SEQCOMPANY_SEQ-REPEAT.ab1
-    ```
-- Contains details of the sequencing process: the sequencing primer, the sequencing company or instrument, and the sequence run number.
-
-#### Example:
-```
-SARS2_IDC10_t1_PBMCs_IgG-S488_1_B8_HC_oPR_2ND-1_IgInt_EF_SEQ-1.ab1
-SARS2_IDC10_t1_PBMCs_IgG-S488_1_B8_KC_oPR_MIDI-435_Ckrev_EF_SEQ-2.ab1
-```
-These two files come from the same B cell sampled from Subject IDC10 in a SARS-CoV-2 study (SARS2) at the first timepoint (t1). 
-The cell, obtained from PBMCs, was sorted from an IgG and S-Protein-Alexa488 positive gate on plate 1 in well B8. 
-The first file represents the heavy chain (HC) sequence from the first nested PCR attempt (2ND-1) using the openPrimeR set, 
-sequenced with the heavy chain reverse primer 'IgInt' at Eurofins (EF) for the first time (SEQ-1). 
-The second file represents the kappa chain (KC) sequence from the same cell, derived from a Midi-prep plasmid (plasmid 435) 
-with the kappa constant region reverse primer 'Ckrev' at Eurofins (EF). However, the first sequence of this plasmid had quality issues and was re-sequenced (SEQ-2).
-    """)
+    st.markdown(data_format_md, unsafe_allow_html=True)
 with tab4:
-    st.subheader("Clonal Assignment")
-    st.markdown("""
-:blue[_AbRAT_] features a modular clonal assignment framework. Users can choose which chain(s) (e.g., heavy and/or light) 
-to include in the clustering process and select which V(D)J gene segment information to use for pre-grouping. 
-Each selected chain is clustered independently, and a global cluster is formed by combining the resulting subclusters. 
-Rows with missing or non-computable values are assigned to subcluster 0.
-
-The framework currently offers three clustering algorithms for CDR3 sequences (at the amino acid level):
-- **Iterative Greedy CDR3 Clustering (Original Approach)**
-- **Matrix-Based Greedy CDR3 Clustering (Global Greedy Approach)**
-- **Hierarchical CDR3 Clustering**
-
-For all methods, common preprocessing steps are applied: filtering out missing data, applying a configurable threshold 
-on sequence length differences, and using a normalized Levenshtein distance threshold. Moreover, each algorithm can be run 
-multiple times with different random initializations to minimize the number of unassigned sequences ("singles"), optimizing 
-the final clustering result.
-    """)
-
+    st.markdown(clonal_assignment_md, unsafe_allow_html=True)
 with tab5:
-    st.subheader("Repertoire Characteristics")
-    st.markdown(r"""
-#### Gene Segment Usage:
-Collapsing requires a unique clone identifier in the dataset and reduces gene segment counts to only unique occurrences 
-within each clone. Note that if clustering settings are less stringent, a single clone may contain multiple gene segments 
-(e.g., multiple light chain V gene segments if not restricted during clustering).
-
-#### Hydrophobicity Values:
-The **GRAVY (Grand Average of Hydropathy)** score is calculated as follows:
-
-$$
-\text{GRAVY} = \frac{\sum_{i=1}^{n} h(a_i)}{n}
-$$
-
-where $h(a_i)$ is the hydrophobicity value (using either the **Kyte-Doolittle** or **Eisenberg** scale) for the $i$-th 
-amino acid and $n$ is the total number of amino acids in the sequence.
-- **Positive GRAVY values** indicate a generally hydrophobic protein.
-- **Negative GRAVY values** indicate a more hydrophilic protein.
-
-#### Net Charge Values:
-The **CDR3 net charge** at pH 7.4 is computed using the Python **peptides** package (via `Peptide.charge(pH=7.4)`), 
-which applies the Henderson–Hasselbalch equation with standard pKa values. A positive net charge indicates a basic 
-sequence, whereas a negative net charge indicates an acidic sequence.
-
-#### CDR3 Diversity:
-:blue[_AbRAT_] implements two widely used diversity indices to quantify the heterogeneity of CDR3 sequences. 
-*Note: The basic implementation of both indices considers only identical sequences, not similar ones, when estimating diversity.*
-
-The **Shannon Index** is calculated as:
-$$
-H = -\sum_{i=1}^{S} p_i \ln(p_i)
-$$
-where $p_i$ is the relative frequency of the $i$-th unique CDR3 sequence and $S$ is the total number of unique sequences.
-- **Interpretation:** A higher Shannon Index indicates a more diverse repertoire with a more even distribution.
-
-The **Inverse Simpson Index** is computed as:
-$$
-D = \frac{1}{\sum_{i=1}^{S} p_i^2}
-$$
-- **Interpretation:** A higher Inverse Simpson Index indicates a more diverse and evenly distributed repertoire, whereas a lower value suggests dominance by a few sequences.
-
-**Subsampling for Fair Comparisons**
-
-To compare diversity across different repertoires, subsampling (rarefaction) is performed. Each dataset is randomly 
-subsampled to match the size of the smallest dataset. The mean diversity index over 20 iterations is reported along with 
-the standard deviation. For the smallest dataset, the diversity index is calculated on the complete data (thus, its standard 
-deviation is zero).
-    """)
-    st.markdown("""
-#### Additional Repertoire Characteristics:
-- **Clonal Assignment:** The filtered and clustered repertoire data can be further analyzed to assess clonal relationships 
-  and diversity.
-- **Visualization:** Various metrics, including gene segment usage, hydrophobicity, net charge, and diversity indices, are 
-  presented on interactive dashboards for in-depth exploration.
-    """)
+    st.markdown(repertoire_char_md, unsafe_allow_html=True)
 with tab6:
-    st.subheader("Citation and References")
-    st.markdown("""
-**:blue[_AbRAT_] DOI:** [10.1234/your-doi](https://doi.org/10.1234/your-doi)
+    st.markdown(citation_md, unsafe_allow_html=True)
 
-If you use this software, please cite:  
-Kreer, C. (2025). *AbRAT*. DOI: [10.1234/your-doi](https://doi.org/10.1234/your-doi)
-
-**Related Publication:**  
-*Kreer, C. (2025). AbRAT - an Antibody Repertoire Analysis Toolkit for single B cell receptor sequencing. 
-BMC, 12(3), 123-145.* [Read the article](https://link-to-your-article.com)
-
-**Example Publications that used AbRAT functionalities:**  
-*Kreer, C. (2025). AbRAT - an Antibody Repertoire Analysis Toolkit for single B cell receptor sequencing. 
-BMC, 12(3), 123-145.* [Read the article](https://link-to-your-article.com)
-
-**:blue[_AbRAT_] incorporates the following tools and datasets:**
-- **IgBLAST**, version 1.22.0 through Conda (Bioconda) for antibody sequence annotation: 
-  > Ye J, Ma N, Madden TL, Ostell JM. IgBLAST: an immunoglobulin variable domain sequence analysis tool. 
-  Nucleic Acids Res. 2013 Jul;41(Web Server issue):W34-40. doi: 10.1093/nar/gkt382. [Read the article](https://doi.org/10.1093/nar/gkt382)
-- **BLAST**, version 2.16.0 for isotype determination:
-  > Camacho C, Coulouris G, Avagyan V, Ma N, Papadopoulos J, Bealer K, Madden TL. BLAST+: architecture and applications. 
-  BMC Bioinformatics. 2009 Dec 15;10:421. doi: 10.1186/1471-2105-10-421. [Read the article](https://doi.org/10.1186/1471-2105-10-421)
-- **IMGT** and **AIRR** datasets for V(D)J and constant region databases:
-  > Giudicelli V, Chaume D, Lefranc MP. IMGT/GENE-DB: a comprehensive database for human and mouse immunoglobulin and T 
-  cell receptor genes. Nucleic Acids Res. 2005 Jan 1;33(Database issue):D256-61. doi: 10.1093/nar/gki010. 
-  [Read the article](https://doi.org/10.1093/nar/gki010)
-  
-  > Lees W, Busse CE, Corcoran M, Ohlin M, Scheepers C, Matsen FA, Yaari G, Watson CT; AIRR Community; Collins A, 
-  Shepherd AJ. OGRDB: a reference database of inferred immune receptor genes. Nucleic Acids Res. 2020 Jan 
-  8;48(D1):D964-D970. doi: 10.1093/nar/gkz822. [Read the article](https://doi.org/10.1093/nar/gkz822)
-  
-  > Lees WD, Christley S, Peres A, Kos JT, Corrie B, Ralph D, Breden F, Cowell LG, Yaari G, Corcoran M, Karlsson Hedestam GB, 
-  Ohlin M, Collins AM, Watson CT, Busse CE; AIRR Community. AIRR community curation and standardised representation for 
-  immunoglobulin and T cell receptor germline sets. Immunoinformatics (Amst). 2023 Jun;10:100025. 
-  doi: 10.1016/j.immuno.2023.100025. Epub 2023 Feb 19. [Read the article](https://doi.org/10.1016/j.immuno.2023.100025)
-- **Hydrophobicity Scales** (*Kyte-Doolittle* and *Eisenberg*) for determination of GRAVY scores: 
-  > Kyte J, Doolittle RF. A simple method for displaying the hydropathic character of a protein. J Mol Biol. 1982 May 
-  5;157(1):105-32. doi: 10.1016/0022-2836(82)90515-0. [Read the article](https://doi.org/10.1016/0022-2836(82)90515-0)
-  
-  > Eisenberg D, Weiss RM, Terwilliger TC. The helical hydrophobic moment: a measure of the amphiphilicity of a helix. 
-  Nature. 1982 Sep 23;299(5881):371-4. doi: 10.1038/299371a0. [Read the article](https://doi.org/10.1038/299371a0)
-    """, unsafe_allow_html=True)
