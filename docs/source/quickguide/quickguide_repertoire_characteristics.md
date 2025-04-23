@@ -27,7 +27,7 @@ a negative net charge indicates an acidic sequence.
 
 #### CDR3 Diversity
 
-AbRAT implements two widely used diversity indices to quantify the heterogeneity of CDR3 sequences.  
+{{AbRAT}} implements two widely used diversity indices to quantify the heterogeneity of CDR3 sequences.  
 *Note: The basic implementation of both indices considers only identical sequences, not similar ones, when estimating diversity.*
 
 ##### Shannon Index

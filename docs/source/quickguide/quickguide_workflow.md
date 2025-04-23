@@ -1,13 +1,21 @@
-```{panels}
-:::: columns
-:::: column
-![Workflow](workflow.png "The typical workflow of AbRAT: Data Preparation, Clonal Assignment, and Exploratory & Comparative Analysis")
-::::
-:::: column
-### |AbRAT| Workflow
+### {{AbRAT}} Workflow
 
-##### 1. Data Preparation
+<div class="flex-two">
+  <div class="col-one">
+    <figure>
+      <img
+        src="../_static/workflow.png"
+        alt="The typical workflow of AbRAT: Data Preparation, Clonal Assignment, and Exploratory & Comparative Analysis"
+      />
+      <figcaption>
+          The typical workflow of AbRAT: Data Preparation, Clonal Assignment,
+          and Exploratory & Comparative Analysis.
+      </figcaption>
+    </figure>
+  </div>
+  <div class="col-two">
 
+#### 1. Data Preparation
 - **Quality Control & Annotation:**  
   In the first step, the module processes *.ab1 files from a dedicated **ab1files** folder (see Folder Structure).  
   These files must be renamed according to a specific naming scheme (see Data Format). Using IgBLAST and BLAST for sequence annotation,  
@@ -23,8 +31,7 @@
   and split into subgroups (e.g., by donor). A separate **filtered_subgroup.xlsx** file is generated for each subgroup.  
   These tables represent your refined repertoire data, ready for downstream analyses.
 
-##### 2. Clonal Assignment
-
+#### 2. Clonal Assignment
 - **Clonal Clustering:**  
   The goal is to assess clonal relationships among individual B cells. This module provides a modular framework with configurable  
   filter settings and clustering algorithms to infer clonal relationships based on sequence similarities.  
@@ -32,9 +39,11 @@
   Detailed information on the implemented clustering algorithms is provided separately.  
   *Note: You may also infer clonal relationships using an external tool and simply record the results in the designated columns.*
 
-##### 3. Exploratory & Comparative Analysis
+#### 3. Exploratory & Comparative Analysis
 - **Basic Repertoire Characteristics:**  
   Finally, explore your filtered and clustered repertoire data (from the **filtered_subgroup.xlsx** files) using this module.  
   Key metrics are computed and presented on an interactive dashboard, enabling you to save individual graphs.  
   *Note: Any tables following the **b-cell-receptors.xlsx** layout can also be uploaded and analyzed here.*
-::::
+
+  </div>
+</div>

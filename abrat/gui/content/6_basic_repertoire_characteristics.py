@@ -685,8 +685,8 @@ def plot_interactive_box_plot(
         color_dict: dict = None,
         vertical_gap: float = 1,
         figure_height: int = None,
-        xaxis_title: str = "GRAVY score",
-        xaxis_resolution: float = 0.5,
+        x_axis_title: str = "GRAVY score",
+        x_axis_resolution: float = 0.5,
         yaxis_resolution: float = 1,
         yaxis_title: str = "Dataset",
         data_col: str = "GRAVY",
@@ -707,8 +707,8 @@ def plot_interactive_box_plot(
         color_dict (dict): Dictionary mapping group names to color codes (hex strings). If not provided, a default color is used.
         vertical_gap (float): Numeric gap between groups on the y-axis. Default is 1.
         figure_height (int): Overall figure height in pixels. If None, the height is computed based on the number of groups.
-        xaxis_title (str): Title for the x-axis.
-        xaxis_resolution (float): Resolution for the x-axis ticks (major ticks are set at twice this value; default is 0.5).
+        x_axis_title (str): Title for the x-axis.
+        x_axis_resolution (float): Resolution for the x-axis ticks (major ticks are set at twice this value; default is 0.5).
         yaxis_resolution (float): Resolution for the y-axis minor ticks (default is 1).
         yaxis_title (str): Title for the y-axis.
         data_col (str): Column name in df to be used as data values (default is "GRAVY").
@@ -830,7 +830,7 @@ def plot_interactive_box_plot(
                 y=-0.3
             ),
             margin=dict(l=50, r=50, t=30, b=100),
-            xaxis_title=xaxis_title,
+            xaxis_title=x_axis_title,
             yaxis_title=yaxis_title
         )
     else:
@@ -846,7 +846,7 @@ def plot_interactive_box_plot(
         )
         # Configure x-axis for horizontal orientation.
         fig.update_xaxes(
-            title_text=xaxis_title,
+            title_text=x_axis_title,
             showline=True,
             linewidth=1,
             linecolor='grey',
@@ -857,10 +857,10 @@ def plot_interactive_box_plot(
             tickwidth=1,
             tickcolor="grey",
             tick0=0,
-            dtick=xaxis_resolution * 2,
+            dtick=x_axis_resolution * 2,
             minor=dict(
                 tickmode="linear",
-                dtick=xaxis_resolution,
+                dtick=x_axis_resolution,
                 showgrid=True,
                 gridcolor="#F0F0F0"
             )
@@ -1601,7 +1601,7 @@ with tab4:
             plot_type="box",
             color_dict=color_dict,
             x_axis_title="GRAVY score",
-            xaxis_resolution=x_res[scale],
+            x_axis_resolution=x_res[scale],
             yaxis_title="Dataset",
             data_col="GRAVY",
             group_col="Group"
@@ -1664,7 +1664,7 @@ with tab4:
             plot_type="box",
             color_dict=color_dict,
             x_axis_title=x_label,
-            xaxis_resolution=0.5,
+            x_axis_resolution=0.5,
             yaxis_title="Dataset",
             data_col="Charge",
             group_col="Group"
@@ -1925,8 +1925,8 @@ def v_ident_statistics(bcr_chain,
         plot_type="violin",
         color_dict=color_dict,
         figure_height=None,
-        xaxis_title="Datasets",
-        xaxis_resolution=0.5,
+        x_axis_title="Datasets",
+        x_axis_resolution=0.5,
         yaxis_title="%",
         data_col="Identities",
         group_col="Group",

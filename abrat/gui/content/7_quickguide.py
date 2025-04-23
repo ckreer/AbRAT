@@ -1,6 +1,6 @@
 # gui/content/7_quickguide.py
 
-import os
+import os, re
 import streamlit as st
 from importlib.resources import files
 from pathlib import Path
@@ -14,6 +14,7 @@ def remove_sphinx_code_and_images(text):
       - Lines that start with a code fence for Sphinx directives (e.g., "```{panels}")
       - Lines that start with "::::" (used for panels and columns in Sphinx)
       - Lines that contain image embeddings (lines that include "![")
+      - Lines encoding html
 
     Parameters:
         text (str): The input multiline string (e.g. Markdown content).
@@ -21,16 +22,38 @@ def remove_sphinx_code_and_images(text):
     Returns:
         str: The modified text with the Sphinx-specific lines removed.
     """
-    filtered_lines = []
+    # 1) Alles vor und mit <div class="col-two"> löschen
+    #    → Wir landen genau am Anfang des Textblocks, den wir behalten wollen.
+    text = re.sub(
+        r'.*?<div\s+class="col-two">\s*',
+        '',
+        text,
+        flags=re.S
+    )
+
+    # 2) Abschluss </div></div> löschen (das sind die Wrapper für col-two und flex-two)
+    text = re.sub(
+        r'</div>\s*</div>\s*$',
+        '',
+        text,
+        flags=re.S
+    )
+
+    # 3) Alle reinen HTML-Resten wie <figure>, </figure>, <img...>, <figcaption>…</figcaption> entfernen
+    text = re.sub(r'<figure>.*?</figure>', '', text, flags=re.S)
+    text = re.sub(r'<img[^>]+>', '', text)
+    text = re.sub(r'<figcaption>.*?</figcaption>', '', text, flags=re.S)
+
+    # 4) MyST/Sphinx-Fences (```{…}` und :::) sowie Markdown-Bilder rausschmeißen
+    lines = []
     for line in text.splitlines():
-        if line.lstrip().startswith("```{"):
-            continue
-        if line.lstrip().startswith("::::"):
+        s = line.lstrip()
+        if s.startswith("```{") or s.startswith(":::"):
             continue
         if "![" in line and "](" in line:
             continue
-        filtered_lines.append(line)
-    return "\n".join(filtered_lines)
+        lines.append(line)
+    return "\n".join(lines)
 
 # ==============================================
 # Global settings passed from session state
@@ -47,17 +70,17 @@ docs_path = Path("docs/source/quickguide")
 # load chapters
 workflow_md = remove_sphinx_code_and_images(
     (docs_path / "quickguide_workflow.md").read_text(encoding="utf-8")).replace(
-    "### |AbRAT| Workflow", "").replace("|AbRAT|", abrat)
+    "### {{AbRAT}} Workflow", "").replace("{{AbRAT}}", abrat)
 folder_structure_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_folder_structure.md").read_text(encoding="utf-8")).replace("|AbRAT|", abrat)
+    (docs_path / "quickguide_folder_structure.md").read_text(encoding="utf-8")).replace("{{AbRAT}}", abrat)
 data_format_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_data_format.md").read_text(encoding="utf-8")).replace("|AbRAT|", abrat)
+    (docs_path / "quickguide_data_format.md").read_text(encoding="utf-8")).replace("{{AbRAT}}", abrat)
 clonal_assignment_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_clonal_assignment.md").read_text(encoding="utf-8")).replace("|AbRAT|", abrat)
+    (docs_path / "quickguide_clonal_assignment.md").read_text(encoding="utf-8")).replace("{{AbRAT}}", abrat)
 repertoire_char_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_repertoire_characteristics.md").read_text(encoding="utf-8")).replace("|AbRAT|", abrat)
+    (docs_path / "quickguide_repertoire_characteristics.md").read_text(encoding="utf-8")).replace("{{AbRAT}}", abrat)
 citation_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_citation_references.md").read_text(encoding="utf-8")).replace("|AbRAT|", abrat)
+    (docs_path / "quickguide_citation_references.md").read_text(encoding="utf-8")).replace("{{AbRAT}}", abrat)
 
 
 st.title("Quick Guide")

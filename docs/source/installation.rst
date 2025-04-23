@@ -1,30 +1,58 @@
 .. AbRAT installation documentation file
+.. include:: shared.rst
 
 Installation and Setup Guide
 ============================
-Hello and welcome! This guide will help you install and run our containerized |AbRAT| app on your Mac
-in a designated folder—even if you have little experience with GitHub and Docker.
-You can choose from several options to obtain the app’s code or its prebuilt container image.
+Hello and welcome! This guide will help you install and run our containerized |AbRAT| app on your Mac in a designated folder—even if you have little experience with GitHub, Docker, or the macOS Terminal.
 
 Prerequisites
 ^^^^^^^^^^^^^
+
 1. **Install Docker Desktop**
-   - Download `Docker Desktop for Mac <https://www.docker.com/products/docker-desktop>`_ and install it.
-   - Launch Docker Desktop to ensure Docker is running in the background.
+   - In Finder, open your **Applications** folder and double-click **Docker Desktop** (if already installed).
+   - If not installed, download `Docker Desktop for Mac <https://www.docker.com/products/docker-desktop>`_ and double-click the downloaded file to install.
+   - Launch Docker Desktop from the Applications folder to ensure it is running in the background.
 
 2. **Git (optional but recommended for updates)**
-   - Install Git via Homebrew with ``brew install git`` or download it from the `Git website <https://git-scm.com/download/mac>`_.
-   - Alternatively, download the repository as a ZIP file.
+   - If you have Homebrew installed, open **Terminal** (see below) and run:
+
+     .. code-block:: bash
+
+        brew install git
+
+   - Alternatively, download the installer from the `Git website <https://git-scm.com/download/mac>`_ and follow the on-screen instructions.
+   - You can also download the repository as a ZIP file via your web browser.
+
+Opening the Terminal
+^^^^^^^^^^^^^^^^^^^^
+
+If you are new to the macOS Terminal, here are two ways to open it:
+
+- **Via Finder:**
+  1. Open Finder.
+  2. Go to **Applications** > **Utilities**.
+  3. Double-click **Terminal** to launch it.
+
+- **Via Spotlight Search:**
+  1. Press **⌘ + Spacebar** to open Spotlight.
+  2. Type **Terminal** and press **Enter**.
 
 Step-by-Step Guide
 ^^^^^^^^^^^^^^^^^^
+
 1. **Create a Destination Folder**
 
-   Create a folder on your Mac where you want to install the software. For example:
+   You can use Finder or Terminal to create the folder where AbRAT will be installed.
 
-   .. code-block:: bash
+   - **In Finder:**
+     1. Open Finder and navigate to your home directory (click **Go** > **Home** in the menu bar).
+     2. Right-click in the folder and select **New Folder**.
+     3. Name the folder **Applications**.
 
-      mkdir ~/Applications
+   - **In Terminal:**
+     .. code-block:: bash
+
+        mkdir ~/Applications
 
 2. **Obtaining the App**
 
@@ -32,7 +60,7 @@ Step-by-Step Guide
 
    **Option A: Clone with Git (recommended)**
 
-   - Open Terminal.
+   - Open **Terminal**.
    - Change directory to your destination folder:
 
      .. code-block:: bash
@@ -47,14 +75,14 @@ Step-by-Step Guide
 
    **Option B: Download as ZIP**
 
-   - Go to the repository’s GitHub page.
-   - Click the green **“Code”** button and select **“Download ZIP”**.
-   - Save and unzip the file in your destination folder.
+   - In your web browser, visit the repository’s GitHub page.
+   - Click the green **Code** button and select **Download ZIP**.
+   - Use Finder to move the downloaded ZIP into `~/Applications` and double-click to unzip.
 
    **Option C: Use Prebuilt Image from GitHub Container Registry**
 
    - Ensure Docker Desktop is running.
-   - Open Terminal and run:
+   - Open **Terminal** and run:
 
      .. code-block:: bash
 
@@ -69,7 +97,7 @@ Step-by-Step Guide
    **Option D: Use Prebuilt Image from Docker Hub**
 
    - Ensure Docker Desktop is running.
-   - Open Terminal and run:
+   - Open **Terminal** and run:
 
      .. code-block:: bash
 
@@ -83,7 +111,7 @@ Step-by-Step Guide
 
 3. **Change to the Project Folder (if using Options A or B)**
 
-   If you cloned or downloaded the repository, open Terminal and navigate to the project folder:
+   If you cloned or downloaded the repository, open **Terminal** and navigate to the project folder:
 
    .. code-block:: bash
 
@@ -92,23 +120,28 @@ Step-by-Step Guide
 4. **Start the Application with Docker Compose (for Options A & B)**
 
    - Ensure Docker Desktop is running.
-   - In Terminal, run:
+   - In **Terminal**, run:
 
      .. code-block:: bash
 
         docker-compose up
 
-   Wait until the logs indicate that the app is running.
+   Wait until the logs indicate that the app is running (look for a message about Streamlit listening on port 8501).
 
 5. **Access the App and Exchange Files**
 
-   - Open your browser and navigate to http://localhost:8501 (or the URL shown in the logs).
-   - Place your _ab1-files_ in the local ``data/userdata/ab1files`` folder (as defined in the docker-compose.yml).
+   - Open your web browser and navigate to `http://localhost:8501` (or the URL shown in the Docker logs).
+   - Use Finder to place your *ab1 files* in the `data/userdata/ab1files` folder inside the `AbRAT` directory, or via Terminal:
+
+     .. code-block:: bash
+
+        mkdir -p data/userdata/ab1files
+        cp /path/to/your/ab1files/*.ab1 data/userdata/ab1files/
 
 6. **Stop the Application**
 
-   - Stop it by pressing ``Ctrl + C`` in the Terminal running ``docker-compose up``.
-   - Alternatively, open a new Terminal window, navigate to the project folder, and run:
+   - In the **Terminal** window running `docker-compose up`, press **Ctrl + C** to stop.
+   - Alternatively, in a new **Terminal** window, navigate to the project folder and run:
 
      .. code-block:: bash
 
@@ -116,7 +149,7 @@ Step-by-Step Guide
 
 7. **Applying Updates (when using Git)**
 
-   - Navigate to the project folder:
+   - Open **Terminal** and make sure you are in the `AbRAT` folder:
 
      .. code-block:: bash
 
@@ -129,14 +162,9 @@ Step-by-Step Guide
         git pull
 
    - Restart the app:
-     - Stop it using:
 
-       .. code-block:: bash
+     .. code-block:: bash
 
-          docker-compose down
+        docker-compose down
+        docker-compose up
 
-     - Start it again with:
-
-       .. code-block:: bash
-
-          docker-compose up

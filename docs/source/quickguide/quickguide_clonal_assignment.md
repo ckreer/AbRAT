@@ -1,6 +1,6 @@
 ### Clonal Assignment
 
-|AbRAT| features a modular clonal assignment framework. Users can choose which chain(s) (e.g., heavy and/or light) 
+{{AbRAT}} features a modular clonal assignment framework. Users can choose which chain(s) (e.g., heavy and/or light) 
 to include in the clustering process and select which V(D)J gene segment information to use for pre-grouping. 
 Each selected chain is clustered independently, and a global cluster is formed by combining the resulting subclusters. 
 Rows with missing or non-computable values are assigned to subcluster 0.

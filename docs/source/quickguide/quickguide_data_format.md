@@ -1,6 +1,6 @@
 ### Data Format
 
-In |AbRAT|, the names of _ab1-files_ serve as a **unique identifier** for a specific sequence. Therefore, 
+In {{AbRAT}}, the names of _ab1-files_ serve as a **unique identifier** for a specific sequence. Therefore, 
 _ab1-files_ must follow a strict naming convention with **13 positions** separated by underscores ('_').
 
 ```
@@ -43,7 +43,7 @@ The file name is divided into 4 blocks that contain information on:
     ```
 - Contains details of the sequencing process: the sequencing primer, the sequencing company or instrument, and the sequence run number.
 
-###### Example:
+###### Example
 ```
 SARS2_IDC10_t1_PBMCs_IgG-S488_1_B8_HC_oPR_2ND-1_IgInt_EF_SEQ-1.ab1
 SARS2_IDC10_t1_PBMCs_IgG-S488_1_B8_KC_oPR_MIDI-435_Ckrev_EF_SEQ-2.ab1
