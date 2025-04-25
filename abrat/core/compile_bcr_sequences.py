@@ -116,6 +116,8 @@ def compile_bcrs(composite_df, h_ident, k_ident, l_ident, col_co):
     Returns:
         pd.DataFrame: A DataFrame with the compiled antibody (BCR) information.
     """
+    if composite_df.empty:
+        raise ValueError("Cannot compile BCRs from empty dataframe.")
     sample_columns = ['B_CELL_ID', 'COHORT', 'SUBJECT', 'TIME_POINT', 'TISSUE',
                       'SUBSET', 'PLATE', 'WELL']
     clone_columns = ['HC-LC_CLUSTER', 'CLUSTER_SIZE', 'IS_CLONAL', 'CLONE', 'CLONE_COLOR']

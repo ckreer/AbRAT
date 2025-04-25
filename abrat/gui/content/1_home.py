@@ -22,11 +22,8 @@ heavy and light chains.
 Explore |AbRAT| to boost your B cell antibody research and accelerate your discoveries!
 
 ___
-
-For more information check out the related publication [Kreer et al. (2025)](https://doi.org/10.1038/s41596-021-00554-w)
- and the **documentation**.
 """
 
 st.markdown(welcome_text_md.replace("|AbRAT|", abrat), unsafe_allow_html=True)
 
-st.page_link("content/7_quickguide.py", label="_**Quick Guide**_ 📄")
+st.page_link("content/7_quickguide.py", label="Check out the _**Quick Guide**_ 📄 for more information.")

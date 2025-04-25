@@ -29,11 +29,13 @@ Opening the Terminal
 If you are new to the macOS Terminal, here are two ways to open it:
 
 - **Via Finder:**
+
   1. Open Finder.
   2. Go to **Applications** > **Utilities**.
   3. Double-click **Terminal** to launch it.
 
 - **Via Spotlight Search:**
+
   1. Press **⌘ + Spacebar** to open Spotlight.
   2. Type **Terminal** and press **Enter**.
 
@@ -45,11 +47,13 @@ Step-by-Step Guide
    You can use Finder or Terminal to create the folder where AbRAT will be installed.
 
    - **In Finder:**
+
      1. Open Finder and navigate to your home directory (click **Go** > **Home** in the menu bar).
      2. Right-click in the folder and select **New Folder**.
      3. Name the folder **Applications**.
 
    - **In Terminal:**
+
      .. code-block:: bash
 
         mkdir ~/Applications

@@ -1,0 +1,25 @@
+name: abrat_env
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.12.5
+  - blast=2.16.0
+  - streamlit=1.40.1
+  - igblast=1.22.0
+  - scipy=1.15.1
+  - altair=5.0.1
+  - numpy
+  - pandas
+  - matplotlib
+  - streamlit
+  - pillow
+  - biopython
+  - peptides
+  - openpyxl
+  - plotly
+  - rapidfuzz
+  - xlsxwriter
+  - python-kaleido
+  - pytest>=7.0

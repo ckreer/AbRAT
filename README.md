@@ -1,22 +1,53 @@
 # AbRAT
-The Antibody Repertoire Analysis Toolkit
 
-## Introduction
+[![Build Status](https://github.com/ckreer/AbRAT/actions/workflows/ci.yml/badge.svg)](https://github.com/ckreer/AbRAT/actions)
+[![Docs](https://readthedocs.org/projects/abrat/badge/?version=latest)](https://abrat.readthedocs.io/)
+[![License](https://img.shields.io/github/license/ckreer/AbRAT)](LICENSE)
 
-Welcome to AbRAT - The Antibody Repertoire Analysis Toolkit. AbRAT is a collection of python scripts bundeled with stand
-alone versions of IgBLAST {ref} and BLAST {ref}
+## 🌟 What is AbRAT?
+
+AbRAT (Antibody Repertoire Analysis Toolkit) is a Python package and Streamlit app for analyzing single-cell BCR sequencing data.  
+It covers data preparation, clonal assignment, and exploratory & comparative analysis.
+
+## 🚀 Quick Start
+
+1) Clone the repo
+```bash
+git clone https://github.com/ckreer/AbRAT.git
+cd AbRAT
+```
+
+2) Create and activate your environment
+```bash
+conda env create -f environment.yml
+conda activate abrat_env
+```
+
+3) Run the Streamlit GUI
+```bash
+streamlit run abrat/gui/abrat_app.py
+```
+
+Or with Docker:
+
+```bash
+docker pull ckreer/abrat:latest
+docker run -d -p 8501:8501 ckreer/abrat:latest
+```
+
+## 📖 Documentation
+
+For detailed installation and usage guides, visit our full documentation on Read the Docs:
+
+> https://abrat.readthedocs.io/
+
+Included topics:
+
+- **Quick Guide** (Workflow, Folder Structure, Data Format, …)  
+- **Installation & Setup** (incl. macOS Terminal instructions)  
+- **Clustering Algorithms** (Iterative, Matrix-based, Hierarchical)
 
 
-## Installation
+## 📜 License
 
-AbRAT has been conceptialized to run within a docker container.
-There are currently two options for running AbRAT.
-1) Use the image from XXX
-2) Clone this repository and build 
-Install Docker ≥xxx
-I personally recommend using docker desktop, which makes it easier to 
-
-## Documnetation
-
-For more details on functionalities refer to the documentation within the AbRAT.
-
+This project is licensed under the GNU GPLv3 License. See the [LICENSE](LICENSE) file for details.

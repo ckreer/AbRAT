@@ -55,6 +55,9 @@ def remove_sphinx_code_and_images(text):
         lines.append(line)
     return "\n".join(lines)
 
+def _load_md(name):
+    return files("abrat.gui.content.quickguide").joinpath(name).read_text(encoding="utf-8")
+
 # ==============================================
 # Global settings passed from session state
 # ==============================================
@@ -63,27 +66,26 @@ page_name = os.path.splitext(os.path.basename(__file__))[0]
 workflow_path = files('abrat.gui.assets') / 'workflow.png'
 workflow_caption = ("The typical workflow of AbRAT consists of (1) Data Preparation, (2) Clonal Assignment, "
                     "and (3) Exploratory & Comparative Analysis.")
-#workflow_md = Path("../../../docs/source/quickguide/quickguide_workflow.md").read_text(encoding="utf-8")
-
-docs_path = Path("docs/source/quickguide")
 
 # load chapters
-workflow_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_workflow.md").read_text(encoding="utf-8")).replace(
+workflow_md = remove_sphinx_code_and_images(_load_md("quickguide_workflow.md")).replace(
     "### {{AbRAT}} Workflow", "").replace("{{AbRAT}}", abrat)
 folder_structure_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_folder_structure.md").read_text(encoding="utf-8")).replace("{{AbRAT}}", abrat)
+    _load_md("quickguide_folder_structure.md")).replace("{{AbRAT}}", abrat)
 data_format_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_data_format.md").read_text(encoding="utf-8")).replace("{{AbRAT}}", abrat)
+    _load_md("quickguide_data_format.md")).replace("{{AbRAT}}", abrat)
 clonal_assignment_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_clonal_assignment.md").read_text(encoding="utf-8")).replace("{{AbRAT}}", abrat)
+    _load_md("quickguide_clonal_assignment.md")).replace("{{AbRAT}}", abrat)
 repertoire_char_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_repertoire_characteristics.md").read_text(encoding="utf-8")).replace("{{AbRAT}}", abrat)
+    _load_md("quickguide_repertoire_characteristics.md")).replace("{{AbRAT}}", abrat)
 citation_md = remove_sphinx_code_and_images(
-    (docs_path / "quickguide_citation_references.md").read_text(encoding="utf-8")).replace("{{AbRAT}}", abrat)
-
+    _load_md("quickguide_citation_references.md")).replace("{{AbRAT}}", abrat)
 
 st.title("Quick Guide")
+
+st.markdown("""
+    The full documentation is available at [![Read The Docs](https://readthedocs.org/projects/abrat/badge/?version=latest)](https://abrat.readthedocs.io/)
+.""")
 
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "Workflow",

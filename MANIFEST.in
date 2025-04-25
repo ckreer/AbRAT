@@ -1,1 +1,2 @@
 include abrat/gui/assets *
+recursive-include abrat/gui/content/quickguide *.md

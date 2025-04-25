@@ -3,6 +3,8 @@ import os
 import streamlit as st
 from importlib.resources import files
 
+from abrat import __version__
+
 def main():
     # ================
     # Set Page Config
@@ -12,7 +14,7 @@ def main():
         layout='centered',
         page_title='AbRAT: The Antibody Repertoire Analysis Toolkit',
         menu_items={
-            'About': '''**AbRAT v1.0.0**        
+            'About': f'''**AbRAT v{__version__}**        
                 The Antibody Repertoire Analysis Toolkit.
                 © 2025 Christoph Kreer
                 '''
@@ -162,7 +164,7 @@ def main():
 
     pg.run()
 
-    st.sidebar.markdown("""_AbRAT v1.0.0 © 2025 Christoph Kreer_""")
+    st.sidebar.markdown(f"""_AbRAT v{__version__} © 2025 Christoph Kreer_""")
 
 if __name__ == "__main__":
     main()

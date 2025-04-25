@@ -191,7 +191,7 @@ def reverse_complement(seq):
     Returns:
         str: Reverse complement of the sequence.
     """
-    translate = {'A': 'T ', 'T': 'A', 'G': 'C', 'C': 'G', 'N': 'N',
+    translate = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G', 'N': 'N',
                  'S': 'S', 'W': 'W', 'M': 'K', 'K': 'M', 'R': 'Y',
                  'Y': 'R', 'B': 'V', 'V': 'B', 'D': 'H', 'H': 'D'}
     return ''.join([translate[n] for n in seq[::-1]])
