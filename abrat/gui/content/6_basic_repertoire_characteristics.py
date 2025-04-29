@@ -148,7 +148,7 @@ def get_repertoire_statistics(df):
     clone_df = df[df[(sample_col, clonal_subcol)].astype('boolean')]
     color_dict = (
         df[[(sample_col, clone_subcol), (sample_col, clone_color_subcol)]]
-        .drop_duplicates(subset=[(sample_col, clone_color_subcol)])
+        .drop_duplicates(subset=[(sample_col, clone_subcol)])
         .set_index((sample_col, clone_subcol))[(sample_col, clone_color_subcol)]
         .to_dict()
     )
@@ -622,10 +622,8 @@ def plot_interactive_donut_chart(group_count_df, color_map, group='Group', inner
     # Central text displaying the aggregated total count.
     selected_text = alt.Chart(data).transform_filter(selection) \
         .transform_aggregate(total=f"sum({col2})") \
-        .mark_text(size=24, align='left', dx=3, color='black') \
+        .mark_text(size=24, align='center', baseline='middle', color='black') \
         .encode(
-            y=alt.Y(f"{col1}:N"),
-            x=alt.X(f"total:Q", title="Sum"),
             text=alt.Text("total:Q", format='d')
         )
 

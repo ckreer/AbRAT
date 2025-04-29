@@ -436,13 +436,16 @@ else:
 st.sidebar.divider()
 # Set Cutoffs
 with st.sidebar.expander("Advanced settings", icon="⚙️"):
-    collision_cutoff = st.slider("Collision cut off", 0, 30, value = default_collision_cutoff, key="collision_cut_off")
-    setting_2 = st.toggle("Setting_2", value=default_setting_2, key="setting_2")
+    collision_cutoff = st.slider("Collision cut off", 0, 30,
+                                 value = default_collision_cutoff,
+                                 key="collision_cut_off",
+                                 help="Number of different amino acids between two sequences of the same chain, "
+                                      "at which an collision error is reported.")
+    #setting_2 = st.toggle("Setting_2", value=default_setting_2, key="setting_2")
 
 # Summary of settings as dict
 settings= {
-    "Collision cutoff": collision_cutoff,
-    "Setting 2": setting_2
+    "Collision cutoff": collision_cutoff
     }
 
 # =========================

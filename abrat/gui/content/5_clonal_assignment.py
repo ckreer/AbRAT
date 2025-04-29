@@ -201,7 +201,9 @@ if hc_selected:
         hc_vdj_selection = st.segmented_control('Gene segments for clustering',
                                                     ['V','D','J'],
                                                     default=['V','J'],
-                                                    selection_mode='multi')
+                                                    selection_mode='multi',
+                                                   help='Gene segments that need to match between sequences to be '
+                                                        'considered as clonal')
 
         heavy_chain_settings = {'group_by': [settings_to_columns[gene_segment]
                                              for gene_segment in hc_vdj_selection]}
@@ -211,24 +213,35 @@ if hc_selected:
                  key="hc_cluster",
                  options=["Iterative CDR3 similarity",
                           "Matrix CDR3 similarity",
-                          "Hierarchical CDR3 Clustering"])
+                          "Hierarchical CDR3 Clustering"],
+                 help="Clustering algorithm for CDR3s")
+
         heavy_chain_settings['algorithm']=hc_algorithm
         heavy_chain_settings['params'] = {}
 
         if hc_algorithm: #== "Iterative CDR3 similarity" or hc_algorithm == "Matrix CDR3 similarity":
-            if st.toggle('Restrict CDR3 length difference for clustering', value=True, key='hc_length_difference'):
+            if st.toggle('Restrict CDR3 length difference for clustering',
+                         value=True,
+                         key='hc_length_difference',
+                         help='Sequences will only be considered clonal, if the difference in their CDR3 lengths is below '
+                              'the slider-specified number of amino acids'):
                 heavy_chain_settings['params']['length_threshold'] = st.slider("Max. difference", 0, 20,
                                                                                value=default_cdrh3_aa_length_difference_threshold,
-                                                                               key="cdrh3_length_difference_threshold")
+                                                                               key="cdrh3_length_difference_threshold",
+                                                                               help='Define the maximum amino acid length difference '
+                                                                                    'for CDR3s to be considered as clonal')
             else:
                 heavy_chain_settings['params']['length_threshold'] = None
             heavy_chain_settings['params']['lev_threshold'] = (100 - st.slider("Minimum % CDRH3 identity for clustering", 0, 100,
                                                          value=default_hc_minimum_identity_aa_fixed,
-                                                         step=1, key="fixed_cdrh3_aa_identity")) / 100
+                                                         step=1, key="fixed_cdrh3_aa_identity",
+                                                         help="Similarity cutoff for heavy chain CDR3s to be considered as clonal")) / 100
 
             heavy_chain_settings['params']['iterations'] = st.slider("Number of iterations", 1, 100,
                                                                      value=default_number_of_iterations[hc_algorithm],
-                                                                     key="number_of_hc_iterations")
+                                                                     key="number_of_hc_iterations",
+                                                                     help="Number of repeated clonal assignments to "
+                                                                          "reduce seeding effects")
 
 else:
     heavy_chain_settings = {}
@@ -240,7 +253,10 @@ if lc_selected:
         lc_vj_selection = st.segmented_control('Gene segments for clustering',
                                                    ['V', 'J'],
                                                    default=['V'],
-                                                   selection_mode='multi')
+                                                   selection_mode='multi',
+                                                   help="Gene segments that need to match between sequences to be "
+                                                        "considered as clonal"
+                                               )
         light_chain_settings = {
             'group_by': [settings_to_columns[gene_segment]
                          for gene_segment in lc_vj_selection] if lc_vj_selection else []
@@ -251,26 +267,37 @@ if lc_selected:
                  key="lc_cluster",
                  options=["Iterative CDR3 similarity",
                           "Matrix CDR3 similarity",
-                          "Hierarchical CDR3 Clustering"])
+                          "Hierarchical CDR3 Clustering"],
+                 help="Clustering algorithm for CDR3s")
         light_chain_settings['lc_algorithm'] = lc_algorithm
         light_chain_settings['params'] = {}
 
         if lc_algorithm: # == "Iterative CDR3 similarity" or lc_algorithm == "Matrix CDR3 similarity":
-            if st.toggle('Restrict CDR3 length difference for clustering', value=True, key="lc_length_difference"):
+            if st.toggle('Restrict CDR3 length difference for clustering',
+                         value=True,
+                         key="lc_length_difference",
+                         help='Sequences will only be considered clonal, if the difference in their CDR3 lengths is below '
+                              'the slider-specified number of amino acids'):
                 light_chain_settings['params']['length_threshold'] = st.slider("Max. difference", 0, 10,
                                       value = default_cdrl3_aa_length_difference_threshold,
-                                      key="cdrl3_length_difference_threshold")
+                                      key="cdrl3_length_difference_threshold",
+                                      help='Define the maximum amino acid length difference '
+                                      'for CDR3s to be considered as clonal')
             else:
                 light_chain_settings['params']['length_threshold'] = None
 
             light_chain_settings['params']['lev_threshold'] = (100 - st.slider(
-                "Minimum % CDR3 identity for clustering", 1, 100,
+                "Minimum % CDRL3 identity for clustering", 1, 100,
                 value=default_lc_minimum_identity_aa_fixed,
-                step=1, key="fixed_cdrl3_aa_identity")) / 100
+                step=1, key="fixed_cdrl3_aa_identity",
+                help="Similarity cutoff for light chain CDR3s to be considered as clonal")) / 100
 
             light_chain_settings['params']['iterations'] = st.slider("Number of iterations", 0, 100,
                                       value = default_number_of_iterations[lc_algorithm],
-                                      key="number_of_lc_iterations")
+                                      key="number_of_lc_iterations",
+                                      help="Number of repeated clonal assignments to "
+                                           "reduce seeding effects"
+                                      )
 
 else:
     light_chain_settings = {}

@@ -371,7 +371,7 @@ def combine_ig_blast_and_q_check_data(q_check_df, igblast_dict, combi_ex_name, o
 
     # Select a subset of columns from q_check_df
     subset_q_check = q_check_df[['SAMPLE_NAME', 'SUBSET', 'TISSUE', 'CHAIN_PCR',
-                                 'IGBLAST_PASSED', 'MEAN_PHRED_PASSED', 'INNER_N_PASSED',
+                                 'MEAN_PHRED_PASSED', 'INNER_N_PASSED',
                                  'LENGTH_PASSED', 'INNER_N', 'QCHECK_PASSED', 'ORIGINAL_SEQ',
                                  'TRIMMED_SEQ', 'MASKED_SEQ', 'COHORT', 'SUBJECT',
                                  'TIME_POINT', 'PLATE', 'PRIMER_SET', 'WELL',

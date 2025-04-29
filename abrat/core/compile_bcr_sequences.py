@@ -127,7 +127,8 @@ def compile_bcrs(composite_df, h_ident, k_ident, l_ident, col_co):
                   'STOP_CODON', 'FRAME', 'PRODUCTIVE', 'FULL_V_ALIGNMENT', 'CDR3_AA', 'CDR3_AA_LENGTH',
                   'CDR3_NT', 'CDR3_NT_LENGTH', 'V_IDENTITY', 'V_BTOP', 'INNER_N', 'QCHECK_PASSED', 'MIDI_WARNING',
                   'COLLISIONS', 'FWR4_WARNING', 'ALTERNATIVE_SEQ', 'ORIGINAL_SEQ', 'TRIMMED_SEQ', 'MASKED_SEQ']
-    light_chain_columns = ['LIGHT_FOUND', 'SAMPLE_NAME', 'SOURCE', 'SUBSOURCE', 'V_GENE', 'TOP_V',
+    light_chain_columns = ['LIGHT_FOUND', 'PCR_ISOTYPE', 'ISOTYPE', 'TOP_ISOTYPE', 'LC_SUBCLUSTER',
+                           'CLUSTER_REPRESENTATIVE', 'SAMPLE_NAME', 'SOURCE', 'SUBSOURCE', 'V_GENE', 'TOP_V',
                            'J_GENE', 'TOP_J', 'STOP_CODON', 'FRAME', 'PRODUCTIVE', 'FULL_V_ALIGNMENT',
                            'CDR3_AA', 'CDR3_AA_LENGTH', 'CDR3_NT', 'CDR3_NT_LENGTH', 'V_IDENTITY', 'V_BTOP',
                            'INNER_N', 'QCHECK_PASSED', 'MIDI_WARNING', 'COLLISIONS', 'FWR4_WARNING',
