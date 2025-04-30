@@ -6,6 +6,10 @@ from importlib.resources import files
 from abrat import __version__
 
 def main():
+
+    os.makedirs("/app/data/userdata/ab1files", exist_ok=True)
+    os.makedirs("/app/data/userdata/output", exist_ok=True)
+
     # ================
     # Set Page Config
     # ================

@@ -3,12 +3,19 @@
 
 Installation and Setup Guide
 ============================
+
+.. note::
+
+   This guide is tailored for **macOS**, but the installation instructions and Docker commands also work on **Linux** and **Windows**,
+   provided that folder paths and system-specific commands are adjusted accordingly.
+
 Hello and welcome! This guide will help you install and run our containerized |AbRAT| app on your Mac in a designated folder—even if you have little experience with GitHub, Docker, or the macOS Terminal.
 
 Prerequisites
 ^^^^^^^^^^^^^
 
 1. **Install Docker Desktop**
+
    - In Finder, open your **Applications** folder and double-click **Docker Desktop** (if already installed).
    - If not installed, download `Docker Desktop for Mac <https://www.docker.com/products/docker-desktop>`_ and double-click the downloaded file to install.
    - Launch Docker Desktop from the Applications folder to ensure it is running in the background.
@@ -62,7 +69,7 @@ Step-by-Step Guide
 
    You have four options to get started:
 
-   **Option A: Clone with Git (recommended)**
+   **Option 1: Clone with Git (recommended)**
 
    - Open **Terminal**.
    - Change directory to your destination folder:
@@ -77,13 +84,50 @@ Step-by-Step Guide
 
         git clone https://github.com/ckreer/AbRAT.git
 
-   **Option B: Download as ZIP**
+   **Option 2: Download as ZIP**
 
    - In your web browser, visit the repository’s GitHub page.
    - Click the green **Code** button and select **Download ZIP**.
    - Use Finder to move the downloaded ZIP into `~/Applications` and double-click to unzip.
 
-   **Option C: Use Prebuilt Image from GitHub Container Registry**
+  **Option 3: Use Prebuilt Image from Docker Hub**
+
+    Note: If you use prebuilt images (options 3 & 4), you must manually create exchange folders for ab1files and output
+    and set up mount points on your machine to link to these folders.
+
+   - Create local folders on your machine with Finder or the Terminal:
+
+    .. code-block::
+
+        mkdir -p ~/abrat_data/userdata/ab1files
+        mkdir -p ~/abrat_data/userdata/output
+
+   - Ensure Docker Desktop is running.
+   - Open **Terminal** and run:
+
+     .. code-block:: bash
+
+        docker pull ckreer/abrat:latest
+
+   - Start the container with mounted *abrat_data*-folder:
+
+     .. code-block:: bash
+
+        docker run -d -p 8501:8501 \
+        -v ~/abrat_data:/app/data \
+        ckreer/abrat:latest
+
+   **Option 4: Use Prebuilt Image from GitHub Container Registry**
+
+    Note: If you use prebuilt images (options 3 & 4), you must manually create exchange folders for ab1files and output
+    and set up mount points on your machine to link to these folders.
+
+   - Create local folders on your machine with Finder or the Terminal:
+
+    .. code-block::
+
+        mkdir -p ~/abrat_data/userdata/ab1files
+        mkdir -p ~/abrat_data/userdata/output
 
    - Ensure Docker Desktop is running.
    - Open **Terminal** and run:
@@ -96,24 +140,11 @@ Step-by-Step Guide
 
      .. code-block:: bash
 
-        docker run -d -p 8501:8501 ghcr.io/ckreer/abrat:latest
+        docker run -d -p 8501:8501 \
+        -v ~/abrat_data:/app/data \
+        ghcr.io/ckreer/abrat:latest
 
-   **Option D: Use Prebuilt Image from Docker Hub**
-
-   - Ensure Docker Desktop is running.
-   - Open **Terminal** and run:
-
-     .. code-block:: bash
-
-        docker pull ckreer/abrat:latest
-
-   - Start the container:
-
-     .. code-block:: bash
-
-        docker run -d -p 8501:8501 ckreer/abrat:latest
-
-3. **Change to the Project Folder (if using Options A or B)**
+3. **Change to the Project Folder (if using Options 1 or 2)**
 
    If you cloned or downloaded the repository, open **Terminal** and navigate to the project folder:
 
@@ -121,7 +152,7 @@ Step-by-Step Guide
 
       cd ~/Applications/AbRAT
 
-4. **Start the Application with Docker Compose (for Options A & B)**
+4. **Start the Application with Docker Compose (for Options 1 & 2)**
 
    - Ensure Docker Desktop is running.
    - In **Terminal**, run:
@@ -136,11 +167,6 @@ Step-by-Step Guide
 
    - Open your web browser and navigate to `http://localhost:8501` (or the URL shown in the Docker logs).
    - Use Finder to place your *ab1 files* in the `data/userdata/ab1files` folder inside the `AbRAT` directory, or via Terminal:
-
-     .. code-block:: bash
-
-        mkdir -p data/userdata/ab1files
-        cp /path/to/your/ab1files/*.ab1 data/userdata/ab1files/
 
 6. **Stop the Application**
 

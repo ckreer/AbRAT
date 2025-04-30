@@ -9,7 +9,7 @@ Usage:
     print(abrat.__version__)
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__ = "Christoph Kreer"
 __license__ = "GNU GPLv3"
 __url__ = "https://github.com/ckreer/abrat"

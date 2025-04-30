@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 # Create and activate conda environemnt
 COPY environment.yml .
 RUN conda env create -f environment.yml
-ENV PATH /opt/conda/envs/abrat_env/bin:$PATH
+ENV PATH=/opt/conda/envs/abrat_env/bin:$PATH
 RUN conda clean -afy
 
 # Set ENV variables
@@ -46,9 +46,7 @@ EXPOSE 8501
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health || exit 1
 
 # Define Entrypoint
-# ENTRYPOINT ["streamlit", "run", "abrat/gui/abrat_app.py"]
 ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "abrat_env", "streamlit", "run", "abrat/gui/abrat_app.py"]
 
 # Standardarguments
 CMD ["--server.port=8501", "--server.address=0.0.0.0"]
-# ["python", "testfile.py"]

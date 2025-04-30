@@ -10,7 +10,7 @@ project = 'AbRAT'
 copyright = '2025, Christoph Kreer'
 author = 'Christoph Kreer'
 release = __version__
-version = release
+version = ".".join(release.split(".")[:2])
 
 # -- General configuration ---------------------------------------------------
 extensions = [
