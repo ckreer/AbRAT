@@ -1,1 +1,4 @@
 /Sandbox/
+# Sphinx build output
+docs/build/
+_build/
