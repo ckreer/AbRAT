@@ -9,8 +9,8 @@ Usage:
     print(abrat.__version__)
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __author__ = "Christoph Kreer"
 __license__ = "GNU GPLv3"
 __url__ = "https://github.com/ckreer/abrat"
-__doi__ = "PLACEHOLDER"
+__doi__ = "https://doi.org/10.5281/zenodo.15311638"

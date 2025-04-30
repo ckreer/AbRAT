@@ -2,7 +2,7 @@
 
 **If you use this software, please cite:**  
 
-Kreer, C. (2025). *AbRAT*. DOI: Will be assigned upon release via Zenodo
+Kreer, C. (2025). *AbRAT*. DOI: [10.5281/zenodo.15311638](https://doi.org/10.5281/zenodo.15311638)
 
 **Selected publications using AbRAT functionalities:**
 

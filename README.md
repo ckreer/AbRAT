@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/ckreer/AbRAT/actions/workflows/ci.yml/badge.svg)](https://github.com/ckreer/AbRAT/actions)
 [![Docs](https://readthedocs.org/projects/abrat/badge/?version=latest)](https://abrat.readthedocs.io/)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15311638.svg)](https://doi.org/10.5281/zenodo.15311638)
 [![License](https://img.shields.io/github/license/ckreer/AbRAT)](LICENSE)
 
 ## 🌟 What is AbRAT?
@@ -52,7 +52,7 @@ Included topics:
 
 If you use this software, please cite:
 
-**Kreer, C. (2025).** AbRAT. DOI: [10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)
+**Kreer, C. (2025).** AbRAT. DOI: [10.5281/zenodo.15311638](https://doi.org/10.5281/zenodo.15311638)
 
 ## 🛡️ License
 

@@ -17,7 +17,7 @@ For a quick start, refer to the **Quick Guide** section below.
 
 Installation Quick Guide
 ^^^^^^^^^^^^^^^^^^^^^^^^
-1. Create a destination folder (e.g., ``~/AbRAT``).
+1. Create a destination folder (e.g., ``~/Applications``).
 2. Obtain the app:
 
    - Option A: Clone with Git.

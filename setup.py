@@ -32,6 +32,6 @@ setup(
     project_urls={
         "Documentation": "https://abrat.readthedocs.io",
         "Source Code": "https://github.com/ckreer/abrat",
-        "DOI": "https://doi.org/10.5281/zenodo.XXXXXXX",
+        "DOI": "https://doi.org/10.5281/zenodo.15311638",
     },
 )

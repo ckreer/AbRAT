@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use AbRAT in your work, please cite it using the following metadata."
+title: "AbRAT: The Antibody Repertoire Analysis Toolkit"
+version: 1.0.0
+doi: 10.5281/zenodo.15311638
+date-released: 2025-04-30
+license: GPL-3.0
+repository: https://github.com/ckreer/AbRAT
+url: https://github.com/ckreer/AbRAT
+authors:
+  - family-names: Kreer
+    given-names: Christoph
+    orcid: https://orcid.org/0000-0002-9140-9850
