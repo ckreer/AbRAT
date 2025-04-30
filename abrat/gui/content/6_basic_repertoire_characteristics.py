@@ -1533,8 +1533,7 @@ with tab4:
             y_axis_title=y_label,
             fill_plot=fill_curves,
             marker_list=cdr3_marker_list,
-            x_axis_minor_ticks=x_minor_ticks.get(bcr_chain, 2),
-            title=title
+            x_axis_minor_ticks=x_minor_ticks.get(bcr_chain, 2)
         )
 
         return combined_df, cdr3_length_figure

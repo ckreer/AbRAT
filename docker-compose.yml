@@ -1,15 +1,15 @@
 services:
   abrat:
     build: .
-    container_name: my-abrat-app
     ports:
       - "8501:8501"
     volumes:
-      #- ./data:/app/data
-      - .:/app # mounted einfach alles - später entfernen
-      #- ./abrat:/app/abrat # Mounten des abrat-Ordners für Live-Updates - später entfernen
-      #- ./content:/app/content # Mounten des content-Ordners für Live-Updates - später entfernen
+      - ./data:/app/data
     environment:
       - STREAMLIT_SERVER_ADDRESS=0.0.0.0
       - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_ENABLECORS=false
+      - STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION=false
+      - STREAMLIT_SERVER_SHOWWARNINGONDIRECTEXECUTION=false
     restart: unless-stopped

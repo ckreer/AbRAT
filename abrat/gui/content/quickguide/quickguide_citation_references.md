@@ -2,17 +2,15 @@
 
 **If you use this software, please cite:**  
 
-Kreer, C. (2025). *AbRAT*. DOI: [10.1234/your-doi](https://doi.org/10.1234/your-doi)
+Kreer, C. (2025). *AbRAT*. DOI: Will be assigned upon release via Zenodo
 
-**Example SARS-CoV-2 mAb data is taken from:**
+**Selected publications using AbRAT functionalities:**
 
 > Kreer C, Zehner M, Weber T, Ercanoglu MS, Gieselmann L, Rohde C, Halwe S, Korenkov M, Schommers P, Vanshylla K, Di Cristanziano V, Janicki H, 
 Brinker R, Ashurov A, Krähling V, Kupke A, Cohen-Dvashi H, Koch M, Eckert JM, Lederer S, Pfeifer N, Wolf T, Vehreschild MJGT, Wendtner C, 
 Diskin R, Gruell H, Becker S, Klein F. Longitudinal Isolation of Potent Near-Germline SARS-CoV-2-Neutralizing Antibodies 
 from COVID-19 Patients. Cell. 2020 Aug 20;182(4):843-854.e12. doi: 10.1016/j.cell.2020.06.044.
 [Read the article](https://doi.org/10.1016/j.cell.2020.06.044)
-
-**Other selected publications using AbRAT functionalities:**
 
 > Vanshylla K, Fan C, Wunsch M, Poopalasingam N, Meijers M, Kreer C, Kleipass F, Ruchnewitz D, Ercanoglu MS, Gruell H, 
 Münn F, Pohl K, Janicki H, Nolden T, Bartl S, Stein SC, Augustin M, Dewald F, Gieselmann L, Schommers P, Schulz TF, 

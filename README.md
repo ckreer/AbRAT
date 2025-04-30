@@ -2,6 +2,7 @@
 
 [![Build Status](https://github.com/ckreer/AbRAT/actions/workflows/ci.yml/badge.svg)](https://github.com/ckreer/AbRAT/actions)
 [![Docs](https://readthedocs.org/projects/abrat/badge/?version=latest)](https://abrat.readthedocs.io/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
 [![License](https://img.shields.io/github/license/ckreer/AbRAT)](LICENSE)
 
 ## 🌟 What is AbRAT?
@@ -47,7 +48,12 @@ Included topics:
 - **Installation & Setup** (incl. macOS Terminal instructions)  
 - **Clustering Algorithms** (Iterative, Matrix-based, Hierarchical)
 
+## 📜 Citation
 
-## 📜 License
+If you use this software, please cite:
+
+**Kreer, C. (2025).** AbRAT. DOI: [10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)
+
+## 🛡️ License
 
 This project is licensed under the GNU GPLv3 License. See the [LICENSE](LICENSE) file for details.

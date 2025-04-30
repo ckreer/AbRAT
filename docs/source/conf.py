@@ -9,7 +9,6 @@ from abrat import __version__
 project = 'AbRAT'
 copyright = '2025, Christoph Kreer'
 author = 'Christoph Kreer'
-# Dynamische Versionsnummer aus dem Package
 release = __version__
 version = release
 

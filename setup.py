@@ -17,22 +17,21 @@ version = version_match.group(1)
 setup(
     name="abrat",
     version=version,
-    packages=find_packages(),         # Sucht automatisch nach "abrat", "abrat.core", ...
-    install_requires=[
-        "numpy~=1.23",
-        "pandas~=2.2",
-        "streamlit~=1.40",
-        # weitere Abhängigkeiten ...
-    ],
+    packages=find_packages(),
     include_package_data=True,
     package_data={
         'abrat.gui.assets': ['*'],
         "abrat.gui.content": ["quickguide/*.md"],
     },
-    python_requires=">=3.12",          # Minimale Python-Version (optional, aber empfehlenswert)
-
+    python_requires=">=3.12",
     author="Dr. Christoph Kreer",
     description="AbRAT: The Antibody Repertoire Analysis Toolkit",
     license="GPLv3",
-    #url="https://github.com/username/abrat",
+    url="https://github.com/ckreer/abrat",
+
+    project_urls={
+        "Documentation": "https://abrat.readthedocs.io",
+        "Source Code": "https://github.com/ckreer/abrat",
+        "DOI": "https://doi.org/10.5281/zenodo.XXXXXXX",
+    },
 )
