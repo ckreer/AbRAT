@@ -1,9 +1,8 @@
 # AbRAT
 
-[![Build Status](https://github.com/ckreer/AbRAT/actions/workflows/ci.yml/badge.svg)](https://github.com/ckreer/AbRAT/actions)
 [![Docs](https://readthedocs.org/projects/abrat/badge/?version=latest)](https://abrat.readthedocs.io/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15311638.svg)](https://doi.org/10.5281/zenodo.15311638)
-[![License](https://img.shields.io/github/license/ckreer/AbRAT)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 ## 🌟 What is AbRAT?
 
