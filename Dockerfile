@@ -1,4 +1,4 @@
-# Basis-Image mit Miniconda verwenden und Plattform festlegen (optional für Apple Silicon)
+# Base-Image miniconda
 FROM continuumio/miniconda3
 
 # Define Workdir in Container
@@ -26,6 +26,10 @@ ENV BLASTDB=/app/data/database/blastdb:/app/data/database/igblastdb
 # Copy setup.py and MANIFEST.in
 COPY setup.py MANIFEST.in /app/
 
+# streamlit config
+COPY .streamlit /root/.streamlit
+ENV HOME=/root
+
 # Copy package
 COPY abrat /app/abrat
 
@@ -42,7 +46,8 @@ EXPOSE 8501
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health || exit 1
 
 # Define Entrypoint
-ENTRYPOINT ["streamlit", "run", "abrat/gui/abrat_app.py"]
+# ENTRYPOINT ["streamlit", "run", "abrat/gui/abrat_app.py"]
+ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "abrat_env", "streamlit", "run", "abrat/gui/abrat_app.py"]
 
 # Standardarguments
 CMD ["--server.port=8501", "--server.address=0.0.0.0"]

@@ -1,0 +1,764 @@
+>BK063801|IGHA1*01|Homo sapiens|F|CH1|1126727..1127032|306 nt|3| | | | |306+0=306| | |
+catccccgaccagccccaaggtcttcccgctgagcctctgcagcacccagccagatggga
+acgtggtcatcgcctgcctggtccagggcttcttcccccaggagccactcagtgtgacct
+ggagcgaaagcggacagggcgtgaccgccagaaacttcccacccagccaggatgcctccg
+gggacctgtacaccacgagcagccagctgaccctgccggccacacagtgcctagccggca
+agtccgtgacatgccacgtgaagcactacacgaatcccagccaggatgtgactgtgccct
+gcccag
+>BK063799|IGHA1*02|Homo sapiens|F|CH1|1171181..1171486|306 nt|3| | | | |306+0=306| | |
+catccccgaccagccccaaggtcttcccgctgagcctctgcagcacccagccagatggga
+acgtggtcatcgcctgcctggtccagggcttcttcccccaggagccactcagtgtgacct
+ggagcgaaagcggacagggcgtgaccgccagaaacttcccacccagccaggatgcctccg
+gggacctgtacaccacgagcagccagctgaccctgccggccacacagtgcctagccggca
+agtccgtgacatgccacgtgaagcactacacgaatcccagccaggatgtgactgtgccct
+gcccag
+>IMGT000111|IGHA1*04|Homo sapiens|F|CH1|1163088..1163393|306 nt|3| | | | |306+0=306| | |
+catccccgaccagccccaaggtcttcccgctgagcctctgcagcacccagccagatggga
+acgtggtcatcgcctgcctggtccagggcttcttcccccaggagccactcagtgtgacct
+ggagcgaaagcggacagggcgtgaccgccagaaacttcccacccagccaggatgcctccg
+gggacctgtacaccacgagcagccaactgaccctgccggccacacagtgcctagccggca
+agtccgtgacatgccacgtgaagcactacacgaatcccagccaggatgtgactgtgccct
+gcccag
+>BK068299|IGHA1*06|Homo sapiens|F|CH1|1183513..1183818|306 nt|3| | | | |306+0=306| | |
+catccccgaccagccccaaggtcttcccgctgagcctctgcagcacccagccagatggga
+acgtggtcatcgcctgcctggtccagggcttcttcccccaggagccactcagtgtgacct
+ggagcgaaagcggacagggcgtgaccgccagaaacttcccacccagccaggatgcctccg
+gggacctgtacaccacgagcagccagctgaccctgccggccacacagtgcctagccggca
+agtccgtgacatgccacgtgaagcactacacgaatcccagccaggatgtgactgtgccct
+gcccag
+>BK063800|IGHA2*01|Homo sapiens|F|CH1|1320067..1320372|306 nt|3| | | | |306+0=306| | |
+catccccgaccagccccaaggtcttcccgctgagcctcgacagcaccccccaagatggga
+acgtggtcgtcgcatgcctggtccagggcttcttcccccaggagccactcagtgtgacct
+ggagcgaaagcggacagaacgtgaccgccagaaacttcccacctagccaggatgcctccg
+gggacctgtacaccacgagcagccagctgaccctgccggccacacagtgcccagacggca
+agtccgtgacatgccacgtgaagcactacacgaatcccagccaggatgtgactgtgccct
+gcccag
+>AL928742|IGHA2*02|Homo sapiens|F|CH1|69308..69613|306 nt|3| | | | |306+0=306| | |
+catccccgaccagccccaaggtcttcccgctgagcctcgacagcaccccccaagatggga
+acgtggtcgtcgcatgcctggtccagggcttcttcccccaggagccactcagtgtgacct
+ggagcgaaagcggacagaacgtgaccgccagaaacttcccacctagccaggatgcctccg
+gggacctgtacaccacgagcagccagctgaccctgccggccacacagtgcccagacggca
+agtccgtgacatgccacgtgaagcactacacgaattccagccaggatgtgactgtgccct
+gccgag
+>S71043|IGHA2*03|Homo sapiens|F|CH1|107..412|306 nt|3| | | | |306+0=306| | |
+catccccgaccagccccaaggtcttcccgctgagcctcgacagcaccccccaagatggga
+acgtggtcgtcgcatgcctggtccagggcttcttcccccaggagccactcagtgtgacct
+ggagcgaaagcggacagaacgtgaccgccagaaacttcccacctagccaggatgcctccg
+gggacctgtacaccacgagcagccagctgaccctgccggccacacagtgcccagacggca
+agtccgtgacatgccacgtgaagcactacacgaattccagccaggatgtgactgtgccct
+gccgag
+>IMGT000112|IGHA2*05|Homo sapiens|F|CH1|1329918..1330223|306 nt|3| | | | |306+0=306| | |
+catccccgaccagccccaaggtcttcccgctgagcctcgacagcaccccccaagatggga
+acgtggtcgtcgcatgcctggtccagggcttcttcccccaggagccactcagtgtgacct
+ggagcgaaagcggacagaacgtgaccgccagaaacttcccacccagccaggatgcctccg
+gggacctgtacaccacgagcagccagctgaccctgccggccacacagtgcccagacggca
+agtccgtgacatgccacgtgaagcactacacgaattccagccaggatgtgactgtgccct
+gccgag
+>BK068298|IGHA2*06|Homo sapiens|F|CH1|1322449..1322754|306 nt|3| | | | |306+0=306| | |
+catccccgaccagccccaaggtcttcccgctgagcctcgacagcaccccccaagatggga
+acgtggtcgtcgcatgcctggtccagggcttcttcccccaggagccactcagtgtgacct
+ggagcgaaagcggacagaacgtgaccgccagaaacttcccacctagccaggatgcctccg
+gggacctgtacaccacgagcagccagctgaccctgccggccacacagtgcccagacggca
+agtccgtgacatgccacgtgaagcactacacgaatcccagccaggatgtgactgtgccct
+gcccag
+>IMGT000174|IGHA2*07|Homo sapiens|F|CH1|110510..110815|306 nt|3| | | | |306+0=306| | |
+catccccgaccagccccaaggtcttcccgctgagcctcgacagcaccccccaagatggga
+acgtggtcgtcgcatgcctggtccagggcttcttcccccaggagccactcagtgtgacct
+ggagcgaaagcggacagaacgtgaccgccagaaacttcccacctagccaggatgcctccg
+gggacctgtacaccacgagcagccagctgaccctgccggccacacagtgcccagacggca
+agtccgtgacatgccacgtgaagcactacacgaatcccagccaggatgtgactgtgccct
+gcccag
+>K02875|IGHD*01|Homo sapiens_Chronic lymphotic leukemia (CLL)  patient|F|CH1|101..403|303 nt|3| | | | |303+0=303| | |
+cacccaccaaggctccggatgtgttccccatcatatcagggtgcagacacccaaaggata
+acagccctgtggtcctggcatgcttgataactgggtaccacccaacgtccgtgactgtca
+cctggtacatggggacacagagccagccccagagaaccttccctgagatacaaagacggg
+acagctactacatgacaagcagccagctctccacccccctccagcagtggcgccaaggcg
+agtacaaatgcgtggtccagcacaccgccagcaagagtaagaaggagatcttccgctggc
+cag
+>X57331|IGHD*02|Homo sapiens|F|CH1|10747..11049|303 nt|3| | | | |303+0=303| | |
+cacccaccaaggctccggatgtgttccccatcatatcagggtgcagacacccaaaggata
+acagccctgtggtcctggcatgcttgataactgggtaccacccaacgtccgtgactgtca
+cctggtacatggggacacagagccagccccagagaaccttccctgagatacaaagacggg
+acagctactacatgacaagcagccagctctccacccccctccagcagtggcgccaaggcg
+agtacaaatgcgtggtccagcacaccgccagcaagagtaagaaggagatcttccgctggc
+cag
+>IMGT000111|IGHD*03|Homo sapiens|F|CH1|1024840..1025142|303 nt|3| | | | |303+0=303| | |
+cacccaccaaggctccggatgtgttccccatcatatcagggtgcagacacccaaaggata
+acagccctgtggtcctggcatgcttgataactgggtaccacccaacgtccgtgactgtca
+cctggtacatggggacacagagccagccccagagaaccttccctgagatacaaagacggg
+acagctactacatgacaagcagccagctctccacccccctccagcagtggcgccaaggcg
+agtacaaatgcgtggtccagcacaccgccagcaagagtaagaaggagatcttccgctggc
+cag
+>BK068299|IGHD*05|Homo sapiens|F|CH1|1048146..1048448|303 nt|3| | | | |303+0=303| | |
+cacccaccaaggctccggatgtgttccccatcatatcagggtgcagacacccaaaggata
+acagccctgtggtcctggcatgcttgataactgggtaccacccaacgtccgtgactgtca
+cctggtacatggggacacagagccagccccagagaaccttccctgagatacaaagacggg
+acagctactacatgacaagcagccagctctccacccccctccagcagtggcgccaaggcg
+agtacaaatgcgtggtccagcacaccgccagcaagagtaagaaggagatcttccgctggc
+cag
+>J00222|IGHE*01|Homo sapiens|F|CH1|1210..1518|309 nt|3| | | | |309+0=309| | |
+cctccacacagagcccatccgtcttccccttgacccgctgctgcaaaaacattccctcca
+atgccacctccgtgactctgggctgcctggccacgggctacttcccggagccggtgatgg
+tgacctgcgacacaggctccctcaacgggacaactatgaccttaccagccaccaccctca
+cgctctctggtcactatgccaccatcagcttgctgaccgtctcgggtgcgtgggccaagc
+agatgttcacctgccgtgtggcacacactccatcgtccacagactgggtcgacaacaaaa
+ccttcagcg
+>BK063800|IGHE*02|Homo sapiens|F|CH1|1307316..1307624|309 nt|3| | | | |309+0=309| | |
+cctccacacagagcccatccgtcttccccttgacccgctgctgcaaaaacattccctcca
+atgccacctccgtgactctgggctgcctggccacgggctacttcccggagccggtgatgg
+tgacctgggacacaggctccctcaacgggacaactatgaccttaccagccaccaccctca
+cgctctctggtcactatgccaccatcagcttgctgaccgtctcgggtgcgtgggccaagc
+agatgttcacctgccgtgtggcacacactccatcgtccacagactgggtcgacaacaaaa
+ccttcagcg
+>IMGT000025|IGHE*03|Homo sapiens|F|CH1|99..407|309 nt|3| | | | |309+0=309| | |
+cctccacacagagcccatccgtcttccccttgacccgctgctgcaaaaacattccctcca
+atgccacctccgtgactctgggctgcctggccacgggctacttcccggagccggtgatgg
+tgacctgcgacacaggctccctcaacgggacaactatgaccttaccagccaccaccctca
+cgctctctggtcactatgccaccatcagcttgctgaccgtctcgggtgcgtgggccaagc
+agatgttcacctgccgtgtggcacacactccatcgtccacagactgggtcgacaacaaaa
+ccttcagcg
+>AL928742|IGHE*04|Homo sapiens|F|CH1|55975..56283|309 nt|3| | | | |309+0=309| | |
+cctccacacagagcccatccgtcttccccttgacccgctgctgcaaaaacattccctcca
+atgccacctccgtgactctgggctgcctggccacgggctacttcccggagccggtgatgg
+tgacctgggacacaggctccctcaacgggacaactatgaccttaccagccaccaccctca
+cgctctctggtcactatgccaccatcagcttgctgaccgtctcgggtgcgtgggccaagc
+agatgttcacctgccgtgtggcacacactccatcgtccacagactgggtcgacaacaaaa
+ccttcagcg
+>IMGT000177|IGHE*06|Homo sapiens|F|CH1|1311588..1311896|309 nt|3| | | | |309+0=309| | |
+cctccacacagagcccatccgtcttccccttgacccgctgctgcaaaaacattccctcca
+atgccacctccgtgactctgggctgcctggccacgggctacttcccggagccggtgatgg
+tgacctgggacacaggctccctcaacgggacaactatgaccttaccagccaccaccctca
+cgctctctggtcactatgccaccatcagcttgctgaccgtctcgggtgcgtgggccaagc
+agatgttcacctgccgtgtggcacacactccatcgtccacagactgggtcgacaacaaaa
+ccttcagcg
+>IMGT000198|IGHE*07|Homo sapiens|F|CH1|259073..259381|309 nt|3| | | | |309+0=309| | |
+cctccacacagagcccatccgtcttccccttgacccgctgctgcaaaaacattccctcca
+atgccacctccgtgactctgggctgcctggccacgggctacttcccagagccggtgatgg
+tgacctgggacacaggctccctcaacgggacaactatgaccttaccagccaccaccctca
+cgctctctggtcactatgccaccatcagcttgctgaccgtctcgggtgcgtgggccaagc
+agatgttcacctgccgtgtggcacacactccatcgtccacagactgggtcgacaacaaaa
+ccttcagcg
+>IMGT000199|IGHE*08|Homo sapiens|F|CH1|935909..936217|309 nt|3| | | | |309+0=309| | |
+cctccacacagagcccatccgtcttccccttgacccgctgctgcaaaaacattccctcca
+atgccacctccgtgactctgggctgcctggccacgggctacttcccagagccggtgatgg
+tgacctgggacacaggctccctcaacgggacaactatgaccttaccagccaccaccctca
+cgctctctggtcactatgccaccatcagcttgctgaccgtctcgggtgcgtgggccaagc
+agatgttcacctgccgtgtggcacacactccatcgtccacagactgggtcgacaacaaaa
+ccttcagcg
+>J00228|IGHG1*01|Homo sapiens|F|CH1|210..503|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>Z17370|IGHG1*02|Homo sapiens|F|CH1|212..505|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>BK063800|IGHG1*03|Homo sapiens|F|CH1|1147225..1147518|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>JN582178|IGHG1*04|Homo sapiens|(F)|CH1|11..304|294 nt|1| | | | |294+0=294| | |
+gcctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctggg
+ggcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcg
+tggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctca
+ggactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacc
+tacatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagtt
+>AL122127|IGHG1*05|Homo sapiens|F|CH1|12811..13104|294 nt|3| | | | |294+0=294| |rev-compl|
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcagccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>MG920252|IGHG1*06|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MG920245|IGHG1*07|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>MG920246|IGHG1*08|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MG920247|IGHG1*09|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcagccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>MG920248|IGHG1*10|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>MG920249|IGHG1*11|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>MG920250|IGHG1*12|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>MG920251|IGHG1*13|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>MG920253|IGHG1*14|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcct
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>IMGT000158|IGHG1*15|Homo sapiens|F|CH1|889927..890220|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>IMGT000177|IGHG1*16|Homo sapiens|F|CH1|1172499..1172792|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagaaagttg
+>IMGT000198|IGHG1*17|Homo sapiens|F|CH1|118745..119038|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acatctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>J00230|IGHG2*01|Homo sapiens|F|CH1|216..509|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagccgccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccagctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>BK063800|IGHG2*02|Homo sapiens|F|CH1|1244403..1244696|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgacctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>BK068299|IGHG2*03|Homo sapiens|F|CH1|1247204..1247497|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccagctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>AF449617|IGHG2*04|Homo sapiens|F|CH1|217..510|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccagctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>AF449618|IGHG2*05|Homo sapiens|F|CH1|217..510|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccagctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>AL928742|IGHG2*06|Homo sapiens|F|CH1|12913..13206|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>MH025828|IGHG2*07|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccagctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>IMGT000177|IGHG2*08|Homo sapiens|F|CH1|1268689..1268982|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>MH025830|IGHG2*09|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccagctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>MH025831|IGHG2*10|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccagctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>MH025832|IGHG2*11|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>MH025833|IGHG2*12|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>MH025834|IGHG2*13|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccagctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>MH025835|IGHG2*14|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>MH025836|IGHG2*15|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>IMGT000175|IGHG2*19|Homo sapiens|F|CH1|653545..653838|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgctctgaccagcggcgtgcacaccttcccagctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg
+>D78345|IGHG3*01|Homo sapiens|F|CH1|8305..8598|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>X16110|IGHG3*03|Homo sapiens_LAT|F|CH1|216..509|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>X99549|IGHG3*04|Homo sapiens_Mandenka individual (eastern Senegal)|F|CH1|7..300|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390236|IGHG3*05|Homo sapiens_Mandenka individual (Mand-205)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390237|IGHG3*06|Homo sapiens_Mandenka individual (Mand-108)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttcccagaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390238|IGHG3*07|Homo sapiens_Mandenka individual (Mand-548)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390241|IGHG3*08|Homo sapiens_Mandenka individual (Mand-114)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390242|IGHG3*09|Homo sapiens_Mandenka individual (Mand-333)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AL122127|IGHG3*10|Homo sapiens|F|CH1|41146..41439|294 nt|3| | | | |294+0=294| |rev-compl|
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttcccagaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>BK063800|IGHG3*11|Homo sapiens|F|CH1|1118637..1118930|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390252|IGHG3*12|Homo sapiens_French individual (Fr-BL)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390244|IGHG3*13|Homo sapiens_Mandenka individual (Mand-428)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>BK068299|IGHG3*14|Homo sapiens|F|CH1|1122483..1122776|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390260|IGHG3*15|Homo sapiens_Sel'Kup individual (Kp-150)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390262|IGHG3*16|Homo sapiens_Lebanese individual (LibF2)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390272|IGHG3*17|Homo sapiens_Mandenka individual (Mand-231)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcaacttcggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390276|IGHG3*18|Homo sapiens_Lebanese individual (Lib-C5)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtactcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>AJ390279|IGHG3*19|Homo sapiens_Sel'Kup individual (Kp-60)|F|CH1|26..319|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MG920256|IGHG3*20|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>IMGT000112|IGHG3*21|Homo sapiens|F|CH1|1169307..1169600|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcat
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MG920254|IGHG3*22|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MH025837|IGHG3*23|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MG920257|IGHG3*24|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MG920258|IGHG3*25|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MG920259|IGHG3*26|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MG920260|IGHG3*27|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MG786813|IGHG3*28|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>MG920261|IGHG3*29|Homo sapiens|F|CH1|2..295|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgggg
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacccagacct
+acacctgcaacgtgaatcacaagcccagcaacaccaaggtggacaagagagttg
+>IMGT000175|IGHG4*01|Homo sapiens|F|CH1|672218..672511|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatccgtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagccgccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacgaagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagagagttg
+>AL928742|IGHG4*04|Homo sapiens|F|CH1|31637..31930|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagccgccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacgaagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagagagttg
+>IMGT000177|IGHG4*07|Homo sapiens|F|CH1|1287291..1287584|294 nt|3| | | | |294+0=294| | |
+cttccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctctgaga
+gcacagccgccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctattccctcagcagcgtggtgaccgtgccctccagcagcttgggcacgaagacct
+acacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagagagttg
+>IMGT000112|IGHG4*08|Homo sapiens|P|CH1|1292952..1293244|293 nt|3| | | | |293+0=293| | |
+cctccaccaagggcccatcgtcttccccctggcgccctgctccaggagcacctccgagag
+cacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgtg
+gaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcagg
+actctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacgaagaccta
+cacctgcaatgtagatcacaagcccagcaacaccaaggtggacaagagagttg
+>BK063800|IGHG4*09|Homo sapiens|F|CH1|1283031..1283324|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacgaagacct
+acacctgcaatgtagatcacaagcccagcaacaccaaggtggacaagagagttg
+>BK068298|IGHG4*10|Homo sapiens|F|CH1|1285413..1285706|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacgaagacct
+acacctgcaatgtagatcacaagcccagcaacaccaaggtggacaagagagttg
+>BK063800|IGHG4A*01|Homo sapiens|F|CH1|1263433..1263726|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacgaagacct
+acacctgcaatgtagatcacaagcccagcaacaccaaggtggacaagagagttg
+>IMGT000174|IGHG4A*02|Homo sapiens|F|CH1|53886..54179|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacgaagacct
+acacctgcaatgtagatcacaagcccagcaacaccaaggtggacaagagagttg
+>IMGT000207|IGHG4A*03|Homo sapiens|P|CH1|1012325..1012618|294 nt|3| | | | |294+0=294| | |
+cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgaga
+gcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgt
+ggaactcaggcgccctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcag
+gactctactccctcagcagcgtggtgaccgtgccctccagcagcttgggcacgaagacct
+acacctgcaatgtagatcacaagcccagcaacaccaaggtggacaagagagttg
+>X14940|IGHM*01|Homo sapiens|F|CH1|233..544|312 nt|3| | | | |312+0=312| | |
+ggagtgcatccgccccaacccttttccccctcgtctcctgtgagaattccccgtcggata
+cgagcagcgtggccgttggctgcctcgcacaggacttccttcccgactccatcactttgt
+cctggaaatacaagaacaactctgacatcagcagtacccggggcttcccatcagtcctga
+gagggggcaagtacgcagccacctcacaggtgctgctgccttccaaggacgtcatgcagg
+gcacagacgaacacgtggtgtgcaaagtccagcaccccaacggcaacaaagaaaagaacg
+tgcctcttccag
+>X57331|IGHM*03|Homo sapiens|F|CH1|145..456|312 nt|3| | | | |312+0=312| | |
+ggagtgcatccgccccaacccttttccccctcgtctcctgtgagaattccccgtcggata
+cgagcagcgtggccgttggctgcctcgcacaggacttccttcccgactccatcactttct
+cctggaaatacaagaacaactctgacatcagcagcacccggggcttcccatcagtcctga
+gagggggcaagtacgcagccacctcacaggtgctgctgccttccaaggacgtcatgcagg
+gcacagacgaacacgtggtgtgcaaagtccagcaccccaacggcaacaaagaaaagaacg
+tgcctcttccag
+>AC254827|IGHM*04|Homo sapiens|F|CH1|128947..129258|312 nt|3| | | | |312+0=312| |rev-compl|
+ggagtgcatccgccccaacccttttccccctcgtctcctgtgagaattccccgtcggata
+cgagcagcgtggccgttggctgcctcgcacaggacttccttcccgactccatcactttct
+cctggaaatacaagaacaactctgacatcagcagcacccggggcttcccatcagtcctga
+gagggggcaagtacgcagccacctcacaggtgctgctgccttccaaggacgtcatgcagg
+gcacagacgaacacgtggtgtgcaaagtccagcaccccaacggcaacaaagaaaagaacg
+tgcctcttccag
+>IMGT000111|IGHM*05|Homo sapiens|F|CH1|1014197..1014508|312 nt|3| | | | |312+0=312| | |
+ggagtgcatccgccccaacccttttccccctcgtctcctgtgagaattccccgtcggata
+cgagcagcgtggccgttggctgcctcgcacaggacttccttcccgactccatcactttct
+cctggaaatacaagaacaactctgacatcagcagcacccggggcttcccatcagtcctga
+gagggggcaagtacgcagccacctcacaggtgctgctgccttccaaggacgtcatgcagg
+gcacagacgaacacgtggtgtgcaaagtccagcaccccaacggcaacaaagaaaagaacg
+tgcctcttccag
+>BK063801|IGHM*06|Homo sapiens|F|CH1|979502..979813|312 nt|3| | | | |312+0=312| | |
+ggagtgcatccgccccaacccttttccccctcgtctcctgtgagaattccccgtcggata
+cgagcagcgtggccgttggctgcctcgcacaggacttccttcccgactccatcactttct
+cctggaaatacaagaacaactctgacatcagcagcacccggggcttcccatcagtcctga
+gagggggcaagtacgcagccacctcacaggtgctgctgccttccaaggacgtcatgcagg
+gcacagacgaacacgtggtgtgcaaagtccagcaccccaacggcaacaaagaaaagaacg
+tgcctcttccag
+>BK063802|IGHM*07|Homo sapiens|F|CH1|967219..967530|312 nt|1| | | | |312+0=312| | |
+ggagtgcatccgccccaacccttttccccctcgtctcctgtgagaattccccgtcggata
+cgagcagcgtggccgttggctgcctcgcacaggacttccttcccgactccatcactttct
+cctggaaatacaagaacaactctgacatcagcagcacccggggcttcccatcagtcctga
+gagggggcaagtacgcagccacctcacaggtgctgctgccttccaaggacgtcatgcagg
+gcacagacgaacacgtggtgtgcaaagtccagcaccccaacggcaacaaagaaaagaacg
+tgcctcttccag
+>IMGT000198|IGHM*08|Homo sapiens|F|CH1|5735..6046|312 nt|3| | | | |312+0=312| | |
+ggagtgcatccgccccaacccttttccccctcgtctcctgtgagaattccccgtcggata
+cgagcagcgtggccgttggctgcctcgcacaggacttccttcccgactccatcactttct
+cctggaaatacaagaacaactctgacatcagcagcacccggggcttcccatcagtcctga
+gagggggcaagtacgcagccacctcacaggtgctgctgccttccaaggacgtcatgcagg
+gcacagacgaacacgtggtgtgcaaagtccagcaccccaacggcaacaaagaaaagaacg
+tgcctcttccag
+>J00241|IGKC*01|Homo sapiens|F|C-REGION|334..653|320 nt|3| | | | |320+0=320| | |
+gaactgtggctgcaccatctgtcttcatcttcccgccatctgatgagcagttgaaatctg
+gaactgcctctgttgtgtgcctgctgaataacttctatcccagagaggccaaagtacagt
+ggaaggtggataacgccctccaatcgggtaactcccaggagagtgtcacagagcaggaca
+gcaaggacagcacctacagcctcagcagcaccctgacgctgagcaaagcagactacgaga
+aacacaaagtctacgcctgcgaagtcacccatcagggcctgagctcgcccgtcacaaaga
+gcttcaacaggggagagtgt
+>M11736|IGKC*02|Homo sapiens|F|C-REGION|1033..1352|320 nt|3| | | | |320+0=320| | |
+gaactgtggctgcaccatctgtcttcatcttcccgccatctgatgagcagttgaaatctg
+gaactgcctctgttgtgtgcctgctgaataacttctatcccagagaggccaaagtacagt
+ggaaggtggataacgccctccaatcgggtaactcccaggagagtgtcacagagcaggaga
+gcaaggacagcacctacagcctcagcagcaccctgacgctgagcaaagcagactacgaga
+aacacaaagtctacgccggcgaagtcacccatcagggcctgagctcgcccgtcacaaaga
+gcttcaacaggggagagtgt
+>M11737|IGKC*03|Homo sapiens|F|C-REGION|1031..1350|320 nt|3| | | | |320+0=320| | |
+gaactgtggctgcaccatctgtcttcatcttcccgccatctgatgagcagttgaaatctg
+gaactgcctctgttgtgtgcctgctgaataacttctatcccagagaggccaaagtacagc
+ggaaggtggataacgccctccaatcgggtaactcccaggagagtgtcacagagcaggaga
+gcaaggacagcacctacagcctcagcagcaccctgacgctgagcaaagcagactacgaga
+aacacaaagtctacgcctgcgaagtcacccatcagggcctgagctcgcccgtcacaaaga
+gcttcaacaggggagagtgt
+>AF017732|IGKC*04|Homo sapiens|F|C-REGION|62461..62780|320 nt|3| | | | |320+0=320| | |
+gaactgtggctgcaccatctgtcttcatcttcccgccatctgatgagcagttgaaatctg
+gaactgcctctgttgtgtgcctgctgaataacttctatcccagagaggccaaagtacagt
+ggaaggtggataacgccctccaatcgggtaactcccaggagagtgtcacagagcaggaca
+gcaaggacagcacctacagcctcagcagcaccctgacgctgagcaaagcagactacgaga
+aacacaaactctacgcctgcgaagtcacccatcagggcctgagctcgcccgtcacaaaga
+gcttcaacaggggagagtgt
+>AF113887|IGKC*05|Homo sapiens|(F)|C-REGION|388..708|321 nt|1| | | | |321+0=321| | |
+cgaactgtggctgcaccatctgtcttcatcttcccgccatctgatgagcagttgaaatct
+ggaactgcctctgttgtgtgcctgctgaataacttctatcccagagaggccaaagtacag
+tggaaggtggataacgccctccaatcgggtaactcccaggagagtgtcacagagcaggac
+agcaaggacagcacctacagcctcagcaacaccctgacgctgagcaaagcagactacgag
+aaacacaaagtctacgcctgcgaagtcacccatcagggcctgagctcgcccgtcacaaag
+agcttcaacaggggagagtgc
+>J00252|IGLC1*01|Homo sapiens|ORF|C-REGION|1..312|312 nt|1| | | | |312+0=312|partial in 5'| |
+gtcagcccaaggccaaccccacggtcactctgttcccgccctcctctgaggagctccaagccaac
+aaggccacactagtgtgtctgatcagtgacttctacccgggagctgtgacagtggcttgg
+aaggcagatggcagccccgtcaaggcgggagtggagacgaccaaaccctccaaacagagc
+aacaacaagtacgcggccagcagctacctgagcctgacgcccgagcagtggaagtcccac
+agaagctacagctgccaggtcacgcatgaagggagcaccgtggagaagacagtggcccct
+acagaatgttca
+>X51755|IGLC1*02|Homo sapiens|F|C-REGION|4008..4324|317 nt|3| | | | |317+0=317| | |
+gtcagcccaaggccaaccccactgtcactctgttcccgccctcctctgaggagctccaag
+ccaacaaggccacactagtgtgtctgatcagtgacttctacccgggagctgtgacagtgg
+cctggaaggcagatggcagccccgtcaaggcgggagtggagaccaccaaaccctccaaac
+agagcaacaacaagtacgcggccagcagctacctgagcctgacgcccgagcagtggaagt
+cccacagaagctacagctgccaggtcacgcatgaagggagcaccgtggagaagacagtgg
+cccctacagaatgttca
+>J00253|IGLC2*01|Homo sapiens|F|C-REGION|30..346|317 nt|3| | | | |317+0=317| | |
+gtcagcccaaggctgccccctcggtcactctgttcccgccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgtctcataagtgacttctacccgggagccgtgacagtgg
+cttggaaagcagatagcagccccgtcaaggcgggagtggagaccaccacaccctccaaac
+aaagcaacaacaagtacgcggccagcagctatctgagcctgacgcctgagcagtggaagt
+cccacagaagctacagctgccaggtcacgcatgaagggagcaccgtggagaagacagtgg
+cccctacagaatgttca
+>X06875|IGLC2*02|Homo sapiens|F|C-REGION|98..414|317 nt|3| | | | |317+0=317| | |
+gtcagcccaaggctgccccctcggtcactctgttcccgccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgtctcataagtgacttctacccgggagccgtgacagtgg
+cctggaaggcagatagcagccccgtcaaggcgggagtggagaccaccacaccctccaaac
+aaagcaacaacaagtacgcggccagcagctatctgagcctgacgcctgagcagtggaagt
+cccacagaagctacagctgccaggtcacgcatgaagggagcaccgtggagaagacagtgg
+cccctacagaatgttca
+
+>J00254|IGLC3*01|Homo sapiens|F|C-REGION|1..312|312 nt|1| | | | |312+0=312|partial in 5'| |
+gtcagcccaaggctgccccctcggtcactctgttcccaccctcctctgaggagcttcaagccaac
+aaggccacactggtgtgtctcataagtgacttctacccgggagccgtgacagttgcctgg
+aaggcagatagcagccccgtcaaggcgggggtggagaccaccacaccctccaaacaaagc
+aacaacaagtacgcggccagcagctacctgagcctgacgcctgagcagtggaagtcccac
+aaaagctacagctgccaggtcacgcatgaagggagcaccgtggagaagacagttgcccct
+acggaatgttca
+>K01326|IGLC3*02|Homo sapiens|F|C-REGION|203..519|317 nt|3| | | | |317+0=317| | |
+gtcagcccaaggctgccccctcggtcactctgttcccaccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgtctcataagtgacttctacccggggccagtgacagttg
+cctggaaggcagatagcagccccgtcaaggcgggggtggagaccaccacaccctccaaac
+aaagcaacaacaagtacgcggccagcagctacctgagcctgacgcctgagcagtggaagt
+cccacaaaagctacagctgccaggtcacgcatgaagggagcaccgtggagaagacagtgg
+cccctacggaatgttca
+>X06876|IGLC3*03|Homo sapiens|F|C-REGION|98..414|317 nt|3| | | | |317+0=317| | |
+gtcagcccaaggctgccccctcggtcactctgttcccaccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgtctcataagtgacttctacccgggagccgtgacagtgg
+cctggaaggcagatagcagccccgtcaaggcgggagtggagaccaccacaccctccaaac
+aaagcaacaacaagtacgcggccagcagctacctgagcctgacgcctgagcagtggaagt
+cccacaaaagctacagctgccaggtcacgcatgaagggagcaccgtggagaagacagtgg
+cccctacagaatgttca
+>D87017|IGLC3*04|Homo sapiens|F|C-REGION|3455..3771|317 nt|3| | | | |317+0=317| | |
+gtcagcccaaggctgccccctcggtcactctgttcccgccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgtctcataagtgacttctacccgggagccgtgacagtgg
+cctggaaggcagatagcagccccgtcaaggcgggagtggagaccaccacaccctccaaac
+aaagcaacaacaagtacgcggccagcagctacctgagcctgacgcctgagcagtggaagt
+cccacagaagctacagctgccaggtcacgcatgaagggagcaccgtggagaagacagtgg
+cccctacagaatgttca
+>J03011|IGLC6*01|Homo sapiens|F|C-REGION|2..318|317 nt|3| | | | |317+0=317| | |
+gtcagcccaaggctgccccatcggtcactctgttcccgccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgcctgatcagtgacttctacccgggagctgtgaaagtgg
+cctggaaggcagatggcagccccgtcaacacgggagtggagaccaccacaccctccaaac
+agagcaacaacaagtacgcggccagcagctacctgagcctgacgcctgagcagtggaagt
+cccacagaagctacagctgccaggtcacgcatgaagggagcaccgtggagaagacagtgg
+cccctgcagaatgttca
+>X51755|IGLC6*02|Homo sapiens|P|C-REGION|28157..28478|322 nt|3| | | | |322+0=322| | |
+gtcagcccaaggctgccccctcggtcactctgttcccgccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgcctgatcagtgacttctacccgggagctgtaaaagtgg
+cctggaaggcagatggcagccccgtcaacgcgggagtggagaccaccacaccctccaaac
+agagcaacaacaagtacgcggccagcagctagctacctgagcctgacgcctgagcagtgg
+aagtcccacagaagctacagttgccaggtcacgcatgaagggagcaccgtggagaagaca
+gtggcccctgcaggaatgctct
+>M61769|IGLC6*03|Homo sapiens|P|C-REGION|2..322|321 nt|3| | | | |321+0=321| | |
+gtcagcccaaggctgccccatcggtcactctgttcccgccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgcctgatcagtgacttctacccgggagctgtgaaagtgg
+cctggaaggcagatggcagccccgtcaacgcgggagtggagaccaccacaccctccaaac
+agagcaacaacaagtacgcggccagcagctagctacctgagcctgacgcctgagcagtgg
+aagtcccacagaagctacagttgccaggtcacgcatgaagggagcaccgtggagaagaca
+gtggcccctgcagaatgctct
+>X57808|IGLC6*04|Homo sapiens|P|C-REGION|5698..6018|321 nt|3| | | | |321+0=321| | |
+gtcagcccaaggctgccccatcggtcactctgttcccgccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgcctgatcagtgacttctacccgggagctgtgaaagtgg
+cctggaaggcagatggcagccccgtcaacacgggagtggagaccaccacaccctccaaac
+agagcaacaacaagtacgcggccagcagctagctacctgagcctgacgcctgagcagtgg
+aagtcccacagaagctacagttgccaggtcacgcatgaagggagcaccgtggagaagaca
+gtggcccctgcagaatgctct
+>D87017|IGLC6*05|Homo sapiens|P|C-REGION|16650..16970|321 nt|3| | | | |321+0=321| | |
+gtcagcccaaggctgccccctcggtcactctgttcccgccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgcctgatcagtgacttctacccgggagctgtgaaagtgg
+cctggaaggcagatggcagccccgtcaacgcgggagtggagaccaccacaccctccaaac
+agagcaacaacaagtacgcggccagcagctagctacctgagcctgacgcctgagcagtgg
+aagtcccacagaagctacagttgccaggtcacgcatgaagggagcaccgtggagaagaca
+gtggcccctgcagaatgctct
+>X51755|IGLC7*01|Homo sapiens|F|C-REGION|31201..31517|317 nt|3| | | | |317+0=317| | |
+gtcagcccaaggctgccccctcggtcactctgttcccaccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgtctcgtaagtgacttctacccgggagccgtgacagtgg
+cctggaaggcagatggcagccccgtcaaggtgggagtggagaccaccaaaccctccaaac
+aaagcaacaacaagtatgcggccagcagctacctgagcctgacgcccgagcagtggaagt
+cccacagaagctacagctgccgggtcacgcatgaagggagcaccgtggagaagacagtgg
+cccctgcagaatgctct
+>M61771|IGLC7*02|Homo sapiens|F|C-REGION|2..318|317 nt|3| | | | |317+0=317| | |
+gtcagcccaaggctgccccatcggtcactctgttcccaccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgtctcgtaagtgacttctacccgggagccgtgacagtgg
+cctggaaggcagatggcagccccgtcaaggtgggagtggagaccaccaaaccctccaaac
+aaagcaacaacaagtatgcggccagcagctacctgagcctgacgcccgagcagtggaagt
+cccacagaagctacagctgccgggtcacgcatgaagggagcaccgtggagaagacagtgg
+cccctgcagaatgctct
+>KM455557|IGLC7*03|Homo sapiens|F|C-REGION|1..317|317 nt|3| | | | |317+0=317| | |
+gtcagcccaaggctgccccctcggtcactctgttcccaccctcctctgaggagcttcaag
+ccaacaaggccacactggtgtgtctcgtaagtgacttcaacccgggagccgtgacagtgg
+cctggaaggcagatggcagccccgtcaaggtgggagtggagaccaccaaaccctccaaac
+aaagcaacaacaagtatgcggccagcagctacctgagcctgacgcccgagcagtggaagt
+cccacagaagctacagctgccgggtcacgcatgaagggagcaccgtggagaagacagtgg
+cccctgcagaatgctct

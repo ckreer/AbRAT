@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clustering Algorithms &mdash; AbRAT 0.1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sphinx-design.min.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Citation and References" href="quickguide/quickguide_citation_references.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            AbRAT
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and Setup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickguide.html">Quick Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Clustering Algorithms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#iterative-greedy-cdr3-clustering">Iterative Greedy CDR3 Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#matrix-based-greedy-cdr3-clustering">Matrix-Based Greedy CDR3 Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hierarchical-cdr3-clustering">Hierarchical CDR3 Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#summary-of-differences">Summary of Differences</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">AbRAT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Clustering Algorithms</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/clustering_algorithms.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="clustering-algorithms">
+<h1>Clustering Algorithms<a class="headerlink" href="#clustering-algorithms" title="Link to this heading"></a></h1>
+<section id="iterative-greedy-cdr3-clustering">
+<h2>Iterative Greedy CDR3 Clustering<a class="headerlink" href="#iterative-greedy-cdr3-clustering" title="Link to this heading"></a></h2>
+<p>This is the original algorithm that was used in the cited publications in the Quick Guide.</p>
+<p><strong>How It Works</strong></p>
+<ul class="simple">
+<li><p>Valid CDR3 sequences are processed sequentially:
+- The first sequence in the list starts a new cluster.
+- Each subsequent candidate is compared first with the cluster’s representative using a length filter (ensuring the difference in length does not exceed a specified threshold) and then against <strong>all</strong> members already in the cluster using the normalized Levenshtein distance.
+- Only if the candidate meets both criteria for every cluster member is it added to the cluster.</p></li>
+<li><p>The process repeats with the remaining unclustered sequences.</p></li>
+<li><p>Multiple iterations with different random orderings can be performed to minimize the number of singles.</p></li>
+</ul>
+<p><strong>Pros</strong></p>
+<ul class="simple">
+<li><p><strong>High Homogeneity:</strong> Every candidate is verified against all existing cluster members, ensuring very homogeneous clusters.</p></li>
+<li><p><strong>Historical Consistency:</strong> This is the original approach used in previous versions.</p></li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul class="simple">
+<li><p><strong>Performance:</strong> Sequential pairwise comparisons can be slow for large datasets.</p></li>
+<li><p><strong>Order Sensitivity:</strong> The final clustering result may depend on the initial sequence order.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="matrix-based-greedy-cdr3-clustering">
+<h2>Matrix-Based Greedy CDR3 Clustering<a class="headerlink" href="#matrix-based-greedy-cdr3-clustering" title="Link to this heading"></a></h2>
+<p><strong>How It Works</strong></p>
+<ul class="simple">
+<li><p>A full pairwise similarity matrix is computed for all valid CDR3 sequences using both the normalized Levenshtein distance and a length filter.</p></li>
+<li><p>A global greedy strategy is applied:
+- In each iteration, the sequence with the highest overall similarity (i.e., the one with the most matches according to the filters) is chosen as the cluster representative.
+- All sequences similar to this representative (meeting both length and distance criteria) are grouped together.
+- These sequences are then removed from further consideration, and the process repeats.</p></li>
+<li><p>As with the iterative method, multiple iterations can be performed to reduce the number of singles.</p></li>
+</ul>
+<p><strong>Pros</strong></p>
+<ul class="simple">
+<li><p><strong>Efficiency:</strong> Vectorized computation of the similarity matrix makes it faster for larger datasets.</p></li>
+<li><p><strong>Global Perspective:</strong> Quickly identifies clusters with many similar sequences based on overall similarity counts.</p></li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul class="simple">
+<li><p><strong>Potential Heterogeneity:</strong> Because clustering is based on overall counts rather than verifying each candidate against every cluster member, some pairs within a cluster might slightly exceed the threshold.</p></li>
+<li><p><strong>Less Fine-Grained:</strong> New candidates may not be compared as rigorously on a pairwise basis compared to the iterative approach.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="hierarchical-cdr3-clustering">
+<h2>Hierarchical CDR3 Clustering<a class="headerlink" href="#hierarchical-cdr3-clustering" title="Link to this heading"></a></h2>
+<p><strong>How It Works</strong></p>
+<ul class="simple">
+<li><p>For valid sequences, a full pairwise distance matrix is computed that combines the normalized Levenshtein distance with a length filter—this ensures that only sequences with acceptable length differences are compared.</p></li>
+<li><p>The resulting distance information is then condensed to focus on the unique distances between sequence pairs.</p></li>
+<li><p>Using this condensed distance data, a hierarchical clustering procedure is applied, where the most similar sequences are iteratively merged into clusters to form a dendrogram representing the overall structure.</p></li>
+<li><p>Finally, a threshold is applied to cut the dendrogram into flat clusters.</p></li>
+<li><p>Multiple iterations can also be run to optimize the result, though hierarchical clustering is deterministic and less order-sensitive than the greedy approaches.</p></li>
+</ul>
+<p><strong>Pros</strong></p>
+<ul class="simple">
+<li><p><strong>Flexible Clustering Structure:</strong> Hierarchical clustering produces a dendrogram, which can be “cut” at different levels, providing a flexible view of the data structure.</p></li>
+<li><p><strong>No Need to Predefine Cluster Number:</strong> A threshold is used to form clusters, which can be particularly useful for heterogeneous datasets.</p></li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul class="simple">
+<li><p><strong>Computational Complexity:</strong> Calculating the full distance matrix and linkage can be computationally intensive for very large datasets.</p></li>
+<li><p><strong>Sensitivity to Cutoff:</strong> The choice of the cutoff threshold is critical and may require fine-tuning.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="summary-of-differences">
+<h2>Summary of Differences<a class="headerlink" href="#summary-of-differences" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>The <strong>Iterative Greedy CDR3 Clustering (Original Approach)</strong> builds clusters by sequentially verifying each candidate against all current cluster members. It produces very homogeneous clusters but is slower and more order-sensitive.</p></li>
+<li><p>The <strong>Matrix-Based Greedy CDR3 Clustering (Global Greedy Approach)</strong> uses a full similarity matrix to quickly form clusters based on overall similarity counts, trading off some pairwise strictness for efficiency.</p></li>
+<li><p>The <strong>Hierarchical CDR3 Clustering</strong> method computes a full distance matrix and uses a dendrogram-based approach to form clusters. It offers flexibility in selecting the clustering threshold but can be computationally heavy and sensitive to the chosen cutoff.</p></li>
+</ul>
+<p>All methods share common preprocessing steps—such as filtering out missing data, applying a configurable length
+difference threshold, and using a normalized Levenshtein distance threshold—and they all allow for multiple
+iterations with random initializations to minimize the number of unassigned sequences (“singles”).</p>
+<p>Note that iterations are generally critical for the original (iterative) greedy algorithm because its outcome
+is highly dependent on the order in which sequences are processed, leading to different clustering outcomes when the
+order is changed. Running multiple iterations with different random orderings helps overcome local optima and
+reduces the chance that a suboptimal ordering leads to too many unassigned sequences (“singles”). In contrast, the
+matrix-based approach computes a full pairwise similarity matrix and uses a global view to choose the representative
+with the highest overall similarity. Although randomization can still affect the tie-breaking or the grouping in
+borderline cases, the global nature of the matrix reduces the sensitivity to ordering. Therefore, iterations might
+have a less pronounced effect on the matrix-based algorithm. Hierarchical clustering is deterministic and largely
+insensitive to input order; however, in edge cases with many nearly identical distances leading to tie-breaking
+ambiguities, additional iterations with random variations may help.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quickguide/quickguide_citation_references.html" class="btn btn-neutral float-left" title="Citation and References" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Christoph Kreer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
