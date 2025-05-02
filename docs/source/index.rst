@@ -6,7 +6,10 @@
 
 Overview
 --------
-|AbRAT|, the Antibody Repertoire Analysis Toolkit, runs as a containerized Streamlit app.
+|AbRAT|, the Antibody Repertoire Analysis Toolkit, is a containerized Streamlit app and Python package for analyzing single-cell BCR sequencing data
+generated with the high-throughput protocol by `Gieselmann and Kreer et al. <https://www.nature.com/articles/s41596-021-00554-w>`_.
+It covers data preparation, clonal assignment, and exploratory & comparative analysis.
+
 This documentation covers installation, setup, usage, API details, and more.
 For a quick start, refer to the **Quick Guide** section below.
 

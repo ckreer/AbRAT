@@ -9,7 +9,7 @@ Installation and Setup Guide
    This guide is tailored for **macOS**, but the installation instructions and Docker commands also work on **Linux** and **Windows**,
    provided that folder paths and system-specific commands are adjusted accordingly.
 
-Hello and welcome! This guide will help you install and run our containerized |AbRAT| app on your Mac in a designated folder—even if you have little experience with GitHub, Docker, or the macOS Terminal.
+Hello and welcome! This guide will help you install and run my containerized |AbRAT| app on your Mac in a designated folder—even if you have little experience with GitHub, Docker, or the macOS Terminal.
 
 Prerequisites
 ^^^^^^^^^^^^^
@@ -20,7 +20,8 @@ Prerequisites
    - If not installed, download `Docker Desktop for Mac <https://www.docker.com/products/docker-desktop>`_ and double-click the downloaded file to install.
    - Launch Docker Desktop from the Applications folder to ensure it is running in the background.
 
-2. **Git (optional but recommended for updates)**
+2. **Git (optional but highly recommended)**
+
    - If you have Homebrew installed, open **Terminal** (see below) and run:
 
      .. code-block:: bash
@@ -28,23 +29,23 @@ Prerequisites
         brew install git
 
    - Alternatively, download the installer from the `Git website <https://git-scm.com/download/mac>`_ and follow the on-screen instructions.
-   - You can also download the repository as a ZIP file via your web browser.
+   - You can also download this repository as a ZIP file via your web browser if you don't want to use git.
 
 Opening the Terminal
 ^^^^^^^^^^^^^^^^^^^^
 
 If you are new to the macOS Terminal, here are two ways to open it:
 
-- **Via Finder:**
+   - **Via Finder:**
 
-  1. Open Finder.
-  2. Go to **Applications** > **Utilities**.
-  3. Double-click **Terminal** to launch it.
+      1. Open Finder.
+      2. Go to **Applications** > **Utilities**.
+      3. Double-click **Terminal** to launch it.
 
-- **Via Spotlight Search:**
+   - **Via Spotlight Search:**
 
-  1. Press **⌘ + Spacebar** to open Spotlight.
-  2. Type **Terminal** and press **Enter**.
+      1. Press **⌘ + Spacebar** to open Spotlight.
+      2. Type **Terminal** and press **Enter**.
 
 Step-by-Step Guide
 ^^^^^^^^^^^^^^^^^^
@@ -55,9 +56,10 @@ Step-by-Step Guide
 
    - **In Finder:**
 
-     1. Open Finder and navigate to your home directory (click **Go** > **Home** in the menu bar).
+     1. Open Finder and navigate to your home directory (click **Go** > **Home** in the menu bar) or
+        any other directory, where you want to install |AbRAT|.
      2. Right-click in the folder and select **New Folder**.
-     3. Name the folder **Applications**.
+     3. Name the folder, e.g. **Applications**.
 
    - **In Terminal:**
 
@@ -65,9 +67,15 @@ Step-by-Step Guide
 
         mkdir ~/Applications
 
+     (the '~' symbol represents your home directory)
+
 2. **Obtaining the App**
 
    You have four options to get started:
+
+     - **Option 1/2:** Clone with Git or download and build the image locally
+     - **Option 3/4:** Use a Prebuilt Image from Docker Hub or GitHub Container Registry
+
 
    **Option 1: Clone with Git (recommended)**
 
@@ -90,19 +98,37 @@ Step-by-Step Guide
    - Click the green **Code** button and select **Download ZIP**.
    - Use Finder to move the downloaded ZIP into `~/Applications` and double-click to unzip.
 
+   .. note::
+
+       For Options 1 & 2 skip Options 3 & 4 and continue with building the image locally (Step 3)
+
   **Option 3: Use Prebuilt Image from Docker Hub**
 
-    Note: If you use prebuilt images (options 3 & 4), you must manually create exchange folders for ab1files and output
-    and set up mount points on your machine to link to these folders.
+   .. note::
 
-   - Create local folders on your machine with Finder or the Terminal:
+     This method is good for quickly running AbRAT without building the image locally.
+     However, you must **manually create and mount all necessary data folders**,
+     including subfolders for data exchange (ab1files, output) and required databases (blastdb, igblastdb).
+
+   - Create local folders for ab1files and output on your machine with Finder or the Terminal:
 
     .. code-block::
 
         mkdir -p ~/abrat_data/userdata/ab1files
         mkdir -p ~/abrat_data/userdata/output
 
+   - Copy the `database` folder (including `igblastdb` and `blastdb`) into the same location:
+
+    If you cloned or downloaded the repository, you can copy the entire `database` folder with the terminal:
+
+    .. code-block::
+
+        cp -r .data/database ~/abrat_data/
+
+    Or simply use Finder to copy the `databse` folder into your `abrat_data` folder.
+
    - Ensure Docker Desktop is running.
+
    - Open **Terminal** and run:
 
      .. code-block:: bash
@@ -119,24 +145,19 @@ Step-by-Step Guide
 
    **Option 4: Use Prebuilt Image from GitHub Container Registry**
 
-    Note: If you use prebuilt images (options 3 & 4), you must manually create exchange folders for ab1files and output
-    and set up mount points on your machine to link to these folders.
+    As Option 3, but you use another source to pull the image:
 
-   - Create local folders on your machine with Finder or the Terminal:
-
-    .. code-block::
-
-        mkdir -p ~/abrat_data/userdata/ab1files
-        mkdir -p ~/abrat_data/userdata/output
+   - Create local folders as above (Option 3)
 
    - Ensure Docker Desktop is running.
+
    - Open **Terminal** and run:
 
      .. code-block:: bash
 
         docker pull ghcr.io/ckreer/abrat:latest
 
-   - Start the container:
+   - Start the container with mounted *abrat_data*-folder:
 
      .. code-block:: bash
 
@@ -144,7 +165,7 @@ Step-by-Step Guide
         -v ~/abrat_data:/app/data \
         ghcr.io/ckreer/abrat:latest
 
-3. **Change to the Project Folder (if using Options 1 or 2)**
+3. **If using Options 1 & 2: Change to the Project Folder**
 
    If you cloned or downloaded the repository, open **Terminal** and navigate to the project folder:
 
@@ -198,3 +219,13 @@ Step-by-Step Guide
         docker-compose down
         docker-compose up
 
+.. note::
+    Instead of using the Terminal to start/shut down your container, it might be
+    more convenient for you to use Docker Desktop.
+
+    Note that all changes (except for the data in the mounted exchange folders) are
+    lost, when you shut down the container or when you click reload in the browser.
+
+.. warning::
+   If you close the container (via Docker Desktop or Terminal), any unsaved data inside the container will be lost.
+   Be sure to always use mounted volumes for input/output files to retain your data.

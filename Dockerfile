@@ -1,6 +1,14 @@
 # Base-Image miniconda
 FROM continuumio/miniconda3
 
+LABEL org.opencontainers.image.source="https://github.com/ckreer/AbRAT"
+LABEL org.opencontainers.image.description="AbRAT – The Antibody Repertoire Analysis Toolkit"
+LABEL org.opencontainers.image.licenses="GPL-3.0"
+ARG VERSION=v1.0.1
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.documentation="https://abrat.readthedocs.io"
+LABEL org.opencontainers.image.authors="Christoph Kreer"
+
 # Define Workdir in Container
 WORKDIR /app
 

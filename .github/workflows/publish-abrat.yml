@@ -1,0 +1,84 @@
+name: Publish AbRAT Docker Image and Documentation
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "abrat/gui/content/quickguide/*.md"
+
+jobs:
+  build-and-publish:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract tag version
+        id: vars
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ckreer/abrat:latest
+            ckreer/abrat:${{ env.VERSION }}
+            ghcr.io/ckreer/abrat:latest
+            ghcr.io/ckreer/abrat:${{ env.VERSION }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+
+      - name: Update CITATION.cff version and release date
+        run: |
+          sed -i "s/^version: .*/version: ${{ env.VERSION }}/" CITATION.cff
+          sed -i "s/^date-released: .*/date-released: 2025-05-01/" CITATION.cff
+
+      - name: Commit updated CITATION.cff
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add CITATION.cff
+          git commit -m "Update CITATION.cff version to ${{ env.VERSION }}"
+          git push
+
+  trigger-docs:
+    name: Trigger Read the Docs build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Trigger RTD build
+        run: |
+          curl -X POST -d "" https://readthedocs.org/api/v2/webhook/abrat/296167/
