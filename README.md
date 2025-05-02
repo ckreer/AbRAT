@@ -64,10 +64,10 @@ mkdir -p ~/abrat_data/userdata/output
 
 2. **Copy igblast and blast databases from the repository:**
 
-Copy the full `data/database/` folder from this repository to your `~/abrat_data/` folder with the terminal:
+Copy the full `database` folder from this repository to your `~/abrat_data/` folder with the terminal:
 
 ```bash
-cp -r database ~/abrat_data/
+cp -r ./data/database ~/abrat_data/
 ```
 
 Or simply use Finder to copy the `databse` folder into your `abrat_data` folder.'

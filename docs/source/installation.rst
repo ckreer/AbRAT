@@ -102,7 +102,7 @@ Step-by-Step Guide
 
        For Options 1 & 2 skip Options 3 & 4 and continue with building the image locally (Step 3)
 
-  **Option 3: Use Prebuilt Image from Docker Hub**
+   **Option 3: Use Prebuilt Image from Docker Hub**
 
    .. note::
 
@@ -123,7 +123,7 @@ Step-by-Step Guide
 
     .. code-block::
 
-        cp -r .data/database ~/abrat_data/
+        cp -r ./data/database ~/abrat_data/
 
     Or simply use Finder to copy the `databse` folder into your `abrat_data` folder.
 
