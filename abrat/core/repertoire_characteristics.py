@@ -33,21 +33,23 @@ def get_sample_information(df):
     return infos
 
 
-def get_hydrophobicity_values(sequence, scale='kyte-doolittle'):
+def get_hydrophobicity_values(sequence, scale='kyte-doolittle', ignore_unknown=True, warn=True):
     """
     Returns a list of hydrophobicity values for the given amino acid sequence based on the selected scale.
+    Unknown amino acids (e.g., 'X') are optionally ignored.
 
     Parameters:
         sequence (str): Amino acid sequence (using single-letter codes).
         scale (str): Hydrophobicity scale to use ('kyte-doolittle' or 'eisenberg'; default is 'kyte-doolittle').
+        ignore_unknown (bool): If True, unknown residues are skipped. If False, raises a ValueError.
+        warn (bool): If True, prints a warning when unknown residues are ignored.
 
     Returns:
-        list: A list of hydrophobicity values corresponding to each residue in the sequence.
+        list: A list of hydrophobicity values corresponding to each known residue in the sequence.
 
     Raises:
-        ValueError: If an unknown amino acid symbol is encountered or an unsupported scale is specified.
+        ValueError: If ignore_unknown=False and an unknown residue is encountered.
     """
-    # Kyte-Doolittle scale: hydrophobicity values for each amino acid
     kyte_doolittle = {
         'I': 4.5, 'V': 4.2, 'L': 3.8, 'F': 2.8, 'C': 2.5,
         'M': 1.9, 'A': 1.8, 'G': -0.4, 'T': -0.7, 'S': -0.8,
@@ -55,7 +57,6 @@ def get_hydrophobicity_values(sequence, scale='kyte-doolittle'):
         'Q': -3.5, 'D': -3.5, 'N': -3.5, 'K': -3.9, 'R': -4.5
     }
 
-    # Eisenberg scale: consensus hydrophobicity scale (Eisenberg et al.)
     eisenberg = {
         'A': 0.62, 'R': -2.53, 'N': -0.78, 'D': -0.90, 'C': 0.29,
         'Q': -0.85, 'E': -0.74, 'G': 0.48, 'H': -0.40, 'I': 1.38,
@@ -63,20 +64,25 @@ def get_hydrophobicity_values(sequence, scale='kyte-doolittle'):
         'S': -0.18, 'T': -0.05, 'W': 0.81, 'Y': 0.26, 'V': 1.08
     }
 
-    scale = scale.lower()
-    if scale == 'kyte-doolittle':
-        scale_dict = kyte_doolittle
-    elif scale == 'eisenberg':
-        scale_dict = eisenberg
-    else:
+    scale_dict = {
+        'kyte-doolittle': kyte_doolittle,
+        'eisenberg': eisenberg
+    }.get(scale.lower())
+
+    if scale_dict is None:
         raise ValueError("Unsupported scale. Please choose 'kyte-doolittle' or 'eisenberg'.")
 
     values = []
     for aa in sequence.upper():
         if aa in scale_dict:
             values.append(scale_dict[aa])
+        elif ignore_unknown:
+            if warn:
+                print(f"Warning: Unknown amino acid '{aa}' ignored.")
+            continue
         else:
             raise ValueError(f"Unknown amino acid '{aa}' in sequence.")
+
     return values
 
 

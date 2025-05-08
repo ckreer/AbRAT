@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ---
 
 ## [Unreleased]
+### Fixed
+- Ignore unknown amino acids (X) for gravy score calculation
+
 ### Docs
 - Update instructions in `README.md` and documentation
 - Add `CHANGELOG.md` file
