@@ -180,9 +180,9 @@ def run_annotation(s, f):
         # Build the command for running the analysis script.
         cmd = [
             "python", "abrat/core/analyze_ab1_files.py",
-            "--input", data_folder,
-            "--output", output_folder,
-            "--project_name", st.session_state.project_name,
+            "--input", str(data_folder),
+            "--output", str(output_folder),
+            "--project_name", str(st.session_state.project_name),
             "--q_cut_off", str(q_cut_off),
             "--mean_q_cut_off", str(mean_q_cut_off),
             "--min_length", str(min_length),

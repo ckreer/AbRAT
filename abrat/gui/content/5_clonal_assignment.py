@@ -372,7 +372,7 @@ else:
             }
 
             while future_to_file:
-                # Warte bis zu 0.1 Sekunden, bis mindestens eine Aufgabe abgeschlossen ist.
+                # Wait at least 0.1s.
                 done, _ = concurrent.futures.wait(
                     future_to_file, timeout=0.1, return_when=concurrent.futures.FIRST_COMPLETED
                 )

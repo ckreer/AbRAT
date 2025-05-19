@@ -412,6 +412,10 @@ def save_excel_with_row_colors(df, path_to_file, color_col=(sample_col, clone_co
     Returns:
         None
     """
+
+    # Convert <NA> (pd.NA) to np.nan to ensure they export as real empty Excel cells
+    df = df.astype(object).where(pd.notnull(df), np.nan)
+
     with pd.ExcelWriter(path_to_file, engine='xlsxwriter') as writer:
         # Write the DataFrame with its index.
         df.to_excel(writer, index=True, sheet_name=sheet_name)

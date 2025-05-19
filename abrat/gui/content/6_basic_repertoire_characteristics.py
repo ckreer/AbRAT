@@ -230,6 +230,9 @@ def get_repertoire_statistics(df):
             else:
                 working_df_vident = working_df
 
+            # to numeric, if data is saved as string
+            working_df_vident[v_ident_col] = pd.to_numeric(working_df_vident[v_ident_col], errors='coerce')
+
             # Calculate histograms for V gene identity; NaNs are replaced by 0 for one histogram.
             v_with_nans_count = compute_histogram(working_df_vident[v_ident_col].fillna(0), bin_size=1, min_val=-0, max_val=101)
             v_with_nans_percent = 100 * v_with_nans_count / v_with_nans_count.sum()
