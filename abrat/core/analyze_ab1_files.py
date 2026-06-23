@@ -429,7 +429,7 @@ def combine_ig_blast_and_q_check_data(q_check_df, igblast_dict, combi_ex_name, o
 
     # If desired: Correct the isotype column for light chains
     change_index = combined_df[combined_df['CHAIN_PCR'] != "HC"].index
-    combined_df.loc[change_index, "ISOTPYE"] = np.nan
+    combined_df.loc[change_index, "ISOTYPE"] = np.nan
 
     # Generate a B_CELL_ID using several columns
     combined_df['B_CELL_ID'] = combined_df[

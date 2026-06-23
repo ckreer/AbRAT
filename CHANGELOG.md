@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Ignore unknown amino acids (X) for gravy score calculation
 - Save <NA> as pd.nan after clonal clustering in excel sheet
 - Convert V Identity to numeric, when importing for repertoire statistics
+- Typo in ISOTYPE fixed
+
 
 ### Docs
 - Update instructions in `README.md` and documentation
